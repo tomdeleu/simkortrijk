@@ -21,6 +21,15 @@ const chromeCandidates = [
   "/usr/bin/google-chrome-stable",
   "/usr/bin/google-chrome",
   "/usr/local/bin/google-chrome",
+  // macOS
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  "/Applications/Chromium.app/Contents/MacOS/Chromium",
+  "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+  process.env.HOME && join(process.env.HOME, "Applications/Google Chrome.app/Contents/MacOS/Google Chrome"),
+  // Windows
+  process.env.PROGRAMFILES && join(process.env.PROGRAMFILES, "Google/Chrome/Application/chrome.exe"),
+  process.env["PROGRAMFILES(X86)"] && join(process.env["PROGRAMFILES(X86)"], "Google/Chrome/Application/chrome.exe"),
+  process.env.LOCALAPPDATA && join(process.env.LOCALAPPDATA, "Google/Chrome/Application/chrome.exe"),
 ].filter((p): p is string => Boolean(p));
 export const CHROME = chromeCandidates.find((p) => existsSync(p)) ?? "/usr/bin/chromium";
 /** The running site the test/film scripts open: their URL argument, else SITE_URL (e.g. the dev server). */
