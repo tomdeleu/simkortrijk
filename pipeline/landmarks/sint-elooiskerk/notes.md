@@ -15,6 +15,8 @@ Sint-Elooiskerk: red-brick neo-Gothic church with one tall slender slate spire.
 
 ## Render fixes needed
 
+- **Done (2026-11-11): `massing.json`.** The 23 m box and LiDAR prism become a red-brick church: aisles 10 m on the GRB footprint, nave ridge 23 m, transept 19 m, west tower 31 m under an octagonal slate needle to 56 m, round stair turret. The church lies near the binnenstad map edge, so its spire is partly in the edge fade.
+
 - Walls brick, not stone. LiDAR prism becomes a needle: replace by tower + octagonal spire.
 
 ## References

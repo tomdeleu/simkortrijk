@@ -15,6 +15,8 @@ Leie bridges: flat modern bridges with light railings across a straight blue riv
 
 ## Render fixes needed
 
+- **Noordbrug done (2026-11-11): `edit_noordbrug.ts`.** The massing render cannot draw its leaning lambda pylon or stays, so they are drawn into `render/` before painting (pylon top 38.3 m TAW on the deck axis at the south-east bank, from DHMV II; seven stays to the deck) and put back with `--restore` afterwards.
+
 - Check the ground render draws each deck over the water (roads with bridge=yes). Noordbrug needs a mast and cables like the Collegebrug.
 
 ## References
