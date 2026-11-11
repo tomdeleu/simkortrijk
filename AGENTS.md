@@ -17,7 +17,7 @@ The code is adapted from [Isometric World](https://github.com/krasun/isometricwo
 
 - **Paint one piece at a time, with Tom in the loop.** Before each piece: show `docs/paint-status.png`, propose tiles, landmarks, render fixes, cost and useful references, and wait for Tom's go and any reference material he adds. After each piece: update the piece table and summary in `docs/PAINT_STATUS.md` and regenerate `docs/paint-status.png`. Full rule in `docs/PAINT_STATUS.md` ("Working rule").
 
-Single source of truth: [docs/PAINT_STATUS.md](docs/PAINT_STATUS.md). Update it after every paint run and every publish. As of 2026-11-11: 6 of 29 tiles painted (20.7%), and windows `-2_-3` / `-1_-3` are excluded.
+Single source of truth: [docs/PAINT_STATUS.md](docs/PAINT_STATUS.md). Update it after every paint run and every publish. As of 2026-11-11: 8 of 29 tiles painted (27.6%; 6 live until piece 1 is published), and windows `-2_-3` / `-1_-3` are excluded.
 
 The live map (published 2026-11-11) is 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours and the Sint-Maartenskerk massing. Six tiles are painted in **Style A + real colours** with OpenAI `gpt-image-2.6-flare`: `tx` -2..0 × `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render. The rest is unpainted render. Paint files are in `data/derived` (not in git) and on R2. Restore points (live, previous coral GPT, pre-colour snapshot, Gemini) are listed in `CLAUDE.md` under "Where the binnenstad paint stands".
 
