@@ -1,6 +1,6 @@
 import sharp from "sharp";
 const [x0, y0, w, h, out] = [Number(process.argv[2]), Number(process.argv[3]), Number(process.argv[4]), Number(process.argv[5]), process.argv[6]];
-const d = "../data/derived/kortrijk-binnenstad/render-hd", S = 2;
+const d = process.env.CROP_DIR ?? "../data/derived/kortrijk-binnenstad/render-hd", S = Number(process.env.CROP_S ?? 2);
 const parts = [];
 for (let ty = Math.floor(y0 / 1024); ty <= Math.floor((y0 + h - 1) / 1024); ty++) for (let tx = Math.floor(x0 / 1024); tx <= Math.floor((x0 + w - 1) / 1024); tx++)
   parts.push({ input: `${d}/${tx}_${ty}.png`, left: (tx * 1024 - Math.floor(x0 / 1024) * 1024) * S, top: (ty * 1024 - Math.floor(y0 / 1024) * 1024) * S });

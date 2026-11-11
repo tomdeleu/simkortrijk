@@ -309,7 +309,7 @@ console.log(`  GRB buildings: ${buildings.length}`);
 {
   const dir = join(import.meta.dirname, "..", "landmarks");
   type Part = {
-    id: string; footprint?: "grb"; rect?: [number, number, number, number]; oct?: [number, number, number];
+    id: string; footprint?: "grb"; rect?: [number, number, number, number]; oct?: [number, number, number]; poly?: Array<[number, number]>;
     h: number; style?: number; wall: number[]; roof: number[]; shape?: "flat" | "gable-u" | "gable-v" | "pyramid"; eave?: number;
   };
   type Massing = { anchor: [number, number]; axis_deg: number; replace_oidn: Array<number | string>; parts: Part[] };
@@ -341,6 +341,8 @@ console.log(`  GRB buildings: ${buildings.length}`);
       else if (part.rect) {
         const [u0, u1, v0, v1] = part.rect;
         rings = [[enu(u0, v0), enu(u1, v0), enu(u1, v1), enu(u0, v1)]];
+      } else if (part.poly) {
+        rings = [part.poly.map(([u, v]) => enu(u, v))];
       } else if (part.oct) {
         const [cu, cv, r] = part.oct;
         rings = [Array.from({ length: 8 }, (_, k) => enu(cu + r * Math.cos((k + 0.5) * Math.PI / 4), cv + r * Math.sin((k + 0.5) * Math.PI / 4)))];
