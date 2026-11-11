@@ -19,14 +19,14 @@ The live map is 29 tiles of `kortrijk-binnenstad`. Six are painted (style A, Ope
 
 New painting should use `PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare` (about $0.09 a window). Try `flare` before `sunburst`; only use `gpt-image-2.6-sunburst` if Tom says so. Gemini is still the code default. Use `PAINT_ATTEMPTS=1` and check windows by eye while `roofNovelty` fails every window.
 
-Before painting the Broeltorens windows, run `python3 pipeline/landmarks/broeltorens/edit_broel.py`, then `--restore` afterwards. Assemble that block with `python3 pipeline/tools/assemble_block.py --skip -2_-3`. A 3×3 there:
+Before rendering, run `python3 pipeline/tools/building_colours.py` (per-building colours, softened half-way to pastel with `--soften 0.5`, and LiDAR gables), then `npm run scene` (also builds landmark `massing.json` parts such as Sint-Maartenskerk) and `npm run render -- kortrijk-binnenstad --force`. Before painting the Broeltorens windows, run `python3 pipeline/landmarks/broeltorens/edit_broel.py`, then `--restore` afterwards. Assemble that block with `python3 pipeline/tools/assemble_block.py --skip -2_-3`. A 3×3 there:
 
 ```sh
 PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1 \
   npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3
 ```
 
-Next, in order: (1) landmark render fixes, Sint-Maartenskerk first; (2) per-building roof and wall colours; (3) `roofNovelty` still fails (0.07–0.29 vs 0.04); (4) colour-match land and river windows; (5) squat Broeltorens cones, and the beige quay downstream of the Broelbrug should be water; (6) paint the rest outward, export, `npm run dev`, and publish only if Tom asks (`npm run publish -- kortrijk --yes --keep`; tiles-only needs no redeploy); (7) optional area `kortrijk`, and a custom domain only if Tom asks. Detail is in `CLAUDE.md`.
+Next, in order: (1) landmark render fixes (Sint-Maartenskerk done via `massing.json`; Belfort next); (2) per-building colours are done in the render and prompt, the coloured Broeltorens block is a preview until Tom approves it; (3) `roofNovelty` still fails (0.07–0.29 vs 0.04); (4) colour-match land and river windows; (5) squat Broeltorens cones, and the beige quay downstream of the Broelbrug should be water; (6) paint the rest outward, export, `npm run dev`, and publish only if Tom asks (`npm run publish -- kortrijk --yes --keep`; tiles-only needs no redeploy); (7) optional area `kortrijk`, and a custom domain only if Tom asks. Detail is in `CLAUDE.md`.
 
 ## Commands
 

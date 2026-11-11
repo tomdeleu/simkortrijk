@@ -134,7 +134,9 @@ heightTarget.texture.generateMipmaps = false;
 
 type P2 = [number, number];
 export interface TileObjects {
-  b: Array<[P2[], number, number, number | null, P2[][]?]>; // ring, height, style, ground hint, holes (CW)
+  // ring, height, style, ground hint, holes (CW), wall+roof rgb,
+  // roof shape: gable [eave, ridge x, y, dir x, y], or pyramid / spire [eave] (apex over the ring centre)
+  b: Array<[P2[], number, number, number | null, P2[][]?, number[]?, (number[] | null)?]>;
   t: Array<[number, number, number, number]>;      // x, y, radius, crown height
 }
 
@@ -185,6 +187,10 @@ const buildingMaterial = new THREE.ShaderMaterial({
         } else if (k == 5) {     // modern: large windows, glass balconies
           float col = fract(x / 4.0);
           if (fl > 0.18 && fl < 0.88 && col > 0.08 && col < 0.92) c = mix(c, GLASS, 0.65);
+        } else if (k == 6) {     // Gothic stone: tall lancet windows between buttresses
+          float col = fract(x / 6.0), lv = fract((vFacade.y - 4.0) / 14.0);
+          if (vFacade.y > 4.0 && lv < 0.72 && col > 0.40 && col < 0.60) c = mix(c, GLASS, 0.55);
+          if (col < 0.05 || col > 0.95) c *= 0.90;
         } else if (k == 2) {     // public: tall sparse windows
           float col = fract(x / 4.5);
           if (fl > 0.25 && fl < 0.85 && col > 0.35 && col < 0.65) c = mix(c, GLASS, 0.6);
@@ -270,12 +276,44 @@ function buildObjects(data: TileObjects) {
   };
   const rnd = (seed: number) => () => ((seed = Math.imul(seed ^ (seed >>> 15), 0x2c1b3c6d) + 0x9e3779b9 | 0) >>> 0) / 2 ** 32;
   data.b.forEach((rec) => {
-    const ring = rec[0], h = rec[1], style = rec[2], holes = rec[4] ?? [];
+    const ring0 = rec[0], h = rec[1], style = rec[2], holes = rec[4] ?? [], c = rec[5], gab = rec[6];
     // sit on the highest ground under the footprint; walls reach 1 m below the lowest so slopes never show a gap
-    const gs = ring.map(([x, y]) => ground(x, y));
+    const gs = ring0.map(([x, y]) => ground(x, y));
     const top = Math.max(...gs) + h, g = Math.min(...gs) - 1;
-    const [wall, roof] = PALETTE[style] ?? PALETTE[0];
+    const [wall, roof] = c ? [c.slice(0, 3), c.slice(3, 6)] : PALETTE[style] ?? PALETTE[0];
     const isTower = style;
+    // Gable: roof planes fall from the ridge line to the eave. Split the ring where it crosses the ridge
+    // so every wall edge and roof polygon lies on one plane.
+    let ring = ring0;
+    let zOf = (_p: P2) => top;
+    let gable = false, pyramid = false;
+    if (gab && gab.length === 1 && !holes.length) {
+      // pyramid / spire: walls up to the eave, then every roof facet climbs to the apex over the centroid
+      pyramid = true;
+      const eaveZ = Math.min(top - 0.5, top - h + gab[0]);
+      zOf = () => eaveZ;
+    } else if (gab && gab.length >= 5 && !holes.length) {
+      const [eave, rx, ry, ux, uy] = gab;
+      const side = (p: P2) => (p[0] - rx) * -uy + (p[1] - ry) * ux;
+      const split: P2[] = [];
+      for (let k = 0; k < ring0.length; k++) {
+        const a = ring0[k], b = ring0[(k + 1) % ring0.length], da = side(a), db = side(b);
+        split.push(a);
+        if ((da > 0.01 && db < -0.01) || (da < -0.01 && db > 0.01)) {
+          const t = da / (da - db);
+          split.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+        }
+      }
+      const dPos = Math.max(0, ...split.map(side)), dNeg = Math.max(0, ...split.map((p) => -side(p)));
+      const eaveZ = top - h + eave;
+      if (dPos + dNeg > 2 && top - eaveZ > 1) {
+        ring = split; gable = true;
+        zOf = (p: P2) => {
+          const d = side(p), m = d >= 0 ? dPos : dNeg;
+          return m < 0.3 ? top : eaveZ + (top - eaveZ) * Math.max(0, 1 - Math.abs(d) / m);
+        };
+      }
+    }
     const wallRing = (pts: P2[]) => {
       let along = 0;
       for (let k = 0; k < pts.length; k++) {
@@ -283,7 +321,8 @@ function buildObjects(data: TileObjects) {
         const L = Math.hypot(bx - ax, by - ay);
         if (L < 0.05) continue;
         const nx = (by - ay) / L, ny = -(bx - ax) / L; // outward for CCW outer rings; courtyard-facing for CW holes
-        const quad = [[ax, ay, g, along, -1], [bx, by, g, along + L, -1], [bx, by, top, along + L, top - g - 1], [ax, ay, top, along, top - g - 1]];
+        const za = zOf(pts[k]), zb = zOf(pts[(k + 1) % pts.length]);
+        const quad = [[ax, ay, g, along, -1], [bx, by, g, along + L, -1], [bx, by, zb, along + L, zb - g - 1], [ax, ay, za, along, za - g - 1]];
         for (const q of [0, 1, 2, 0, 2, 3]) {
           pos.push(quad[q][0], quad[q][1], quad[q][2]); nor.push(nx, ny, 0); col.push(...wall);
           fac.push(quad[q][3], quad[q][4]); tow.push(isTower);
@@ -293,18 +332,50 @@ function buildObjects(data: TileObjects) {
     };
     wallRing(ring);
     for (const hole of holes) wallRing(hole);
-    const tris = THREE.ShapeUtils.triangulateShape(
-      ring.map(([x, y]) => new THREE.Vector2(x, y)),
-      holes.map((hole) => hole.map(([x, y]) => new THREE.Vector2(x, y))),
-    );
-    const verts = [ring, ...holes].flat();
-    for (const t of tris) for (const v of t) {
-      const p = verts[v];
-      if (!p) continue;
-      pos.push(p[0], p[1], top); nor.push(0, 0, 1); col.push(...roof); fac.push(0, -1000); tow.push(0);
-    }
+    const roofPoly = (outer: P2[], inner: P2[][]) => {
+      if (outer.length < 3) return;
+      const tris = THREE.ShapeUtils.triangulateShape(
+        outer.map(([x, y]) => new THREE.Vector2(x, y)),
+        inner.map((hole) => hole.map(([x, y]) => new THREE.Vector2(x, y))),
+      );
+      const verts = [outer, ...inner].flat();
+      for (const t of tris) {
+        const P = t.map((v) => verts[v]);
+        if (P.some((p) => !p)) continue;
+        const Z = P.map(zOf);
+        // face normal (pointing up) so the two roof planes catch the sun differently
+        const ax = P[1][0] - P[0][0], ay = P[1][1] - P[0][1], az = Z[1] - Z[0];
+        const bx = P[2][0] - P[0][0], by = P[2][1] - P[0][1], bz = Z[2] - Z[0];
+        let n = [ay * bz - az * by, az * bx - ax * bz, ax * by - ay * bx];
+        const nl = Math.hypot(n[0], n[1], n[2]) || 1;
+        n = n.map((v) => v / nl);
+        if (n[2] < 0) n = n.map((v) => -v);
+        for (let k = 0; k < 3; k++) {
+          pos.push(P[k][0], P[k][1], Z[k]); nor.push(...(gable ? n : [0, 0, 1])); col.push(...roof); fac.push(0, -1000); tow.push(0);
+        }
+      }
+    };
+    if (pyramid) {
+      const cx = ring.reduce((a, p) => a + p[0], 0) / ring.length, cy = ring.reduce((a, p) => a + p[1], 0) / ring.length;
+      const ez = zOf(ring[0]);
+      for (let k = 0; k < ring.length; k++) {
+        const a = ring[k], b = ring[(k + 1) % ring.length];
+        const P = [[a[0], a[1], ez], [b[0], b[1], ez], [cx, cy, top]];
+        const ux = P[1][0] - P[0][0], uy = P[1][1] - P[0][1], vx = P[2][0] - P[0][0], vy = P[2][1] - P[0][1], vz = P[2][2] - P[0][2];
+        let n = [uy * vz, -ux * vz, ux * vy - uy * vx];
+        const nl = Math.hypot(n[0], n[1], n[2]) || 1;
+        n = n.map((v) => v / nl);
+        if (n[2] < 0) n = n.map((v) => -v);
+        for (const q of P) { pos.push(q[0], q[1], q[2]); nor.push(...n); col.push(...roof); fac.push(0, -1000); tow.push(0); }
+      }
+    } else if (gable) {
+      const [, rx, ry, ux, uy] = gab!;
+      const side = (p: P2) => (p[0] - rx) * -uy + (p[1] - ry) * ux;
+      roofPoly(ring.filter((p) => side(p) >= -0.02), []);
+      roofPoly(ring.filter((p) => side(p) <= 0.02), []);
+    } else roofPoly(ring, holes);
     // rooftop clutter on flat residential roofs: solar water heaters (panel + tank), AC units
-    if (style !== 3 && style !== 4 && h > 6) {
+    if (style !== 2 && style !== 3 && style !== 4 && style !== 6 && h > 6 && !gable && !pyramid) { // no solar heaters on churches
       const xs = ring.map((p) => p[0]), ys = ring.map((p) => p[1]);
       const [x0, x1, y0, y1] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
       const area = Math.abs(THREE.ShapeUtils.area(ring.map(([x, y]) => new THREE.Vector2(x, y))));

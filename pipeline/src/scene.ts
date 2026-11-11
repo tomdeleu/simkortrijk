@@ -4,14 +4,15 @@
  *   npm run scene -- kortrijk-binnenstad
  *
  * Output: data/derived/<area>/scene/<tx>_<ty>.json
- *   b: buildings [ring (ENU x,y pairs, CCW), height above ground, style, groundHint, holes?]
+ *   b: buildings [ring (ENU x,y pairs, CCW), height above ground, style, groundHint, holes?,
+ *      colour? (wall rgb + roof rgb), gable? (eave m, ridge point x y, ridge dir x y)]
  *   t: tree crowns [x, y, radius, crown-centre height above ground]
  *
  * Footprints are GRB. Heights are 3D GRB HN_P99, filled from DHMV where the 2015
  * survey has no building. Spires that 3D GRB flattens (Sint-Maartenskerk, Belfort)
  * are cut from the LiDAR canopy where it rises 8 m above the surveyed roof.
  */
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { openArea } from "./areas.ts";
 import { CAMERA, ecefToEnu, enuToPixel, llhToEcef } from "./camera.ts";
@@ -102,7 +103,7 @@ function hull(pts: P2[]): P2[] {
   return [...lower, ...upper];
 }
 
-type Building = { ring: P2[]; holes: P2[][]; h: number; s: number };
+type Building = { ring: P2[]; holes: P2[][]; h: number; s: number; c?: number[]; g?: number[] | null; oidn?: string };
 
 const name = process.argv[2] ?? "kortrijk-binnenstad";
 openArea(name);
@@ -133,6 +134,21 @@ for (const el of osm.elements ?? []) {
 }
 const isChurch = (c: P2) => churches.some((r) => inside(c, r)) || towerNodes.some((p) => Math.hypot(p[0] - c[0], p[1] - c[1]) < 20);
 
+// Per-building wall/roof colour and gable roofs from pipeline/tools/building_colours.py (optional).
+const coloursFile = join(raw, "building_colours.json");
+const colours: Record<string, { wall: number[]; roof: number[]; gable: number[] | null }> =
+  existsSync(coloursFile) ? readJson(coloursFile) : {};
+if (!existsSync(coloursFile)) console.log("  no building_colours.json: style palette only (run pipeline/tools/building_colours.py)");
+/** [eave above ground, ridge point x, y, ridge direction x, y] in ENU, from the Lambert ridge. */
+function gableEnu(g: number[] | null | undefined): number[] | null {
+  if (!g) return null;
+  const [eave, a, rx, ry] = g;
+  const [lon0, lat0] = fromLambert(rx, ry), [lon1, lat1] = fromLambert(rx + Math.cos(a) * 10, ry + Math.sin(a) * 10);
+  const p = toEnu(lon0, lat0), q = toEnu(lon1, lat1);
+  const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
+  return [eave, p[0], p[1], (q[0] - p[0]) / L, (q[1] - p[1]) / L].map((v) => Math.round(v * 1000) / 1000);
+}
+
 const buildings: Building[] = [];
 const lambertRings: P2[][] = [];
 const lambertHoles: P2[][][] = [];
@@ -147,7 +163,12 @@ for (const f of fc.features ?? []) {
     const holes = (poly as number[][][]).slice(1).map((hole: number[][]) => ringFromLonLat(hole, true)).filter((r): r is P2[] => !!r);
     const c: P2 = [ring.reduce((a, q) => a + q[0], 0) / ring.length, ring.reduce((a, q) => a + q[1], 0) / ring.length];
     const id = Number(p.OIDN) || buildings.length;
-    buildings.push({ ring, holes, h, s: styleOf(h, String(p.layer ?? "Gbg"), id, Math.abs(area2(ring)), isChurch(c)) });
+    const col = colours[String(p.OIDN)];
+    buildings.push({
+      ring, holes, h, s: styleOf(h, String(p.layer ?? "Gbg"), id, Math.abs(area2(ring)), isChurch(c)),
+      c: col ? [...col.wall, ...col.roof] : undefined, g: col && !holes.length ? gableEnu(col.gable) : null,
+      oidn: String(p.OIDN),
+    });
     lambertRings.push((poly[0] as number[][]).map(([lon, lat]) => toLambert(lon, lat)));
     lambertHoles.push((poly as number[][][]).slice(1).map((hole) => hole.map(([lon, lat]) => toLambert(lon, lat))));
   }
@@ -283,6 +304,64 @@ console.log(`  GRB buildings: ${buildings.length}`);
   console.log(`  lidar spires: ${spires.length}` + (spires.length ? `, tallest ${spires.slice(0, 6).map((s) => `${s.h.toFixed(0)}m@${s.lat.toFixed(5)},${s.lon.toFixed(5)}`).join(" ")}` : ""));
 }
 
+// Landmark massing (pipeline/landmarks/<name>/massing.json): replace a GRB footprint and the LiDAR
+// needle inside it with hand-built parts (gabled naves, tower, octagonal spire). See pipeline/landmarks/README.md.
+{
+  const dir = join(import.meta.dirname, "..", "landmarks");
+  type Part = {
+    id: string; footprint?: "grb"; rect?: [number, number, number, number]; oct?: [number, number, number];
+    h: number; style?: number; wall: number[]; roof: number[]; shape?: "flat" | "gable-u" | "gable-v" | "pyramid"; eave?: number;
+  };
+  type Massing = { anchor: [number, number]; axis_deg: number; replace_oidn: Array<number | string>; parts: Part[] };
+  for (const lm of existsSync(dir) ? readdirSync(dir) : []) {
+    const f = join(dir, lm, "massing.json");
+    if (!existsSync(f)) continue;
+    const m: Massing = readJson(f);
+    const ids = new Set(m.replace_oidn.map(String));
+    const grb = buildings.filter((b) => b.oidn && ids.has(b.oidn));
+    if (!grb.length) { console.log(`  landmark ${lm}: GRB ${[...ids]} not in this area, skipped`); continue; }
+    // drop the GRB footprints and any LiDAR needle standing inside them
+    const doomed = new Set(grb);
+    for (const b of buildings) {
+      if (b.oidn) continue;
+      const c: P2 = [b.ring.reduce((a, q) => a + q[0], 0) / b.ring.length, b.ring.reduce((a, q) => a + q[1], 0) / b.ring.length];
+      if (grb.some((g) => inside(c, g.ring))) doomed.add(b);
+    }
+    for (let i = buildings.length - 1; i >= 0; i--) if (doomed.has(buildings[i])) buildings.splice(i, 1);
+    const [ax, ay] = toLambert(m.anchor[1], m.anchor[0]);
+    const a = (m.axis_deg * Math.PI) / 180, ca = Math.cos(a), sa = Math.sin(a);
+    const enu = (u: number, v: number): P2 => {
+      const [lon, lat] = fromLambert(ax + u * ca - v * sa, ay + u * sa + v * ca);
+      const p = toEnu(lon, lat);
+      return [p[0], p[1]];
+    };
+    for (const part of m.parts) {
+      let rings: P2[][] = [];
+      if (part.footprint === "grb") rings = grb.map((g) => g.ring);
+      else if (part.rect) {
+        const [u0, u1, v0, v1] = part.rect;
+        rings = [[enu(u0, v0), enu(u1, v0), enu(u1, v1), enu(u0, v1)]];
+      } else if (part.oct) {
+        const [cu, cv, r] = part.oct;
+        rings = [Array.from({ length: 8 }, (_, k) => enu(cu + r * Math.cos((k + 0.5) * Math.PI / 4), cv + r * Math.sin((k + 0.5) * Math.PI / 4)))];
+      }
+      for (let ring of rings) {
+        if (area2(ring) < 0) ring = [...ring].reverse();
+        let g: number[] | null = null;
+        if (part.shape === "pyramid") g = [part.eave ?? 0];
+        else if ((part.shape === "gable-u" || part.shape === "gable-v") && part.rect) {
+          const [u0, u1, v0, v1] = part.rect, mu = (u0 + u1) / 2, mv = (v0 + v1) / 2;
+          const p = enu(mu, mv), q = part.shape === "gable-u" ? enu(mu + 10, mv) : enu(mu, mv + 10);
+          const L = Math.hypot(q[0] - p[0], q[1] - p[1]) || 1;
+          g = [part.eave ?? part.h * 0.6, p[0], p[1], (q[0] - p[0]) / L, (q[1] - p[1]) / L].map((v) => Math.round(v * 1000) / 1000);
+        }
+        buildings.push({ ring, holes: [], h: part.h, s: part.style ?? 6, c: [...part.wall, ...part.roof], g });
+      }
+    }
+    console.log(`  landmark ${lm}: replaced ${doomed.size} footprint(s) with ${m.parts.length} parts`);
+  }
+}
+
 const trees: Array<[number, number, number, number]> = [];
 for (const f of readJson(join(raw, "trees.geojson")).features ?? []) {
   const [lon, lat] = f.geometry.coordinates;
@@ -308,7 +387,8 @@ for (const b of buildings) {
   const ring = b.ring.map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100] as P2);
   const holes = b.holes.map((h) => h.map(([x, y]) => [Math.round(x * 100) / 100, Math.round(y * 100) / 100] as P2));
   const rec: unknown[] = [ring, Math.round(b.h * 10) / 10, b.s, null];
-  if (holes.length) rec.push(holes);
+  if (holes.length || b.c) rec.push(holes);
+  if (b.c) rec.push(b.c.map((v) => Math.round(v * 1000) / 1000), b.g ?? null);
   add(Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys), (bin) => bin.b.push(rec));
 }
 for (const t of trees) {

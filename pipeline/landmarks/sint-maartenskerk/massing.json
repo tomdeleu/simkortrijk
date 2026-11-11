@@ -1,0 +1,23 @@
+{
+  "_doc": "Render massing for Sint-Maartenskerk, read by pipeline/src/scene.ts. Coordinates are metres in Lambert 72 around 'anchor' (the LiDAR spire peak), u along 'axis_deg' (west tower -> east choir, degrees CCW from grid east), v to the north side. Sizes from notes.md (tower 83 m, eaves ~14 m, ridges ~27 m) and the GRB footprint 1744653. Colours are the softened style-A palette (pale limestone, slate blue-grey).",
+  "anchor": [50.82747, 3.26789],
+  "axis_deg": 17,
+  "replace_oidn": [1744653],
+  "parts": [
+    { "id": "aisles and chapels (whole GRB footprint)", "footprint": "grb", "h": 12, "shape": "flat", "style": 6,
+      "wall": [0.90, 0.87, 0.80], "roof": [0.50, 0.54, 0.63] },
+    { "id": "nave south", "rect": [4, 28, -15, -5], "h": 27, "eave": 15, "shape": "gable-u", "style": 6, "wall": [0.90, 0.87, 0.80], "roof": [0.50, 0.54, 0.63] },
+    { "id": "nave", "rect": [4, 28, -5, 5], "h": 28, "eave": 15, "shape": "gable-u", "style": 6, "wall": [0.90, 0.87, 0.80], "roof": [0.50, 0.54, 0.63] },
+    { "id": "nave north", "rect": [4, 28, 5, 15], "h": 27, "eave": 15, "shape": "gable-u", "style": 6, "wall": [0.90, 0.87, 0.80], "roof": [0.50, 0.54, 0.63] },
+    { "id": "transept", "rect": [28, 39, -27, 28], "h": 28, "eave": 15, "shape": "gable-v", "style": 6, "wall": [0.90, 0.87, 0.80], "roof": [0.50, 0.54, 0.63] },
+    { "id": "choir south", "rect": [39, 60, -24, -8], "h": 25, "eave": 13, "shape": "gable-u", "style": 6, "wall": [0.86, 0.66, 0.58], "roof": [0.50, 0.54, 0.63] },
+    { "id": "choir", "rect": [39, 70, -8, 8], "h": 26, "eave": 13, "shape": "gable-u", "style": 6, "wall": [0.86, 0.66, 0.58], "roof": [0.50, 0.54, 0.63] },
+    { "id": "choir north", "rect": [39, 60, 8, 24], "h": 25, "eave": 13, "shape": "gable-u", "style": 6, "wall": [0.86, 0.66, 0.58], "roof": [0.50, 0.54, 0.63] },
+    { "id": "west tower", "rect": [-6, 5, -5.5, 5.5], "h": 55, "shape": "flat", "style": 6, "wall": [0.92, 0.89, 0.82], "roof": [0.50, 0.54, 0.63] },
+    { "id": "spire (lantern to 63 m, slate needle to 83 m)", "oct": [-0.5, 0, 4.6], "h": 83, "eave": 63, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] },
+    { "id": "pinnacle SW", "oct": [-4.8, -4.3, 1.1], "h": 64, "eave": 57, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] },
+    { "id": "pinnacle NW", "oct": [-4.8, 4.3, 1.1], "h": 64, "eave": 57, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] },
+    { "id": "pinnacle SE", "oct": [3.8, -4.3, 1.1], "h": 64, "eave": 57, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] },
+    { "id": "pinnacle NE", "oct": [3.8, 4.3, 1.1], "h": 64, "eave": 57, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] }
+  ]
+}

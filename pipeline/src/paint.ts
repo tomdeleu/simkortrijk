@@ -50,12 +50,17 @@ roof-tile texture, cobblestones, and richer deciduous tree canopies, but \
 silhouettes and positions must stay identical. Keep the same isometric camera, \
 framing, and crop. Empty map-edge background (plain cream paper) stays empty: paint no city there. No text, labels, \
 borders, or watermarks.
-Flat roof planes in the massing stay flat. Paint blush or coral tile colour on that existing plane only. \
-Do not add hips, ridges, gables, or pitched roofs that change the silhouette.`;
+Flat roof planes in the massing stay flat: paint texture on that existing plane only, in its own colour. \
+Do not add hips, ridges, gables, or pitched roofs that change the silhouette. Sloped roof planes in the \
+massing are real pitched roofs: keep their ridges and slopes.
+Keep every building's roof colour family and wall colour family from image 1. Do not recolour all roofs \
+the same, and do not swap colours between neighbours. Add clay-tile, slate and brick texture.`;
 
 /** Style A (chosen 11 Nov 2026): style C with stronger contrast and clear blue water. */
 const STYLE_A = `Bright, stylised isometric city-map illustration with a cozy city-builder / \
-storybook-game finish. Blush and coral roofs, peach and cream walls, mint and sage tree canopies, \
+storybook-game finish. Roofs and walls keep the colours of image 1 (terracotta and brown clay tiles, \
+slate blue-grey, grey or light flat roofs; red, brown and buff brick, whitewash, pale stone), softened \
+into a light pastel palette: never darker or muddier than image 1. Mint and sage tree canopies, \
 pale lavender-grey streets, simplified charming window dots, clean soft shapes. Still a clear \
 illustrated map, not photorealistic. Compared to a soft pastel map: noticeably MORE CONTRAST \
 (deeper shadows on the shaded facades, clearer light/dark separation between roofs, walls and \
@@ -66,10 +71,12 @@ Keep everything else in the pastel style.`;
 
 const PROMPT = `Four images are attached, in order:
 1. input.png: an orthographic massing render (camera tilted 45° down, no perspective) of {title}, Belgium, \
-built from Flemish open data. ~256 m across. Layout is exact. Colours are flat placeholders.
+built from Flemish open data. ~256 m across. Layout is exact. Each roof and wall already has its own colour, \
+taken from aerial photos and softened toward the pastel palette.
 2. height.png: the height map from the SAME camera, pixel-aligned with image 1. Black = ground, \
 brighter = taller. Use it for footprints and heights. Church spires and the belfry stay the tallest objects.
-3. style.png: STYLE ONLY. A painted tile in the target style (contrast, blue water, slate cones). Do not copy its buildings, streets, or towers into this frame.
+3. style.png: STYLE ONLY. A painted tile in the target style (rendering finish, contrast, blue water, slate cones, \
+how per-building colours are softened). Take colours from image 1, not from this tile. Do not copy its buildings, streets, or towers into this frame.
 4. trees.png: pastel crowns for this style. Round mint and sage canopies, one narrow poplar. \
 Repaint every tree already in image 1 with these canopies. Do not add or move trees. Do not use dark forest green.
 

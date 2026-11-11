@@ -36,7 +36,7 @@ const area = openArea(areaName);
 export const ATTRIBUTIONS = [
   "Bron: Grootschalig Referentie Bestand Vlaanderen, Digitaal Vlaanderen",
   "Hoogte: 3D GRB en DHMV II, Digitaal Vlaanderen",
-  "Orthofotomozaïek middenschalig zomer 2024, Digitaal Vlaanderen",
+  "Orthofotomozaïek middenschalig zomer 2024 en winter 2025, Digitaal Vlaanderen",
   "© OpenStreetMap contributors (ODbL)",
 ];
 

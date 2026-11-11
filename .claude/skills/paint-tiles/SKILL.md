@@ -19,10 +19,10 @@ Gemini prices for `gemini-nano-banana-2.1`: **$0.0336 per 1K image**, **$0.0504 
 
 Style is variant A: style C (pastel, game-like) with stronger contrast, clear blue water (#2F7FD6, never teal) and slate blue-grey cones. Do not replace these with Tel Aviv imagery.
 
-- `pipeline/style/reference.png`: a painted Broeltorens window in style A. Blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets, clear blue river. Style only. The prompt forbids copying its buildings into another window.
+- `pipeline/style/reference.png`: the painted Broeltorens window `-1_-2` in style A with per-building colours (terracotta, brown tile, slate blue-grey, grey flat roofs; red/buff brick, whitewash walls), softened to pastel; mint and sage trees, pale lavender streets, clear blue river. Style only: the prompt says to take colours from the render and not copy its buildings. Mostly-empty edge windows next to it (`-1_-3`) still tend to copy it; skip those in assembly.
 - `pipeline/style/trees.png`: round mint and sage canopies and one narrow poplar, on a cream ground.
 
-The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style A paragraph. Flat roof planes stay flat. Tile colour on that plane is allowed. Hips, ridges, and gables that change the silhouette are not. Empty map edge is cream paper (`PAPER` in `paint.ts`), and the prompt says to leave it empty. The HTTP client is `pipeline/src/gemini.ts`.
+The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style A paragraph. Flat roof planes stay flat; sloped planes in the render (gables from `building_colours.py`, landmark `massing.json`) keep their ridges. Every building keeps its render colour family; no recolouring all roofs alike. Empty map edge is cream paper (`PAPER` in `paint.ts`), and the prompt says to leave it empty. The HTTP client is `pipeline/src/gemini.ts`.
 
 `roofNovelty` currently fails every real window (scores about 0.07–0.29, limit 0.04). The painter keeps the third attempt, so ridges still land. Next change is a tighter prompt or a hard reject, not a higher limit. Land windows are not colour-matched to each other; only open sea is.
 
