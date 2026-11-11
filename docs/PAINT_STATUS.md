@@ -11,7 +11,25 @@ Regenerate `docs/paint-status.png` when the grid changes.
 
 Last updated: **2026-11-11**, after the HD publish of about 17:32 CET (1 277 files to R2 bucket `simkortrijk`, region `kortrijk`). The 16:23 publish before it was the same map at z8.
 
-![Paint status: painted block outlined in red, coloured render greyed, excluded edge windows dashed](paint-status.png)
+![Paint status: painted tiles outlined in red, render-only tiles greyed, landmarks by priority, the proposed next piece dashed blue](paint-status.png)
+
+## Working rule: one piece at a time (Tom, 2026-11-11)
+
+The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one landmark fix plus its repaint. For every piece:
+
+1. **Propose before painting.** Show `docs/paint-status.png` and give the tiles and windows, the landmarks in them and their render fixes, the estimated calls and cost, and which reference material would help (photos of the facades that face the camera, i.e. south-south-west, since the camera looks along heading 20°).
+2. **Wait for Tom.** He approves, changes the scope, and may add reference material (into `pipeline/landmarks/<slug>/refs/`, listed in `refs/SOURCES.md`; his own photos may go into a paint request, Commons images only if their licence allows). No paint call before his go.
+3. **Do the piece**: render fixes, check the render with Tom where a landmark changed, paint, check the windows by eye, assemble, export, and show the result before publishing.
+4. **Record progress** right after: the piece table and the summary in `docs/PAINT_STATUS.md` (tiles painted, % of the binnenstad, calls and cost, date), and regenerate `docs/paint-status.png`. Then propose the next piece.
+
+## Pieces
+
+| # | Piece | Tiles | Landmarks | Status | Calls / cost | Date |
+|---|---|---|---|---|---|---|
+| 0 | Broeltorens block | `-2_-2` `-1_-2` `0_-2` `-2_-1` `-1_-1` `0_-1` | Broeltorens + Broelbrug, Sint-Maartenskerk (fixed); Belfort, stadhuis, OLV-kerk, Begijnhof, Buda, Collegebrug, Groeningeabdij painted from the uncorrected render | **done**, live | 11 / ~$0.98 | 2026-11-11 |
+| 1 | Grote Markt | repaint the Belfort and stadhuis windows in `-1_-1` / `0_-1`; paint `-1_0` `0_0` | Belfort, historisch stadhuis (P1, render fix first); Stadsschouwburg, station (P2) | **proposed**, waiting for Tom | ~10 / ~$0.90 (estimate) | |
+
+Progress: **6 of 29** binnenstad tiles painted (20.7%).
 
 ## Summary
 
