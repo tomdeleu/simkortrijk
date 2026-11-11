@@ -17,7 +17,7 @@
  *   npm run paint -- kortrijk-binnenstad --batch
  */
 import { spawn, spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, openSync, closeSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { appendFileSync, copyFileSync, existsSync, mkdirSync, openSync, closeSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
 import sharp, { type OverlayOptions } from "sharp";
@@ -29,7 +29,7 @@ import { applyRegistration, register, roofNovelty } from "./register.ts";
 import {
   PRICE_1K_USD, choosePaintMode, estimateUsd, geminiEdit, runGeminiBatch, type GeminiImage,
 } from "./gemini.ts";
-import { MAX_ROOF_NOVELTY, MIN_MATCH, MIN_TEXTURE, paintVerdict, shouldWarp } from "./paintqa.ts";
+import { MAX_ATTEMPTS, MAX_ROOF_NOVELTY, MIN_MATCH, MIN_TEXTURE, paintVerdict, shouldWarp } from "./paintqa.ts";
 
 const WIN = 1024, OVERLAP = 128, STRIDE = WIN - OVERLAP, T = CAMERA.tile;
 /** Blend band in the middle of each overlap; outside it a window's own pixels win outright. */
@@ -39,7 +39,7 @@ const TREES = join(PIPELINE, "style", "trees.png"); // pastel mint and sage crow
 const SEA = join(PIPELINE, "style", "sea.png");
 /** Background of the model input outside the map (cream paper). */
 const PAPER = { r: 246, g: 241, b: 231 };
-/** Style C, pastel game-like, plus the shared geometry lock. Used by every painter. */
+/** Style A (style C, more contrast, blue water) plus the shared geometry lock. Used by every painter. */
 const GEOMETRY_LOCK = `Follow the source massing render as a strict geometric template. Preserve every \
 building position, footprint, height, roof outline, street, square, water, and \
 tree. Do not add, remove, move, merge, or invent buildings, towers, bridges, \
@@ -53,24 +53,29 @@ borders, or watermarks.
 Flat roof planes in the massing stay flat. Paint blush or coral tile colour on that existing plane only. \
 Do not add hips, ridges, gables, or pitched roofs that change the silhouette.`;
 
-const STYLE_C = `Bright, stylised, pastel isometric city-map illustration with a cozy \
-city-builder / storybook-game finish. Blush and coral roofs, peach and cream \
-walls, mint and sage tree canopies, pale lavender-grey streets, soft peachy \
-shadows, simplified charming window dots, clean soft shapes, high-key pastel \
-palette, no grit. Still a clear illustrated map, not photorealistic.`;
+/** Style A (chosen 11 Nov 2026): style C with stronger contrast and clear blue water. */
+const STYLE_A = `Bright, stylised isometric city-map illustration with a cozy city-builder / \
+storybook-game finish. Blush and coral roofs, peach and cream walls, mint and sage tree canopies, \
+pale lavender-grey streets, simplified charming window dots, clean soft shapes. Still a clear \
+illustrated map, not photorealistic. Compared to a soft pastel map: noticeably MORE CONTRAST \
+(deeper shadows on the shaded facades, clearer light/dark separation between roofs, walls and \
+streets). Rivers, canals and ponds are a TRUE CLEAR BLUE (around #2F7FD6), saturated and \
+unmistakably blue, NOT mint, teal or turquoise, with a few lighter blue ripple highlights. \
+Conical tower roofs and spires are slate blue-grey (around #6B7A90), not black or anthracite. \
+Keep everything else in the pastel style.`;
 
 const PROMPT = `Four images are attached, in order:
 1. input.png: an orthographic massing render (camera tilted 45° down, no perspective) of {title}, Belgium, \
 built from Flemish open data. ~256 m across. Layout is exact. Colours are flat placeholders.
 2. height.png: the height map from the SAME camera, pixel-aligned with image 1. Black = ground, \
 brighter = taller. Use it for footprints and heights. Church spires and the belfry stay the tallest objects.
-3. style.png: STYLE ONLY. A pastel painted tile. Do not copy its buildings, streets, or towers into this frame.
+3. style.png: STYLE ONLY. A painted tile in the target style (contrast, blue water, slate cones). Do not copy its buildings, streets, or towers into this frame.
 4. trees.png: pastel crowns for this style. Round mint and sage canopies, one narrow poplar. \
 Repaint every tree already in image 1 with these canopies. Do not add or move trees. Do not use dark forest green.
 
 ${GEOMETRY_LOCK}
 
-Style: ${STYLE_C}
+Style: ${STYLE_A}
 {continuation}Output: one square 1024x1024 image, no text, no labels, no border, no vignette.
 
 When done, copy the final PNG to {out} and reply only with that path.
@@ -262,21 +267,34 @@ async function openaiPaint(cwd: string, prompt: string): Promise<void> {
   form.set("model", model);
   form.set("prompt", prompt);
   form.set("size", "1024x1024");
+  form.set("quality", process.env.OPENAI_IMAGE_QUALITY || "high");
+  // keep the pasted neighbour strips and the render layout as close to the input as the model allows
+  const fidelity = process.env.OPENAI_INPUT_FIDELITY ?? "high";
+  if (fidelity) form.set("input_fidelity", fidelity);
   for (const file of ["input.png", "height.png", "style.png", "trees.png"]) {
     const bytes = readFileSync(join(cwd, file));
     form.append("image[]", new Blob([bytes], { type: "image/png" }), file);
   }
-  const r = await fetch("https://api.openai.com/v1/images/edits", {
+  const send = () => fetch("https://api.openai.com/v1/images/edits", {
     method: "POST",
     headers: { Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
     body: form,
-    signal: AbortSignal.timeout(300_000),
+    signal: AbortSignal.timeout(600_000),
   });
-  const text = await r.text();
+  let r = await send();
+  let text = await r.text();
+  // a model that does not take input_fidelity: send again without it
+  if (r.status === 400 && fidelity && /input_fidelity/i.test(text)) {
+    form.delete("input_fidelity");
+    r = await send();
+    text = await r.text();
+  }
   writeFileSync(join(cwd, "codex.log"), `${r.status} ${model}\n${text.slice(0, 6000)}`);
   if (!r.ok) return;
   try {
-    const b64 = JSON.parse(text).data?.[0]?.b64_json as string | undefined;
+    const body = JSON.parse(text);
+    if (body.usage) appendFileSync(join(base, "openai-usage.jsonl"), JSON.stringify({ at: new Date().toISOString(), window: cwd.split("/").pop(), model, ...body.usage }) + "\n");
+    const b64 = body.data?.[0]?.b64_json as string | undefined;
     if (b64) writeFileSync(join(cwd, "out.png"), Buffer.from(b64, "base64"));
   } catch { /* the caller reads codex.log */ }
 }
@@ -352,8 +370,8 @@ async function paintWindow(i: number, j: number) {
   const edges = await composeInput(i, j, join(work, "input.png"), join(work, "height.png"));
   copyFileSync(STYLE, join(work, "style.png"));
   copyFileSync(TREES, join(work, "trees.png"));
-  const prompt = windowPrompt(edges, join(work, "out.png"), painter === "gemini");
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  const prompt = windowPrompt(edges, join(work, "out.png"), painter !== "codex");
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     while (Date.now() < resumeAt) await sleep(Math.min(60_000, resumeAt - Date.now()));
     rmSync(join(work, "out.png"), { force: true });
     const t0 = Date.now();
@@ -380,10 +398,11 @@ async function paintWindow(i: number, j: number) {
 
 interface Prepared { i: number; j: number; work: string; edges: string[] }
 
-function windowPrompt(edges: string[], out: string, gemini: boolean) {
+/** `direct`: an image API (Gemini, OpenAI) returns the picture itself; only Codex copies a file. */
+function windowPrompt(edges: string[], out: string, direct: boolean) {
   const prompt = PROMPT.replace("{title}", title).replace("{out}", out)
     .replace("{continuation}", edges.length ? CONTINUATION.replace("{edges}", edges.join(" and ")) : "");
-  return gemini
+  return direct
     ? prompt.replace(/When done, copy the final PNG to [\s\S]* and reply only with that path\./, "Return one square image and no other text.")
     : prompt;
 }
@@ -431,7 +450,7 @@ async function paintGeminiPass(todo: Array<[number, number]>) {
     jobs.push({ i, j, work, edges, prompt: windowPrompt(edges, join(work, "out.png"), true) });
   }
   let left = jobs;
-  for (let attempt = 1; attempt <= 3 && left.length; attempt++) {
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS && left.length; attempt++) {
     console.log(`  gemini batch: ${left.length} windows, about $${estimateUsd(left.length, true).toFixed(2)} at 1K (half of $${PRICE_1K_USD})`);
     const started = Date.now();
     let images: Map<string, Buffer>;

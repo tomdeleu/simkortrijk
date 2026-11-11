@@ -40,6 +40,7 @@ def main() -> None:
     ap.add_argument("--windows", default="-2..0,-3..-1", help="i range, j range (inclusive)")
     ap.add_argument("--tiles", default="-2..0,-2..-1", help="tx range, ty range (inclusive)")
     ap.add_argument("--feather", type=float, default=220)
+    ap.add_argument("--skip", default="", help="windows to leave out, e.g. -2_-3,0_-1: their area feathers into the render")
     args = ap.parse_args()
     i_spec, j_spec = args.windows.split(",")
     tx_spec, ty_spec = args.tiles.split(",")
@@ -55,8 +56,11 @@ def main() -> None:
     acc = np.zeros((height, width, 3))
     ws = np.zeros((height, width))
     imin, imax, jmin, jmax = min(ii), max(ii), min(jj), max(jj)
+    skip = {w for w in args.skip.split(",") if w}
     for i in ii:
         for j in jj:
+            if f"{i}_{j}" in skip:
+                continue
             path = base / "windows" / f"{i}_{j}.png"
             if not path.is_file():
                 sys.exit(f"missing {path}: paint this window first")
@@ -79,6 +83,12 @@ def main() -> None:
             ws[y + ys : y + ye, x + xs : x + xe] += w2[ys:ye, xs:xe]
     paint = acc / np.maximum(ws, 1e-6)[..., None]
     covered = ws > 1e-3
+    # A skipped window's whole square stays render, including the overlap strips its neighbours
+    # copied from it when they were painted.
+    for w in skip:
+        si, sj = map(int, re.fullmatch(r"(-?\d+)_(-?\d+)", w).groups())
+        x, y = si * S - x0, sj * S - y0
+        covered[max(0, y) : max(0, y + W), max(0, x) : max(0, x + W)] = False
     # Names are {tx}_{ty}.png, and ty (or tx) may be negative: "0_-1" must not split on every underscore.
     tiles = set()
     for f in (base / "render").iterdir():

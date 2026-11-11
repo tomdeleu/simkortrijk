@@ -1,6 +1,6 @@
 ---
 name: paint-tiles
-description: Repaint SimKortrijk render windows with Gemini Nano Banana (default), including Batch API for a whole city and the render-vs-paint retry. Use when painting, retrying a window, or wiring PAINT_PROVIDER. Skip this if the 3D render is enough for the preview. Do not call the API without GEMINI_API_KEY; npm test mocks it.
+description: Repaint SimKortrijk render windows. New painting should use OpenAI gpt-image-2.6-flare; Gemini Nano Banana stays the code default, with a Batch API for a whole city and the render-vs-paint retry. Use when painting, retrying a window, or wiring PAINT_PROVIDER. Skip this if the 3D render is enough for the preview. Do not call a paid API without the matching key; npm test mocks it.
 ---
 
 # Paint tiles
@@ -13,16 +13,16 @@ Optional. Export already shows the 3D render wherever `paint/` has no tile. Do n
 |---|---|---|
 | `gemini` (default) | **`GEMINI_API_KEY`** | Gemini image edits. Model `GEMINI_IMAGE_MODEL` or `gemini-nano-banana-2.1`. |
 | `codex` | none | `codex exec` on PATH, ChatGPT login. No `--batch`. |
-| `openai` | **`OPENAI_API_KEY`** | `POST https://api.openai.com/v1/images/edits`. Model `OPENAI_IMAGE_MODEL` or `gpt-image-1`. No `--batch`. |
+| `openai` (recommended) | **`OPENAI_API_KEY`** | `POST https://api.openai.com/v1/images/edits`. Use `OPENAI_IMAGE_MODEL=gpt-image-2.6-flare` (live paint, ~$0.09 a window). Unset falls back to `gpt-image-1`. No `--batch`. Try `flare` before `sunburst`. |
 
 Gemini prices for `gemini-nano-banana-2.1`: **$0.0336 per 1K image**, **$0.0504 per 2K**. This painter requests 1K (windows are 1024 px). The Batch API is half of that ($0.0168 per 1K image).
 
-Style is variant C, pastel and game-like. Do not replace these with Tel Aviv imagery.
+Style is variant A: style C (pastel, game-like) with stronger contrast, clear blue water (#2F7FD6, never teal) and slate blue-grey cones. Do not replace these with Tel Aviv imagery.
 
-- `pipeline/style/reference.png`: a painted Grote Markt and Belfort tile. Blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets. Style only. The prompt forbids copying its buildings into another window.
+- `pipeline/style/reference.png`: a painted Broeltorens window in style A. Blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets, clear blue river. Style only. The prompt forbids copying its buildings into another window.
 - `pipeline/style/trees.png`: round mint and sage canopies and one narrow poplar, on a cream ground.
 
-The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style C paragraph. Flat roof planes stay flat. Tile colour on that plane is allowed. Hips, ridges, and gables that change the silhouette are not. Empty map edge is cream paper (`PAPER` in `paint.ts`), and the prompt says to leave it empty. The HTTP client is `pipeline/src/gemini.ts`.
+The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style A paragraph. Flat roof planes stay flat. Tile colour on that plane is allowed. Hips, ridges, and gables that change the silhouette are not. Empty map edge is cream paper (`PAPER` in `paint.ts`), and the prompt says to leave it empty. The HTTP client is `pipeline/src/gemini.ts`.
 
 `roofNovelty` currently fails every real window (scores about 0.07–0.29, limit 0.04). The painter keeps the third attempt, so ridges still land. Next change is a tighter prompt or a hard reject, not a higher limit. Land windows are not colour-matched to each other; only open sea is.
 
@@ -32,7 +32,7 @@ The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: th
 npm test
 npm run paint -- kortrijk-binnenstad --plan
 npm run paint -- kortrijk-binnenstad --near 50.82757,3.26562 --radius 1   # interactive
-npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3   # Broeltorens, ~33 calls, ~$1.10
+PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1 npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3   # Broeltorens
 npm run paint -- kortrijk-binnenstad --window 4,-3 --interactive
 npm run paint -- kortrijk-binnenstad --batch                                      # whole area
 npm run paint -- kortrijk-binnenstad --assemble
@@ -77,7 +77,7 @@ Open sea reuses `pipeline/style/sea.png` when that file exists. Kortrijk binnens
 
 ## Env
 
-`GEMINI_API_KEY` for the default painter. `GEMINI_IMAGE_MODEL` optional. `PAINT_PROVIDER`, `OPENAI_API_KEY`, `OPENAI_IMAGE_MODEL` only when switching away from Gemini.
+Recommended: `PAINT_PROVIDER=openai`, `OPENAI_API_KEY`, `OPENAI_IMAGE_MODEL=gpt-image-2.6-flare`, `PAINT_ATTEMPTS=1` while roof checks fail. `OPENAI_IMAGE_QUALITY` and `OPENAI_INPUT_FIDELITY` default to `high`. Gemini remains the code default (`GEMINI_API_KEY`, optional `GEMINI_IMAGE_MODEL`) when `PAINT_PROVIDER` is unset.
 
 Without `GEMINI_API_KEY` the command exits naming that secret and does not write fake paintings.
 
@@ -103,7 +103,7 @@ The edit draws cream stone towers with slate cones, and the Broelbrug from OSM w
 A partial block is not `npm run paint -- --assemble` (that seams against unpainted tiles). Feather the finished windows ~220 px into the render:
 
 ```sh
-python3 pipeline/tools/assemble_block.py
+python3 pipeline/tools/assemble_block.py --skip -2_-3
 ```
 
 Deps and flags: `pipeline/tools/README.md`. Publish only when the user asks (`publish-r2`).

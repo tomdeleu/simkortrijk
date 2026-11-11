@@ -14,7 +14,8 @@ export const MIN_TEXTURE = 0.05;
  * Tile texture on the existing plane stays under this. A pitched roof on a flat block does not.
  */
 export const MAX_ROOF_NOVELTY = 0.04;
-export const MAX_ATTEMPTS = 3;
+/** Attempts per window (PAINT_ATTEMPTS overrides, e.g. 1 for a single paid retry). */
+export const MAX_ATTEMPTS = Math.max(1, Number(process.env.PAINT_ATTEMPTS) || 3);
 
 export interface PaintScore {
   score: number;

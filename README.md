@@ -2,7 +2,7 @@
 
 An isometric map of Kortrijk you can pan and zoom. Buildings, streets and trees sit where they really are. The picture is a 3D render from Flemish open data; an optional image model repaints each window of that render in one illustrated style, checked so nothing moves.
 
-The pipeline and the viewer are adapted from [Isometric World](https://github.com/krasun/isometricworld) by Dmytro Krasun (MIT). This repository keeps that licence ([LICENSE](LICENSE)). It does **not** include his map tiles, video or style images: those stay with his data credits, and [ATTRIBUTION.md](ATTRIBUTION.md) in his repository says not to reuse them. The paint style is variant C, a pastel game-like map: `pipeline/style/reference.png` is a painted Grote Markt tile in that palette, and `trees.png` is mint and sage crowns.
+The pipeline and the viewer are adapted from [Isometric World](https://github.com/krasun/isometricworld) by Dmytro Krasun (MIT). This repository keeps that licence ([LICENSE](LICENSE)). It does **not** include his map tiles, video or style images: those stay with his data credits, and [ATTRIBUTION.md](ATTRIBUTION.md) in his repository says not to reuse them. The paint style is variant A, a pastel game-like map with stronger contrast and clear blue water: `pipeline/style/reference.png` is a painted Broeltorens window in that palette, and `trees.png` is mint and sage crowns.
 
 Live reference for the look: [isometric Tel Aviv](https://isometricworld.dmytrokrasun.com/tel-aviv-yafo).
 
@@ -52,7 +52,7 @@ npm run dev
 
 Not run in the default build. The viewer shows the render until a painter fills `data/derived/<area>/paint/`.
 
-The default painter is Gemini Nano Banana, model `gemini-nano-banana-2.1` (override with `GEMINI_IMAGE_MODEL`). Secret **`GEMINI_API_KEY`**. The same prompt (geometry lock plus style C) is sent to Gemini, Codex, and OpenAI. Each window sends the render, the height pass, `pipeline/style/reference.png` and `pipeline/style/trees.png`. A result that drifts from the render, grows a new roof ridge on a flat block, or comes back with a black band, is rejected and retried up to three times (`pipeline/src/paintqa.ts`). Roof-tile colour on the existing plane is allowed.
+The default painter is Gemini Nano Banana, model `gemini-nano-banana-2.1` (override with `GEMINI_IMAGE_MODEL`). Secret **`GEMINI_API_KEY`**. The same prompt (geometry lock plus style A) is sent to Gemini, Codex, and OpenAI. Each window sends the render, the height pass, `pipeline/style/reference.png` and `pipeline/style/trees.png`. A result that drifts from the render, grows a new roof ridge on a flat block, or comes back with a black band, is rejected and retried up to three times (`pipeline/src/paintqa.ts`). Roof-tile colour on the existing plane is allowed.
 
 | | |
 |---|---|
@@ -74,7 +74,7 @@ Other providers, if you set `PAINT_PROVIDER`:
 - `codex`. The [Codex CLI](https://github.com/openai/codex) on `PATH`, logged into ChatGPT. No API key. This is the upstream tool. No batch mode.
 - `openai`. Secret **`OPENAI_API_KEY`**. Optional `OPENAI_IMAGE_MODEL` (default `gpt-image-1`).
 
-Style C is already the reference. Do not swap in another city's painted tiles.
+Style A is already the reference. Do not swap in another city's painted tiles.
 
 ## Deploy as one Worker
 

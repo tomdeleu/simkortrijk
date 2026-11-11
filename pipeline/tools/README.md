@@ -15,4 +15,6 @@ That reads `data/derived/kortrijk-binnenstad/windows/{i}_{j}.png` for `i` in -2.
 python3 pipeline/tools/assemble_block.py --windows=-1..1,-1..1 --tiles=-1..1,-1..0 --feather=220
 ```
 
+A window that will not paint right (wrong geometry after retries) can be left out with `--skip=i_j[,i_j]`: that area stays render and the paint feathers into it. The live Broeltorens block uses `--skip=-2_-3`.
+
 `--base` points at another derived directory. Windows and render tiles must already be on disk. This does not call Gemini and does not publish.

@@ -15,11 +15,18 @@ The code is adapted from [Isometric World](https://github.com/krasun/isometricwo
 
 ## Paint status
 
-The live map is 29 tiles of `kortrijk-binnenstad`. Six are painted (style C, Nano Banana 2.1): `tx` -2..0 × `ty` -2..-1, the Broeltorens. The rest is unpainted render. Paint files are in `data/derived` (not in git) and on R2.
+The live map is 29 tiles of `kortrijk-binnenstad`. Six are painted (style A, OpenAI `gpt-image-2.6-flare`): `tx` -2..0 × `ty` -2..-1, the Broeltorens. Window `-2_-3` is skipped and stays render. The rest is unpainted render. Paint files are in `data/derived` (not in git) and on R2.
 
-Before painting the Broeltorens windows, run `python3 pipeline/landmarks/broeltorens/edit_broel.py`, then `--restore` afterwards. Assemble a partial block with `python3 pipeline/tools/assemble_block.py` (~220 px feather into the render). A 3×3 there is `npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3` (~33 calls, ~$1.10).
+New painting should use `PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare` (about $0.09 a window). Try `flare` before `sunburst`; only use `gpt-image-2.6-sunburst` if Tom says so. Gemini is still the code default. Use `PAINT_ATTEMPTS=1` and check windows by eye while `roofNovelty` fails every window.
 
-Next, in order: (1) `roofNovelty` fails every window (0.07–0.29 vs 0.04) and the third attempt is kept, so flat roofs get ridges — tighten the prompt or enforce it; (2) colour-match land windows, not only sea; (3) Broeltorens cones are a bit squat; (4) the beige quay downstream of the Broelbrug should be water in the source data; (5) then `npm run paint -- kortrijk-binnenstad`, export, `npm run dev`, and only if the user asks `npm run publish -- kortrijk --yes --keep`, `npm run build`, `npx wrangler deploy`; (6) optional area `kortrijk`; (7) custom domain only if Tom asks. Detail is in `CLAUDE.md`.
+Before painting the Broeltorens windows, run `python3 pipeline/landmarks/broeltorens/edit_broel.py`, then `--restore` afterwards. Assemble that block with `python3 pipeline/tools/assemble_block.py --skip -2_-3`. A 3×3 there:
+
+```sh
+PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1 \
+  npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3
+```
+
+Next, in order: (1) landmark render fixes, Sint-Maartenskerk first; (2) per-building roof and wall colours; (3) `roofNovelty` still fails (0.07–0.29 vs 0.04); (4) colour-match land and river windows; (5) squat Broeltorens cones, and the beige quay downstream of the Broelbrug should be water; (6) paint the rest outward, export, `npm run dev`, and publish only if Tom asks (`npm run publish -- kortrijk --yes --keep`; tiles-only needs no redeploy); (7) optional area `kortrijk`, and a custom domain only if Tom asks. Detail is in `CLAUDE.md`.
 
 ## Commands
 
