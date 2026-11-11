@@ -8,7 +8,7 @@ Live reference for the look: [isometric Tel Aviv](https://isometricworld.dmytrok
 
 ## What you get
 
-The region is one flat map centred on the Belfort. This run builds the **binnenstad**: about 800 m around the Belfort (Grote Markt, Sint-Maartenskerk, Onze-Lieve-Vrouwekerk, Begijnhof, Broeltorens, Leie quays). The same camera and commands cover the whole municipality (`kortrijk` in `pipeline/src/areas.ts`, on the order of 54,000 buildings). Do not change `origin` or `headingDeg` in `pipeline/src/places.ts` after tiles exist.
+The region is one flat map centred on the Belfort. This run builds the **binnenstad**: about 1600 m around the Belfort (the binnenstad with Grote Markt, Sint-Maartenskerk, Onze-Lieve-Vrouwekerk, Begijnhof, Broeltorens and the Leie quays, plus the whole ring, the station quarter, Overleie, Kortrijk Weide and Sint-Jan). The same camera and commands cover the whole municipality (`kortrijk` in `pipeline/src/areas.ts`, on the order of 54,000 buildings). Do not change `origin` or `headingDeg` in `pipeline/src/places.ts` after tiles exist.
 
 ## Quick start
 

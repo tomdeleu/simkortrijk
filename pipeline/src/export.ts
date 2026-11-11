@@ -52,6 +52,8 @@ const EDGE0 = 220, EDGE1 = EDGE0 + 520;
 let outlines: Array<Array<[number, number]>> = [];
 /** web/src/pages/index.astro #map background (#0e0f12): the edge fades into it */
 const BG = [14, 15, 18];
+/** Short tag of the outline in every source stamp: when an area grows, tiles that used to fade are rebuilt. */
+const outlineTag = () => "@" + createHash("sha1").update(JSON.stringify(outlines.map((o) => o.map(([x, y]) => [Math.round(x), Math.round(y)])))).digest("hex").slice(0, 8);
 const edgeDistance = (x: number, y: number) => Math.max(0, ...outlines.map((o) => insideDistance([x, y], o)));
 
 /** Native web tile at global art px (x0, y0): fade alpha near the map edge (null = fully inside). */
@@ -195,7 +197,7 @@ async function exportLayer(layer: string, sources: Map<Key, string>) {
   for (const [k, file] of sources) {
     const [tx, ty] = parse(k);
     const painted = layer === "map" && /\/paint(-hd)?\//.test(file);
-    const m = statSync(file).mtimeMs, stamp = `${file}@${m}@edge${EDGE0}-${EDGE1}d${painted ? `@${DECK_STYLE}` : ""}@${FORMAT}${QUALITY}@hd${HD}`;
+    const m = statSync(file).mtimeMs, stamp = `${file}@${m}@edge${EDGE0}-${EDGE1}${outlineTag()}d${painted ? `@${DECK_STYLE}` : ""}@${FORMAT}${QUALITY}@hd${HD}`;
     const todo: Array<[number, number]> = [];
     for (let j = 0; j < SPLIT; j++)
       for (let i = 0; i < SPLIT; i++) {
