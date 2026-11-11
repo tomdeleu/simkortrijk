@@ -15,18 +15,31 @@ The code is adapted from [Isometric World](https://github.com/krasun/isometricwo
 
 ## Paint status
 
-The live map is 29 tiles of `kortrijk-binnenstad`. Six are painted (style A, OpenAI `gpt-image-2.6-flare`): `tx` -2..0 × `ty` -2..-1, the Broeltorens. Window `-2_-3` is skipped and stays render. The rest is unpainted render. Paint files are in `data/derived` (not in git) and on R2.
+The live map (published 2026-11-11) is 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours and the Sint-Maartenskerk massing. Six tiles are painted in **Style A + real colours** with OpenAI `gpt-image-2.6-flare`: `tx` -2..0 × `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render. The rest is unpainted render. Paint files are in `data/derived` (not in git) and on R2. Restore points (live, previous coral GPT, pre-colour snapshot, Gemini) are listed in `CLAUDE.md` under "Where the binnenstad paint stands".
+
+## Style (live): Style A + real colours
+
+Read `.claude/skills/map-style/SKILL.md` before changing colours, the prompt, `pipeline/style/` or a landmark.
+
+- Look: pastel, game-like and high-contrast. Water is `#2F7FD6`, cones are slate blue-grey `#6B7A90`, trees mint and sage.
+- Colours: every building keeps its own roof and wall colour from the Digitaal Vlaanderen orthophoto, softened halfway to pastel (`--soften 0.5`; 0.35 is more realistic, 0.65 more pastel).
+  - Roofs: terracotta and brown tiles, slate, grey and light flat.
+  - Walls: red, brown and buff brick, whitewash, pale stone.
+  - The tone stays light, and neighbours stay distinguishable.
+- Shapes: gables come from DHMV. Landmarks are researched in `pipeline/landmarks/<slug>/` and fixed with `massing.json` or a render edit.
+- Painting: the style image is `pipeline/style/reference.png` (the coloured Broeltorens window). The painter is `gpt-image-2.6-flare` with `PAINT_ATTEMPTS=1`.
+- Don't: no all-coral roofs and no recolouring. Don't paint windows that are mostly empty map edge. Paint centre-out with neighbour strips for seams.
 
 New painting should use `PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare` (about $0.09 a window). Try `flare` before `sunburst`; only use `gpt-image-2.6-sunburst` if Tom says so. Gemini is still the code default. Use `PAINT_ATTEMPTS=1` and check windows by eye while `roofNovelty` fails every window.
 
-Before rendering, run `python3 pipeline/tools/building_colours.py` (per-building colours, softened half-way to pastel with `--soften 0.5`, and LiDAR gables), then `npm run scene` (also builds landmark `massing.json` parts such as Sint-Maartenskerk) and `npm run render -- kortrijk-binnenstad --force`. Before painting the Broeltorens windows, run `python3 pipeline/landmarks/broeltorens/edit_broel.py`, then `--restore` afterwards. Assemble that block with `python3 pipeline/tools/assemble_block.py --skip -2_-3`. A 3×3 there:
+Before rendering, run `python3 pipeline/tools/building_colours.py` (per-building colours, softened half-way to pastel with `--soften 0.5`, and LiDAR gables), then `npm run scene` (also builds landmark `massing.json` parts such as Sint-Maartenskerk) and `npm run render -- kortrijk-binnenstad --force`. Before painting the Broeltorens windows, run `python3 pipeline/landmarks/broeltorens/edit_broel.py`, then `--restore` afterwards. Assemble that block with `python3 pipeline/tools/assemble_block.py --skip=-2_-3,-1_-3`. A 3×3 there:
 
 ```sh
 PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1 \
   npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3
 ```
 
-Next, in order: (1) landmark render fixes (Sint-Maartenskerk done via `massing.json`; Belfort next); (2) per-building colours are done in the render and prompt, the coloured Broeltorens block is a preview until Tom approves it; (3) `roofNovelty` still fails (0.07–0.29 vs 0.04); (4) colour-match land and river windows; (5) squat Broeltorens cones, and the beige quay downstream of the Broelbrug should be water; (6) paint the rest outward, export, `npm run dev`, and publish only if Tom asks (`npm run publish -- kortrijk --yes --keep`; tiles-only needs no redeploy); (7) optional area `kortrijk`, and a custom domain only if Tom asks. Detail is in `CLAUDE.md`.
+Next, in order: (1) landmark render fixes (Sint-Maartenskerk done via `massing.json`; Belfort next); (2) per-building colours are done and live; (3) `roofNovelty` still fails (0.07–0.29 vs 0.04); (4) colour-match land and river windows; (5) squat Broeltorens cones, and the beige quay downstream of the Broelbrug should be water; (6) paint the rest outward, export, `npm run dev`, and publish only if Tom asks (`npm run publish -- kortrijk --yes --keep`; tiles-only needs no redeploy); (7) optional area `kortrijk`, and a custom domain only if Tom asks. Detail is in `CLAUDE.md`.
 
 ## Commands
 

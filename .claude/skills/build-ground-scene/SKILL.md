@@ -16,9 +16,11 @@ npm run scene -- kortrijk-binnenstad
 
 `pipeline/src/ground.ts`, `pipeline/src/scene.ts`. Both call `openArea`, which selects the region's camera. Do not change `origin` or `headingDeg` in `places.ts` if tiles already exist.
 
+Live style needs per-building colours before `scene`: `python3 pipeline/tools/building_colours.py` (orthophoto colours softened halfway to pastel, `--soften 0.5`, plus LiDAR gables). See `.claude/skills/map-style`.
+
 ## Inputs
 
-`data/raw/<area>/buildings.geojson`, `grb_roads.geojson`, `grb_water.geojson`, `dhm/`, `ground.json`, `osm.json`, `trees.geojson`.
+`data/raw/<area>/buildings.geojson`, `grb_roads.geojson`, `grb_water.geojson`, `dhm/`, `ground.json`, `osm.json`, `trees.geojson`. Optional: `building_colours.json` (from `building_colours.py`) and `pipeline/landmarks/*/massing.json`, which replaces a landmark's GRB footprint and LiDAR needle with hand-built parts (gables, tower, spire).
 
 ## Outputs
 
@@ -34,7 +36,7 @@ npm run scene -- kortrijk-binnenstad
 
 | Field | Contents |
 |---|---|
-| `b` | `[ring, height_m, style, groundHint, holes?]` in ENU. Styles: 0 whitewash, 1 brick, 2 stone, 3 glass, 4 annex. |
+| `b` | `[ring, height_m, style, groundHint, holes?, wallRgb+roofRgb?, roof?]` in ENU. Styles: 0 whitewash, 1 brick, 2 stone, 3 glass, 4 annex/plain, 6 Gothic stone. `roof` is a gable `[eave, ridgeX, ridgeY, dirX, dirY]`, a pyramid/spire `[eave]`, or null (flat). |
 | `t` | `[x, y, radius, crownCentreHeight]` |
 
 Scene also drops decks that a motorway or railway runs through, and adds a spire where the LiDAR canopy maximum is at least 8 m above the surveyed roof. The spire is extruded to that maximum (Sint-Maartenskerk is about 73 m in DHMV II). The Belfort's 1 m DSM peak is only about 33 m, so the model follows the raster rather than a handbook height.
@@ -46,5 +48,5 @@ None.
 ## Verify
 
 - Ground log: terrain width × height and an "up" range near 55–65 m (ellipsoid), not near 0 and not near the Tel Aviv geoid (~19 m).
-- Scene log: a few thousand GRB buildings for the binnenstad, a spire count, and the tallest spires. Sint-Maartenskerk should show up near 70 m, not as a flat nave.
+- Scene log: a few thousand GRB buildings for the binnenstad, a spire count, and the tallest spires. The log also prints `landmark sint-maartenskerk: replaced 2 footprint(s) with 14 parts`; its spire is 83 m from `massing.json`, with gabled naves, not a flat block.
 - `scene/` contains one JSON per render tile that has geometry. An empty directory means the camera region was wrong or fetch produced no buildings.

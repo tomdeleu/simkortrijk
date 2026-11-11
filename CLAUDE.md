@@ -20,7 +20,9 @@ Adapted from [Isometric World](https://github.com/krasun/isometricworld) (Dmytro
 | `pipeline/src/export.ts` | AVIF pyramid into `data/web/regions/kortrijk/` |
 | `pipeline/src/hosting.ts` | R2 bucket `simkortrijk`, default `TILES_ORIGIN` (its r2.dev URL) |
 | `web/` | Astro viewer. `/` and `/kortrijk` |
-| `pipeline/style/` | Style A (style C pastel game-like, more contrast, clear blue water). `reference.png` is the coloured Broeltorens window (-1_-2) painted with GPT 2.6 flare: per-building colours softened into the pastel palette. `trees.png` is mint/sage crowns. Not Tel Aviv imagery. |
+| `pipeline/style/` | Style A + real colours (see "Style" below). `reference.png` is the coloured Broeltorens window (-1_-2) painted with GPT 2.6 flare. `trees.png` is mint/sage crowns. Not Tel Aviv imagery. |
+| `pipeline/tools/building_colours.py` | Per-building roof/wall colour (orthophoto, softened to pastel) and LiDAR gables, read by `scene.ts` |
+| `pipeline/landmarks/` | Landmark research (notes, refs) and render fixes (`massing.json`, `edit_broel.py`) |
 | `.claude/skills/` | One skill per step |
 | `pipeline/landmarks/broeltorens/edit_broel.py` | Hand edit of the Broeltorens render before that block is painted |
 | `pipeline/tools/assemble_block.py` | Paint tiles for a partial block, feathered into the render |
@@ -81,19 +83,43 @@ Attribution on the map must include `Bron: Grootschalig Referentie Bestand Vlaan
 - Do not delete `data/derived/` or `data/web-state/`.
 - Do not run `npm run publish` or `npm run deploy` unless the user asked. Publish asks `[y/N]` unless `--yes`.
 
+## Style: A + real colours (live)
+
+Approved by Tom and live since 2026-11-11. The full spec is in `.claude/skills/map-style/SKILL.md`; read it before touching colours, the prompt, `pipeline/style/` or a landmark.
+
+- Look: pastel, game-like isometric map with more contrast than plain pastel. Water is clear blue `#2F7FD6`, never teal. Cones and spires are slate blue-grey `#6B7A90`. Trees are mint and sage, streets pale lavender-grey, and the empty edge is cream paper.
+- Real colours, softened: every building has its own roof and wall colour. `pipeline/tools/building_colours.py` takes it from OSM tags, else the Digitaal Vlaanderen winter orthophoto `OMWRGB25VL`, else a palette, then moves it halfway to the pastel version of its class: `--soften 0.5` / `COLOUR_SOFTEN=0.5`. 0.35 is more realistic and darker; 0.65 is more pastel and lighter.
+  - Roofs: terracotta and brown clay tiles, slate blue-grey, grey and light flat roofs.
+  - Walls: red, brown and buff brick, whitewash, pale stone.
+  - The tone stays light, never dark, and neighbours stay distinguishable.
+- Shapes: pitched roofs (gables) come from the DHMV II DSM. Landmarks are researched online (`pipeline/landmarks/<slug>/notes.md` + `refs/`) and fixed in the render with `massing.json` (Sint-Maartenskerk) or a render edit script (Broeltorens).
+- Painting: `gpt-image-2.6-flare`, `PAINT_ATTEMPTS=1`. The style image `pipeline/style/reference.png` is the coloured Broeltorens window `-1_-2`. The prompt (`GEOMETRY_LOCK`, `STYLE_A`, `PROMPT` in `pipeline/src/paint.ts`) keeps each building's colour family and ridges, and takes colours from the render, not from the style image.
+- Don't: no all-coral roofs and no old coral reference. Don't recolour or harmonise buildings, and don't paint windows that are mostly empty map edge (skip them in `assemble_block.py`). Keep seams invisible by painting centre-out with neighbour strips pasted in, then assembling with `assemble_block.py`.
+
 ## Cloudflare
 
 Only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any other bucket, worker, domain, DNS, or setting. Never delete objects outside `regions/kortrijk/`. A custom domain on the bucket only if Tom asks.
 
 ## Where the binnenstad paint stands
 
-The live site serves 29 render tiles of `kortrijk-binnenstad`. Six are painted: `tx` -2..0, `ty` -2..-1, the Broeltorens block, style A, painted with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high). The corner window `-2_-3` is skipped and stays render. Windows and paint tiles live in `data/derived` (gitignored) and the published copies are on R2.
+Live since 2026-11-11, published to R2: 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours (`--soften 0.5`) and the Sint-Maartenskerk `massing.json`. Six are painted in **Style A + real colours** with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high, `PAINT_ATTEMPTS=1`): `tx` -2..0, `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render (`assemble_block.py --skip=-2_-3,-1_-3`). Cost was 11 calls, about $1. Windows and paint tiles live in `data/derived` (gitignored), and the published copies are on R2.
+
+Restore points are on the build box (`/workspace/paintrun/`, not in git). Each holds `paint/`, `windows/` and `paint.json`; copy those into `data/derived/kortrijk-binnenstad/`, export, and publish only if Tom asks. `PUBLISH.md` in each folder has the exact commands.
+
+| Folder | What it is |
+|---|---|
+| `styleA-colour-preview/` | The live version. Also holds its render, `building_colours.json` and the old coral reference. |
+| `styleA-gpt/` | The previous coral GPT version. |
+| `pre-colour-snapshot/kortrijk-binnenstad/` | Full derived folder before colours, including the uniform render. |
+| `styleA-gemini-live/` | The Gemini version. |
+
+`publish --keep` leaves older objects on R2.
 
 Painter choice: use OpenAI `gpt-image-2.6-flare` for new painting (`PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare`). It copies the pasted neighbour strips far better than Gemini, so window seams are almost invisible (Gemini Nano Banana 2.1 left rectangular colour steps in the Leie and on roofs). About $0.09 per window. Tom asked to try `flare` first and not `sunburst`; only try `gpt-image-2.6-sunburst` if Tom says so. Use `PAINT_ATTEMPTS=1` and check windows by eye while `roofNovelty` still fails on every window. Every call's token usage is logged to `data/derived/<area>/openai-usage.jsonl`.
 
 Known weakness of GPT: it follows the render literally. Where the render is wrong, GPT paints it wrong. Fix the render first (`pipeline/landmarks/<slug>/massing.json`, read by `npm run scene`; Sint-Maartenskerk is done that way), then repaint that window. GPT also invents a city in windows that are mostly empty map edge (`-1_-3`, `-2_-3`): leave those out of `assemble_block.py --skip`.
 
-Before painting the Broeltorens block, run `python3 pipeline/landmarks/broeltorens/edit_broel.py` so the towers are cream stone with slate cones and the Broelbrug (OSM way 567818112) is drawn low between their feet. After the windows are accepted, `python3 pipeline/landmarks/broeltorens/edit_broel.py --restore` puts the raw render back. Assemble a partial block with `python3 pipeline/tools/assemble_block.py --skip -2_-3` (about 220 px of feather into the surrounding render). Do not use `npm run paint -- --assemble` for a partial block: it leaves a hard seam.
+Before painting the Broeltorens block, run `python3 pipeline/landmarks/broeltorens/edit_broel.py` so the towers are cream stone with slate cones and the Broelbrug (OSM way 567818112) is drawn low between their feet. After the windows are accepted, `python3 pipeline/landmarks/broeltorens/edit_broel.py --restore` puts the raw render back. Assemble a partial block with `python3 pipeline/tools/assemble_block.py --skip=-2_-3,-1_-3` (about 220 px of feather into the surrounding render). Do not use `npm run paint -- --assemble` for a partial block: it leaves a hard seam.
 
 A 3×3 around the towers:
 
@@ -104,7 +130,7 @@ PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1 \
 
 Next, in this order:
 
-1. Landmarks. For each important landmark (Sint-Maartenskerk first, then Belfort/Halletoren, Onze-Lieve-Vrouwekerk, Begijnhof, stadhuis, Leiebruggen, station...), research online how it really looks (roof shape and colour, towers, spires, materials), save refs and a `notes.md` under `pipeline/landmarks/<slug>/`, and fix the render the way `edit_broel.py` does. Then repaint only that window with its painted neighbours pasted in.
+1. Landmarks. Sint-Maartenskerk is done (`massing.json`). Next: Belfort/Halletoren, Onze-Lieve-Vrouwekerk, Begijnhof, stadhuis, Leiebruggen, station... Notes and refs are already under `pipeline/landmarks/<slug>/`; add a `massing.json` (or a render edit like `edit_broel.py`), check the render, then repaint only that window with its painted neighbours pasted in.
 2. Building colours: done. `python3 pipeline/tools/building_colours.py` (OSM tags, else the Digitaal Vlaanderen winter orthophoto, else a palette; gables from DHMV II; `--soften 0.5` pulls colours half-way to pastel) feeds `npm run scene`. The prompt keeps each building's colour family. See `pipeline/tools/README.md`.
 3. `roofNovelty` fails on every window (about 0.07–0.29, limit 0.04). Tighten the prompt or enforce the check. Do not raise the limit to hide it.
 4. Colour match between neighbouring windows for land and river (only open sea is matched). Less urgent with GPT.
@@ -143,7 +169,7 @@ Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` 
 - `npm run dev` serves `/regions/...` from `data/web` first and proxies everything else to R2, so a fresh clone shows the published tiles with no export. With `TILES_ORIGIN=` (empty) it 404s `/regions/...` that are not in `data/web`. Export first. A production build with an empty origin reads that same cache; run `npm run build` after export so `web/dist/regions` exists before `npx wrangler deploy`.
 - If Overpass is unreachable, `fetch` retries a second Overpass server and then the OSM map API (`api.openstreetmap.org/api/0.6/map.json`) for the same bbox. The map API is a fallback: it downloads every object and this repo filters it.
 - `uitest` treats any HTTP 400+ as a failure, including a tile the index should not have requested.
-- Paint style is variant A: style C (pastel game-like, mint and sage trees, pale lavender streets) with stronger contrast, clear blue water (#2F7FD6, not teal) and slate blue-grey cones. Roofs and walls keep each building's own colour from the render (ortho-sampled, softened half-way to pastel: Tom wanted it between pastel and realistic, not dark). The prompt in `paint.ts` is the geometry lock plus that paragraph. Flat LOD1 roofs stay flat; sloped roof planes in the render are real gables and keep their ridges.
+- Paint style is "Style A + real colours" (section "Style" above, full spec in `.claude/skills/map-style`). Flat LOD1 roofs stay flat; sloped roof planes in the render are real gables and keep their ridges.
 - `roofNovelty` in `register.ts` retries a paint when more than 4% of flat roof and wall interiors grow a strong new edge. Fine tile texture stays under that. Do not copy Tel Aviv style images into `pipeline/style/`.
 - Whole-city DHMV is a large raster and tens of thousands of GetFeatureInfo calls. Use the binnenstad area until that is what you want.
 
@@ -154,6 +180,7 @@ Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` 
 | `.claude/skills/fetch-flemish-data` | Downloading GRB, DHMV, orthophoto, OSM |
 | `.claude/skills/build-ground-scene` | Terrain, ground features, 3D scene bins |
 | `.claude/skills/render-tiles` | Headless three.js tiles |
+| `.claude/skills/map-style` | The live look (Style A + real colours): colours, landmarks, prompt, do/don't |
 | `.claude/skills/paint-tiles` | Image-model repaint and geometry check |
 | `.claude/skills/export-preview` | AVIF pyramid and `npm run dev` |
 | `.claude/skills/publish-r2` | Upload the cache, deploy the site |

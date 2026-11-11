@@ -17,7 +17,13 @@ Optional. Export already shows the 3D render wherever `paint/` has no tile. Do n
 
 Gemini prices for `gemini-nano-banana-2.1`: **$0.0336 per 1K image**, **$0.0504 per 2K**. This painter requests 1K (windows are 1024 px). The Batch API is half of that ($0.0168 per 1K image).
 
-Style is variant A: style C (pastel, game-like) with stronger contrast, clear blue water (#2F7FD6, never teal) and slate blue-grey cones. Do not replace these with Tel Aviv imagery.
+Style is **Style A + real colours** (live since 2026-11-11). Read `.claude/skills/map-style/SKILL.md` first. In short:
+- The look: pastel game-like with more contrast, clear blue water (#2F7FD6, never teal) and slate blue-grey cones.
+- Colours: every building keeps its own roof and wall colour from the render, from the orthophoto softened halfway to pastel (`building_colours.py --soften 0.5`).
+- Render first: run `building_colours.py`, `npm run scene` and `npm run render` before painting, and fix landmarks in the render first.
+- Skip windows that are mostly empty map edge.
+
+Do not replace these with Tel Aviv imagery.
 
 - `pipeline/style/reference.png`: the painted Broeltorens window `-1_-2` in style A with per-building colours (terracotta, brown tile, slate blue-grey, grey flat roofs; red/buff brick, whitewash walls), softened to pastel; mint and sage trees, pale lavender streets, clear blue river. Style only: the prompt says to take colours from the render and not copy its buildings. Mostly-empty edge windows next to it (`-1_-3`) still tend to copy it; skip those in assembly.
 - `pipeline/style/trees.png`: round mint and sage canopies and one narrow poplar, on a cream ground.
@@ -103,7 +109,7 @@ The edit draws cream stone towers with slate cones, and the Broelbrug from OSM w
 A partial block is not `npm run paint -- --assemble` (that seams against unpainted tiles). Feather the finished windows ~220 px into the render:
 
 ```sh
-python3 pipeline/tools/assemble_block.py --skip -2_-3
+python3 pipeline/tools/assemble_block.py --skip=-2_-3,-1_-3
 ```
 
 Deps and flags: `pipeline/tools/README.md`. Publish only when the user asks (`publish-r2`).
