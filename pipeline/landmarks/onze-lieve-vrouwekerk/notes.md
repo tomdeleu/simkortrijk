@@ -15,6 +15,8 @@ Onze-Lieve-Vrouwekerk: dark grey stone Gothic church with two squat square west 
 
 ## Render fixes needed
 
+- **Done (2026-11-11): `massing.json`.** The 1 810 m² box at 34.6 m is replaced by: aisles and chapels flat at 11 m on the GRB footprint, nave ridge 26 m, transept ridge 24.5 m (9 m wide, at u -14.5..-5.5), choir 24 m, Gravenkapel on the south side to 20.5 m with a ridge turret, west towers to 36 m (south) and 31 m (north) under slate tent roofs. Heights from DHMV II, grey stone walls, slate roofs.
+
 - One 1 810 m² box at 34.6 m (the ridge/tower height): far too massive; the towers do not show.
 - Edit: nave/transept as cross-shaped steep slate gables (eaves ~13 m, ridge ~25 m), two west towers ~9 × 9 m to ~33 m with low pyramid roofs (~5 m), Gravenkapel as a lower separate gable on the south.
 - Wall colour should be grey Tournai stone, not the cream STONE of the palette.

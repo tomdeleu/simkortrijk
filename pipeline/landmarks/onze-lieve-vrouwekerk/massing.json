@@ -1,0 +1,16 @@
+{
+  "_doc": "Render massing for the Onze-Lieve-Vrouwekerk and Gravenkapel, read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (centre of GRB footprint 1742613), u along 'axis_deg' (west towers -> east choir), v to the north. From DHMV II on that footprint: west towers at u -28..-21, south one to ~36 m and north one to ~30 m; nave ridge ~26 m at v ~9; transept ridge ~24 m at u ~-10 across v -6..24; choir ridge ~24 m; Gravenkapel on the south side (v -13..-5) with its ridge ~20 m; aisles and chapels 10-15 m. Dark grey Tournai stone, softened toward style A; slate roofs; low slate tent roofs on the towers (notes.md, refs/).",
+  "anchor": [50.8290426, 3.2674544],
+  "axis_deg": 342.9,
+  "replace_oidn": [1742613],
+  "parts": [
+    { "id": "aisles, chapels and porches (whole GRB footprint)", "footprint": "grb", "h": 11, "shape": "flat", "style": 6, "wall": [0.70, 0.70, 0.68], "roof": [0.50, 0.54, 0.63] },
+    { "id": "nave", "rect": [-22, -13, 4, 14], "h": 26, "eave": 15, "shape": "gable-u", "style": 6, "wall": [0.70, 0.70, 0.68], "roof": [0.46, 0.50, 0.60] },
+    { "id": "transept", "rect": [-14.5, -5.5, -6, 24], "h": 24.5, "eave": 15, "shape": "gable-v", "style": 6, "wall": [0.70, 0.70, 0.68], "roof": [0.46, 0.50, 0.60] },
+    { "id": "choir", "rect": [-7, 19, 4, 14], "h": 24, "eave": 15, "shape": "gable-u", "style": 6, "wall": [0.70, 0.70, 0.68], "roof": [0.46, 0.50, 0.60] },
+    { "id": "Gravenkapel", "rect": [-1, 20, -13, -5], "h": 20.5, "eave": 14, "shape": "gable-u", "style": 6, "wall": [0.74, 0.74, 0.72], "roof": [0.46, 0.50, 0.60] },
+    { "id": "Gravenkapel ridge turret", "oct": [4, -9, 0.7], "h": 25, "eave": 20, "shape": "pyramid", "style": 4, "wall": [0.74, 0.74, 0.72], "roof": [0.46, 0.50, 0.60] },
+    { "id": "south-west tower", "rect": [-28, -21, -1, 6], "h": 36, "eave": 30, "shape": "pyramid", "style": 6, "wall": [0.68, 0.68, 0.66], "roof": [0.46, 0.50, 0.60] },
+    { "id": "north-west tower", "rect": [-28, -21, 12, 19], "h": 31, "eave": 27, "shape": "pyramid", "style": 6, "wall": [0.68, 0.68, 0.66], "roof": [0.46, 0.50, 0.60] }
+  ]
+}

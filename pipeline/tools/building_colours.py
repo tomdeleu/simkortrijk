@@ -33,7 +33,7 @@ read dark next to the pastel style A. Each colour is moved part of the way to th
 of its own class (PASTEL_ROOF / PASTEL_WALL), keeping its offset from the class base so neighbours
 stay different. 0 = measured colours, 1 = full pastel. "wall_raw"/"roof_raw" keep the measured ones.
 """
-import argparse, colorsys, hashlib, io, json, math, os, sys, time, urllib.parse, urllib.request
+import argparse, colorsys, glob, hashlib, io, json, math, os, sys, time, urllib.parse, urllib.request
 import numpy as np
 import cv2
 from PIL import Image
@@ -300,6 +300,22 @@ def soften_wall(rgb, t):
     return soften(rgb, base, pastel, t)
 
 
+# Landmark colour overrides: pipeline/landmarks/<slug>/colours.json forces wall and roof class for
+# every footprint whose centre lies inside its OSM area (e.g. the whitewashed Begijnhof).
+WALL_BY_NAME = {name.split(" /")[0]: col for _, col, name in WALLS}
+overrides = []
+for cf in sorted(glob.glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "landmarks", "*", "colours.json"))):
+    ov = json.load(open(cf))
+    poly = np.array([toL.transform(lon, lat) for lat, lon in ov["polygon"]], np.float32)
+    overrides.append((os.path.basename(os.path.dirname(cf)), poly, WALL_BY_NAME[ov["wall"]], ov["roof"]))
+override_hits = {}
+
+def override_for(L):
+    c = L.mean(axis=0)
+    for slug, poly, wall, roof in overrides:
+        if cv2.pointPolygonTest(poly, (float(c[0]), float(c[1])), False) >= 0: return slug, wall, roof
+    return None
+
 heights = {}
 out, stats = {}, {"osm": 0, "ortho": 0, "palette": 0, "gable": 0, "cls": {}}
 for oidn, p, L in feats:
@@ -340,6 +356,11 @@ for oidn, p, L in feats:
         for wt, col, _ in WALLS:
             t -= wt
             if t < 0: wall = col; break
+    ov = override_for(L)
+    if ov:
+        slug, wall, cls = ov
+        roof = ROOF_CLASSES[cls]
+        override_hits[slug] = override_hits.get(slug, 0) + 1
     # small per-house jitter so a row of houses does not read as one block
     j = (h01(oidn, "j") - 0.5) * 0.08
     wall = tuple(round(min(1, max(0, c * (1 + j))), 3) for c in wall)
@@ -354,3 +375,4 @@ N = len(out)
 print(f"  {N} GRB footprints: roof from osm {stats['osm']}, ortho {stats['ortho']} ({100*stats['ortho']/N:.1f}%), palette {stats['palette']}; gable roofs {stats['gable']} ({100*stats['gable']/N:.1f}%)")
 print(f"  soften {args.soften} (0 = measured, 1 = pastel)")
 print("  roof classes", dict(sorted(stats["cls"].items(), key=lambda kv: -kv[1])))
+for slug, n in override_hits.items(): print(f"  landmark colours {slug}: {n} footprints")

@@ -3,9 +3,10 @@
  * per 1024 px art tile), painted tiles outlined red, render-only tiles greyed, landmarks by priority,
  * and the proposed next piece dashed blue. Run after every piece (docs/PAINT_STATUS.md "Working rule").
  *
- *   npx tsx src/paintstatus.ts [--next "1_-2,1_-1"] [--label "voorstel: stuk 2 ..."]
+ *   npx tsx src/paintstatus.ts [--next="1_-2,1_-1"] [--label "voorstel: stuk 2 ..."]
  *
- * Needs an export (data/web/regions/<region>/tiles/map/7).
+ * Reads the z7 map tiles from the export cache, else the published ones on R2 (TILES_ORIGIN, default the
+ * simkortrijk r2.dev bucket) by their hashes in data/web-state/<region>.json.
  */
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -13,7 +14,7 @@ import { parseArgs } from "node:util";
 import sharp from "sharp";
 import { GROUND_H } from "./areas.ts";
 import { llhToPixel } from "./camera.ts";
-import { DERIVED, PIPELINE, ROOT, WEB_CACHE } from "./paths.ts";
+import { DERIVED, PIPELINE, ROOT, WEB_CACHE, WEB_STATE } from "./paths.ts";
 
 const { values: args } = parseArgs({ options: { area: { type: "string", default: "kortrijk-binnenstad" }, next: { type: "string", default: "" }, label: { type: "string", default: "" } } });
 const d = join(DERIVED, args.area!);
@@ -24,11 +25,21 @@ const painted = new Set(existsSync(join(d, "paint")) ? readdirSync(join(d, "pain
 const next = new Set(args.next!.split(",").filter(Boolean));
 const C = 240, TX0 = Math.min(...tiles.map((t) => t[0])), TY0 = Math.min(...tiles.map((t) => t[1]));
 const NX = Math.max(...tiles.map((t) => t[0])) - TX0 + 1, NY = Math.max(...tiles.map((t) => t[1])) - TY0 + 1, W = NX * C, H = NY * C;
+const ORIGIN = process.env.TILES_ORIGIN || "https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev";
+const stateFile = join(WEB_STATE, "kortrijk.json");
+const published = existsSync(stateFile) ? JSON.parse(readFileSync(stateFile, "utf8")) : {};
 const parts = [];
 for (const [tx, ty] of tiles) {
   const f = join(z7, `${tx}`, `${ty}.avif`);
-  if (!existsSync(f)) throw new Error(`${f} missing: run npm run export first`);
-  let img = sharp(readFileSync(f)).resize(C, C);
+  let buf: Buffer;
+  if (existsSync(f)) buf = readFileSync(f);
+  else {
+    const v = published.layers?.map?.hashes?.[`7/${tx}_${ty}`];
+    const r = await fetch(`${ORIGIN}/regions/kortrijk/tiles/map/7/${tx}/${ty}.avif${v ? `?v=${v}` : ""}`);
+    if (!r.ok) throw new Error(`z7 tile ${tx}_${ty}: not in the export cache and ${r.status} from ${ORIGIN}`);
+    buf = Buffer.from(await r.arrayBuffer());
+  }
+  let img = sharp(buf).resize(C, C);
   if (!painted.has(`${tx}_${ty}`)) img = img.modulate({ saturation: 0.25, brightness: 1.05 });
   parts.push({ input: await img.png().toBuffer(), left: (tx - TX0) * C, top: (ty - TY0) * C });
 }
