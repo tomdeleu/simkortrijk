@@ -1,0 +1,28 @@
+{
+  "name": "simkortrijk",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "pipeline",
+    "web"
+  ],
+  "scripts": {
+    "boundaries": "npm -w pipeline run boundaries --",
+    "fetch": "npm -w pipeline run fetch --",
+    "scene": "npm -w pipeline run scene --",
+    "ground": "npm -w pipeline run ground --",
+    "render": "npm -w pipeline run render --",
+    "paint": "npm -w pipeline run paint --",
+    "export": "npm -w pipeline run export --",
+    "og": "npm -w pipeline run og --",
+    "dev": "npm -w web run dev",
+    "build": "npm -w web run build",
+    "typecheck": "npm -w pipeline run typecheck && npm -w web run astro -- check",
+    "publish": "npm -w pipeline run publish --",
+    "deploy": "npm run build && npm -w pipeline exec tsx src/deploy.ts",
+    "binnenstad": "npm run boundaries -- kortrijk && npm run fetch -- kortrijk-binnenstad && npm run ground -- kortrijk-binnenstad && npm run scene -- kortrijk-binnenstad && npm run render -- kortrijk-binnenstad -j 2 && npm run export -- kortrijk-binnenstad"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true
+  }
+}
