@@ -11,6 +11,8 @@
  *
  * Auth: header x-goog-api-key from GEMINI_API_KEY. No call is made without it.
  */
+import { createHash } from "node:crypto";
+
 export const DEFAULT_GEMINI_IMAGE_MODEL = "gemini-nano-banana-2.1";
 export const GEMINI_ROOT = "https://generativelanguage.googleapis.com";
 /** Interactive 1K price, USD. Batch API is half. */
@@ -209,7 +211,51 @@ export async function createBatch(fileName: string, key: string, model: string, 
   return body.name;
 }
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** Name of a batch with this display name that has not failed, newest first; undefined if none. */
+export async function findBatch(displayName: string, key: string, fetchImpl: FetchImpl): Promise<string | undefined> {
+  let pageToken = "";
+  for (let page = 0; page < 10; page++) {
+    const r = await fetchImpl(`${GEMINI_ROOT}/v1beta/batches?pageSize=100${pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : ""}`, {
+      headers: { "x-goog-api-key": key },
+    });
+    if (!r.ok) throw new Error(`gemini batch list ${await readError(r)}`);
+    const body = await r.json() as { operations?: Array<{ name?: string; metadata?: { displayName?: string } }>; nextPageToken?: string };
+    for (const op of body.operations ?? []) {
+      if (op.name && op.metadata?.displayName === displayName && readBatchState(op) !== "failed") return op.name;
+    }
+    if (!body.nextPageToken) return undefined;
+    pageToken = body.nextPageToken;
+  }
+  return undefined;
+}
+
+/**
+ * Retry transient failures: HTTP 429/5xx always, and dropped connections (ECONNRESET,
+ * "fetch failed") only when `network` is true, i.e. for calls that are safe to repeat.
+ */
+export function retrying(fetchImpl: FetchImpl, wait: (ms: number) => Promise<void>, network = true, attempts = 6): FetchImpl {
+  return (async (input: Parameters<FetchImpl>[0], init?: Parameters<FetchImpl>[1]) => {
+    for (let i = 1; ; i++) {
+      const delay = Math.min(60_000, 2_000 * 2 ** (i - 1));
+      try {
+        const r = await fetchImpl(input, init);
+        if ((r.status === 429 || r.status >= 500) && i < attempts) {
+          console.log(`  gemini ${r.status}, retry ${i}/${attempts - 1} in ${delay / 1000}s`);
+          await wait(delay);
+          continue;
+        }
+        return r;
+      } catch (err) {
+        if (!network || i >= attempts) throw err;
+        const cause = (err as { cause?: { code?: string } }).cause?.code ?? (err as Error).message;
+        console.log(`  gemini ${cause}, retry ${i}/${attempts - 1} in ${delay / 1000}s`);
+        await wait(delay);
+      }
+    }
+  }) as FetchImpl;
+}
 
 export interface BatchRunOptions {
   fetchImpl?: FetchImpl;
@@ -228,11 +274,30 @@ export async function runGeminiBatch(
 ): Promise<Map<string, Buffer>> {
   if (!items.length) return new Map();
   const key = opts.key ?? requireGeminiKey();
-  const fetchImpl = opts.fetchImpl ?? fetch;
-  const model = opts.model ?? geminiModel();
-  const fileName = await uploadJsonl(batchJsonl(items), key, fetchImpl);
-  const batchName = await createBatch(fileName, key, model, opts.displayName ?? "simkortrijk-paint", fetchImpl);
   const wait = opts.sleep ?? sleep;
+  const raw = opts.fetchImpl ?? fetch;
+  // upload, poll, list and download are idempotent and retry on dropped connections.
+  // A create can hang past the 300 s headers timeout while the server still creates the
+  // batch, so the batch is named after its input and adopted by that name instead of resubmitted.
+  const fetchImpl = retrying(raw, wait);
+  const model = opts.model ?? geminiModel();
+  const jsonl = batchJsonl(items);
+  const displayName = `${opts.displayName ?? "simkortrijk-paint"}-${createHash("sha256").update(model).update(jsonl).digest("hex").slice(0, 16)}`;
+  let batchName = await findBatch(displayName, key, fetchImpl);
+  if (batchName) console.log(`  gemini batch: reusing ${batchName} (same input)`);
+  else {
+    const fileName = await uploadJsonl(jsonl, key, fetchImpl);
+    try {
+      batchName = await createBatch(fileName, key, model, displayName, retrying(raw, wait, false));
+    } catch (err) {
+      for (let i = 0; i < 4 && !batchName; i++) {
+        await wait(15_000);
+        batchName = await findBatch(displayName, key, fetchImpl);
+      }
+      if (!batchName) throw err;
+      console.log(`  gemini batch create: ${(err as Error).message}; the server created ${batchName}, following it`);
+    }
+  }
   const pollMs = opts.pollMs ?? 15_000;
   const deadline = Date.now() + (opts.timeoutMs ?? 6 * 60 * 60 * 1000);
   let output: string | undefined;

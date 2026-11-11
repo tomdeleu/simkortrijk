@@ -110,6 +110,7 @@ test("batch JSONL is one request per window and the batch run uploads, polls, an
   const fetchImpl: FetchImpl = async (input, init) => {
     const url = String(input);
     calls.push(`${init?.method ?? "GET"} ${url}`);
+    if (url.includes("/v1beta/batches?")) return Response.json({ operations: [] });
     if (url.endsWith("/upload/v1beta/files")) {
       assert.equal(new Headers(init?.headers).get("X-Goog-Upload-Protocol"), "raw");
       assert.equal(String(init?.body), batchJsonl(items));
@@ -146,6 +147,46 @@ test("batch JSONL is one request per window and the batch run uploads, polls, an
   assert.equal(slept.length, 1);
   assert.equal(readBatchState({ metadata: { state: "BATCH_STATE_FAILED" } }), "failed");
   assert.ok(calls.some((c) => c.startsWith("POST")));
+});
+
+test("a create that times out after the server made the batch is followed, not resubmitted", async () => {
+  process.env.GEMINI_API_KEY = "test-key";
+  const items = [{ key: "0_0", prompt: "a", images: images() }];
+  let creates = 0, uploads = 0, lists = 0, pollResets = 0;
+  let created: string | undefined;
+  const fetchImpl: FetchImpl = async (input, init) => {
+    const url = String(input);
+    if (url.includes("/v1beta/batches?")) {
+      lists++;
+      return Response.json({ operations: created ? [{ name: "batches/job-2", metadata: { displayName: created, state: "BATCH_STATE_RUNNING" } }] : [] });
+    }
+    if (url.endsWith("/upload/v1beta/files")) { uploads++; return Response.json({ file: { name: "files/in-2" } }); }
+    if (url.includes(":batchGenerateContent")) {
+      creates++;
+      created = JSON.parse(String(init?.body)).batch.displayName;
+      throw new TypeError("fetch failed", { cause: { code: "UND_ERR_HEADERS_TIMEOUT" } });
+    }
+    if (url.endsWith("/v1beta/batches/job-2")) {
+      if (pollResets++ === 0) throw new TypeError("fetch failed", { cause: { code: "ECONNRESET" } });
+      return Response.json({ done: true, metadata: { state: "BATCH_STATE_SUCCEEDED" }, response: { responsesFile: "files/out-2" } });
+    }
+    if (url.includes("/download/v1beta/files/out-2")) {
+      return new Response(JSON.stringify({ key: "0_0", response: { candidates: [{ content: { parts: [{ inlineData: { data: PNG.toString("base64") } }] } }] } }));
+    }
+    return new Response("unexpected " + url, { status: 500 });
+  };
+  const got = await runGeminiBatch(items, { fetchImpl, sleep: async () => {} });
+  assert.ok(got.get("0_0")?.equals(PNG));
+  assert.equal(creates, 1);
+  assert.equal(uploads, 1);
+  assert.equal(pollResets, 2);
+
+  // a second run with the same input reuses that batch: no upload, no create
+  const again = await runGeminiBatch(items, { fetchImpl, sleep: async () => {} });
+  assert.ok(again.get("0_0")?.equals(PNG));
+  assert.equal(creates, 1);
+  assert.equal(uploads, 1);
+  assert.ok(lists >= 3);
 });
 
 test("imagesFromBatchJsonl skips errors and accepts metadata.key", () => {

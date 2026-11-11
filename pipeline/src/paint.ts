@@ -433,7 +433,7 @@ async function paintGeminiPass(todo: Array<[number, number]>) {
     try {
       images = await runGeminiBatch(left.map((job) => ({
         key: `${job.i}_${job.j}`, prompt: job.prompt, images: windowImages(job.work),
-      })), { displayName: `simkortrijk-${areaName}` });
+      })), { displayName: `simkortrijk-${areaName}-a${attempt}` }); // a QA retry is a new batch
     } catch (err) {
       const msg = (err as Error).message;
       for (const job of left) writeFileSync(join(job.work, "paint.log"), msg);
