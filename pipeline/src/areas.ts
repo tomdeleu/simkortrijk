@@ -14,14 +14,15 @@ export interface Area {
 
 export const AREAS: Record<string, Area> = {
   /**
-   * ~800 m around the Belfort: Grote Markt, Sint-Maartenskerk, Onze-Lieve-Vrouwekerk,
-   * Begijnhof, Broeltorens and the Leie quays.
-   * Belfort 50.8275738, 3.2656171; 800 m ≈ 0.007186° lat, 0.011377° lon.
+   * ~1600 m around the Belfort (3.2 × 3.2 km, 109 tiles): the whole ring with the binnenstad,
+   * station quarter, Overleie, Kortrijk Weide and Sint-Jan. Until 2026-11-11 it was 800 m
+   * (29 tiles: 50.820387, 3.254240, 50.834760, 3.276994); tile coordinates did not change.
+   * Belfort 50.8275738, 3.2656171; 1600 m ≈ 0.014373° lat, 0.022754° lon.
    */
   "kortrijk-binnenstad": {
     title: "Kortrijk binnenstad",
     region: "kortrijk",
-    bbox: [50.820387, 3.254240, 50.834760, 3.276994],
+    bbox: [50.813201, 3.242863, 50.841947, 3.288372],
   },
   /** Whole municipality (OSM relation 961284). Defined so the region scales; not fetched by default. */
   kortrijk: {

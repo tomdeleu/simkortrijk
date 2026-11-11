@@ -9,7 +9,7 @@ Adapted from [Isometric World](https://github.com/krasun/isometricworld) (Dmytro
 | Path | Role |
 |---|---|
 | `pipeline/src/places.ts` | Region `kortrijk` (origin = Belfort, heading 20°) and city `kortrijk` |
-| `pipeline/src/areas.ts` | `kortrijk-binnenstad` (~800 m) and `kortrijk` (whole municipality) |
+| `pipeline/src/areas.ts` | `kortrijk-binnenstad` (~1600 m since 2026-11-11, was 800 m) and `kortrijk` (whole municipality) |
 | `pipeline/src/fetch.ts` | GRB, 3D GRB, DHMV, OSM. Calls `trees.ts` |
 | `pipeline/src/flanders.ts` | Lambert 72 and DHMV rasters |
 | `pipeline/src/ground.ts` | Terrain grid + drawable ground |
@@ -104,7 +104,7 @@ Only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any ot
 
 - **Paint one piece at a time, with Tom in the loop.** Before each piece: show `docs/paint-status.png`, propose tiles, landmarks, render fixes, cost and useful references, and wait for Tom's go and any reference material he adds. After each piece: update the piece table and summary in `docs/PAINT_STATUS.md` and regenerate `docs/paint-status.png`. Full rule in `docs/PAINT_STATUS.md` ("Working rule").
 
-**`docs/PAINT_STATUS.md` is the single source of truth**: what is painted and what is not, the tile and window grid, cost, excluded windows, landmark status, and restore points. Update it (and `docs/paint-status.png`) after every paint run and every publish. In short, as of 2026-11-11: 14 of 29 binnenstad tiles are painted (48.3%, all live), 15 are coloured render, and the municipality is not started.
+**`docs/PAINT_STATUS.md` is the single source of truth**: what is painted and what is not, the tile and window grid, cost, excluded windows, landmark status, and restore points. Update it (and `docs/paint-status.png`) after every paint run and every publish. In short, as of 2026-11-11: the map is 109 tiles (1600 m around the Belfort); 14 are painted (12.8%, all live), 95 are coloured render, and the rest of the municipality is not started.
 
 Live since 2026-11-11, published to R2 in HD (native zoom 9, 0.125 m/px from `render-hd/`, AVIF q65; viewer reads `scale` from world.json): 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours (`--soften 0.5`) and the Sint-Maartenskerk `massing.json`. Six are painted in **Style A + real colours** with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high, `PAINT_ATTEMPTS=1`): `tx` -2..0, `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render (`assemble_block.py --skip=-2_-3,-1_-3`). Cost was 11 calls, about $1. Windows and paint tiles live in `data/derived` (gitignored), and the published copies are on R2.
 
@@ -168,9 +168,10 @@ Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` 
 - HD: `HD = 2` in `camera.ts`. `npm run render` writes `render/` (1024, for paint and tools) and `render-hd/` (2048) from one render; export builds z9 from the HD file and upscales a 1024 paint. Art px stay the coordinate system everywhere; only the pyramid and OpenSeadragon's image px are ×HD. Deploy a viewer change before publishing a `world.json` it does not understand.
 - Cloudflare auth on Tom's Mac: the `CLOUDFLARE_API_TOKEN` in `.env` gets 403 on Workers and R2 for account `fa71ab6722bdece3cb45e84ff630e3c0`. Use the wrangler OAuth login instead: `npx wrangler deploy --env-file <empty file>`, and for publish `CLOUDFLARE_API_TOKEN=$(npx wrangler auth token) CLOUDFLARE_ACCOUNT_ID=fa71ab6722bdece3cb45e84ff630e3c0` (run `auth token` outside the repo so `.env` is not loaded). Build with `TILES_ORIGIN=https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev` so the site loads tiles from R2 like production.
 
+- Growing an area (done 2026-11-11, 800 m → 1600 m): change the bbox in `pipeline/src/areas.ts` **and** in `BBOX` of `pipeline/tools/building_colours.py`; move `data/raw/<area>` aside (fetch caches every file, so a bigger bbox is not refetched otherwise) but copy `3dgrb.json` back in to skip known height lookups; then fetch, building colours, ground, scene. Old tiles that crossed the old outline lack the buildings and trees outside the old bbox: move their `render/`, `render-hd/` and `height/` files aside and render (only missing tiles are rendered), then re-run render edits such as `edit_noordbrug.ts` for those tiles. Export stamps include a tag of the outline, so a moved edge re-exports every tile (the edge fade is baked in). Python's Overpass calls may fail with LibreSSL; fetch `osm_building_tags.json` with curl (`maps.mail.ru/osm/tools/overpass` answered when overpass-api.de was full).
 - WFS 2.0 bbox for EPSG:4326 on this server is west,south,east,north. Geometries are lon, lat.
 - DHMV GeoTIFFs are north-up (origin at the north edge, negative y scale). `flanders.ts` normalises row 0 = north.
-- 3D GRB misses buildings newer than about 2015. Those keep a DHMV height. The binnenstad is roughly 6,500 footprints after dropping ramps and bridge decks.
+- 3D GRB misses buildings newer than about 2015. Those keep a DHMV height. The 800 m binnenstad was roughly 6,500 footprints after dropping ramps and bridge decks; the 1600 m area is about 21,600.
 - A failed height lookup is stored as `null` in `3dgrb.json` and that building uses DHMV. Keys already in the checkpoint are not requested again.
 - Render uses software WebGL if there is no GPU (`--enable-unsafe-swiftshader`). `-j 2` is a safe default.
 - `npm run dev` serves `/regions/...` from `data/web` first and proxies everything else to R2, so a fresh clone shows the published tiles with no export. With `TILES_ORIGIN=` (empty) it 404s `/regions/...` that are not in `data/web`. Export first. A production build with an empty origin reads that same cache; run `npm run build` after export so `web/dist/regions` exists before `npx wrangler deploy`.

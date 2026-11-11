@@ -42,7 +42,7 @@ import pyproj
 Image.MAX_IMAGE_PIXELS = None
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 UA = {"User-Agent": "simkortrijk/0.1 (open-data isometric map of Kortrijk)"}
-BBOX = {"kortrijk-binnenstad": (50.820387, 3.254240, 50.834760, 3.276994)}
+BBOX = {"kortrijk-binnenstad": (50.813201, 3.242863, 50.841947, 3.288372)}  # keep in step with pipeline/src/areas.ts
 ORTHO_LAYER, RES = "OMWRGB25VL", 0.25
 
 ap = argparse.ArgumentParser()
