@@ -27,12 +27,12 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 | # | Piece | Tiles | Landmarks | Status | Calls / cost | Date |
 |---|---|---|---|---|---|---|
 | 0 | Broeltorens block | `-2_-2` `-1_-2` `0_-2` `-2_-1` `-1_-1` `0_-1` | Broeltorens + Broelbrug, Sint-Maartenskerk (fixed); Belfort, stadhuis, OLV-kerk, Begijnhof, Buda, Collegebrug, Groeningeabdij painted from the uncorrected render | **done**, live | 11 / ~$0.98 | 2026-11-11 |
-| 1 | Grote Markt | repaint the Belfort and stadhuis windows in `-1_-1` / `0_-1`; paint `-1_0` `0_0` | Belfort, historisch stadhuis (P1, render fix first); Stadsschouwburg, station (P2) | **painted and exported, not yet published** (waiting for Tom's look): render fixed (`belfort/massing.json`, `stadhuis/massing.json`), windows `-1_-1` and `0_-1` repainted, `-1_0` and `0_0` painted, tiles `-1_-1` `0_-1` `-1_0` `0_0` reassembled | 4 / ~$0.36 | 2026-11-11 |
+| 1 | Grote Markt | repaint the Belfort and stadhuis windows in `-1_-1` / `0_-1`; paint `-1_0` `0_0` | Belfort, historisch stadhuis (P1, render fix first); Stadsschouwburg, station (P2) | **done**, live (published 18:27 CET, 214 files): render fixed (`belfort/massing.json`, `stadhuis/massing.json`), windows `-1_-1` and `0_-1` repainted, `-1_0` and `0_0` painted, tiles `-1_-1` `0_-1` `-1_0` `0_0` reassembled | 4 / ~$0.36 | 2026-11-11 |
 | 2 | OLV-kerk, Begijnhof, east side | repaint `0_-1` after the OLV and Begijnhof fixes; paint `1_-2` `1_-1` | OLV-kerk + Gravenkapel, Begijnhof (P1, render fix first); K in Kortrijk + Sint-Janstoren (P2); Baggaertshof (P3) | **proposed** | ~5 / ~$0.45 (estimate) | |
 
-Progress: **8 of 29** binnenstad tiles painted (27.6%) locally; live has 6 until piece 1 is published.
+Progress: **8 of 29** binnenstad tiles painted (27.6%), all live.
 
-How piece 1 was painted (and how the next pieces go): the local `windows/` held old pre-colour windows, so they are in `windows.old-local/`. The windows of the live block (`-2_-2` `-1_-2` `0_-2` `-2_-1` `0_-1`) were cut back out of the live paint tiles so new windows continue the live paint. Each window is painted alone (`npm run paint -- kortrijk-binnenstad --window=i,j [--force] --interactive`, `PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1`), and only the tiles that change are reassembled, with the usual 220 px feather into the render wherever a painted tile meets an unpainted one. The bottom ~220 px of a block are a feather into the render, so a block that grows downward or sideways repaints its edge windows too.
+How piece 1 was painted (and how the next pieces go): the local `windows/` held old pre-colour windows, so they are in `windows.old-local/`. The windows of the live block (`-2_-2` `-1_-2` `0_-2` `-2_-1` `0_-1`) were cut back out of the live paint tiles so new windows continue the live paint. To publish only what changed: empty `data/web/regions/<region>` and `data/web/<region>.state.json`, then `TILES_ORIGIN=https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev npm run export -- kortrijk-binnenstad` (the lower zooms fetch unchanged tiles from R2, and `.env` leaves `TILES_ORIGIN` empty) and publish with the same `TILES_ORIGIN` plus the OAuth token (CLAUDE.md, Gotchas). Each window is painted alone (`npm run paint -- kortrijk-binnenstad --window=i,j [--force] --interactive`, `PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1`), and only the tiles that change are reassembled, with the usual 220 px feather into the render wherever a painted tile meets an unpainted one. The bottom ~220 px of a block are a feather into the render, so a block that grows downward or sideways repaints its edge windows too.
 
 ## Summary
 
@@ -41,7 +41,7 @@ How piece 1 was painted (and how the next pieces go): the local `windows/` held 
 | Area on the live map | `kortrijk-binnenstad` only (bbox 50.820387,3.254240 – 50.834760,3.276994, about 800 m) |
 | Render tiles (1024 px, 0.25 m/px, 256 m) | **29**, `tx` -4..3 × `ty` -3..2 (irregular, see grid) |
 | Web resolution | **HD**: native zoom 9 at 0.125 m/px from `render-hd/` (2048 px per tile), AVIF q65. The 6 painted tiles are 1024 px paint upscaled: they are no sharper than before until they are repainted at 2K into `paint-hd/`. |
-| Painted tiles | **8** (6 live): `tx` -2..0 × `ty` -2..-1, the Broeltorens / Sint-Maarten block, plus `-1_0` `0_0` (Grote Markt south side, Schouwburg, station; piece 1) |
+| Painted tiles | **8**: `tx` -2..0 × `ty` -2..-1, the Broeltorens / Sint-Maarten block, plus `-1_0` `0_0` (Grote Markt south side, Schouwburg, station; piece 1) |
 | Render-only tiles | **21**, showing the coloured 3D render (per-building colours, `--soften 0.5`), not painted |
 | Coverage | **27.6%** of the binnenstad map (8 of 29 equal tiles) |
 | Style | Style A + real colours (`.claude/skills/map-style`) |
