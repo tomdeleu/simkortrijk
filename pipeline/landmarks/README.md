@@ -15,14 +15,15 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 | P2 | artillerietoren | Artillerietoren | bright red walls, slate pyramid |
 | P2 | sint-michielskerk | Sint-Michielskerk | brick walls, two needle-spired towers |
 | P2 | sint-elooiskerk | Sint-Elooiskerk | brick, one tall slate spire (56 m) |
-| P2 | k-in-kortrijk | K in Kortrijk + Sint-Janstoren | lower dark-stone block with glass barrel roof; white tower |
+| P2 | k-in-kortrijk | K in Kortrijk | done (massing.json): dark stone block at 16.8 m, glass hip roof to 25 m |
+| P2 | sint-janstoren | Sint-Janstoren | done (massing.json + colours.json): white stepped tower, dark plinth, roof garden |
 | P2 | buda | Budatoren, Budafabriek, Budabrug | glass-clad tower, brick halls, steel bridge |
 | P2 | collegebrug | Collegebrug | zigzag deck, two leaning masts with cables |
 | P2 | leiebruggen | Leie bridges | modern flat decks, Noordbrug mast |
 | P2 | station | Station | buff brick, flat roofs, platform canopies |
 | P2 | schouwburg | Stadsschouwburg | brick + white stone, stepped gables, slate |
 | P3 | groeningeabdij | Groeningeabdij (Abby) | brick wings with steep tiled roofs |
-| P3 | baggaertshof | Baggaertshof | whitewash + red pantiles override |
+| P3 | baggaertshof | Baggaertshof | done (colours.json): whitewash + red pantiles |
 | P3 | groeningemonument | Groeningemonument + poort | statue in park |
 | - | _city | oblique aerials of the binnenstad | palette check for building_colours.py |
 

@@ -13,13 +13,15 @@ Almshouse court (1638): 13 small whitewashed houses with red pantile roofs and a
 
 Baggaertshof: a small courtyard of whitewashed cottages with red tile roofs.
 
-## Render fixes needed
+## Render fixes
 
-- Same colour override as the begijnhof (whitewash + terracotta) inside way 1210614358.
+**Done (piece 4, 2026-11-11):** `colours.json` (whitewash + terracotta inside OSM way 1210614358, 3 GRB footprints).
 
 ## References
 
 - refs/01-kortrijk-baggaertshof-binnenkoer.jpg
 - refs/02-kortrijk-baggaertshof-1.jpg
+- refs/03-06: front on the Sint-Jansstraat, courtyard, chapel (Commons)
+- refs/07-08: orthophoto top views (Digitaal Vlaanderen)
 
 Sources and licences: refs/SOURCES.md.

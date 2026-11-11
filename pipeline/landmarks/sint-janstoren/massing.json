@@ -1,0 +1,52 @@
+{
+ "_doc": "Render massing for the Sint-Janstoren (Veemarkt, Robbrecht en Daem), read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (centre of GRB footprint 363006), u along 'axis_deg' (the footprint's long edge). DHMV II: tower 39-46 m over u -20..1, a lower wing at ~12 m over u 2..11. Look from Commons photos (k-in-kortrijk/refs, CC0 / CC BY-SA): a white stepped residential tower with balconies, a dark grey stone plinth of about three storeys under the whole footprint, a roof garden on top. The tower rect is inset 0.3 m so its white walls do not z-fight with the plinth.",
+ "anchor": [
+  50.8267592,
+  3.2722551
+ ],
+ "axis_deg": 97.4,
+ "replace_oidn": [
+  363006
+ ],
+ "parts": [
+  {
+   "id": "dark grey plinth and low wing (GRB footprint)",
+   "footprint": "grb",
+   "h": 12,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.36,
+    0.37,
+    0.4
+   ],
+   "roof": [
+    0.55,
+    0.56,
+    0.55
+   ]
+  },
+  {
+   "id": "white tower with roof garden",
+   "rect": [
+    -19.2,
+    1.2,
+    -10.4,
+    6.4
+   ],
+   "h": 43.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.93,
+    0.93,
+    0.91
+   ],
+   "roof": [
+    0.58,
+    0.68,
+    0.5
+   ]
+  }
+ ]
+}

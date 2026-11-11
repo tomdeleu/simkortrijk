@@ -21,5 +21,7 @@ Groeningemonument: a tall statue monument in a green park, entered through a gre
 
 - refs/01-groeningemonument-voorzijde.jpg
 - refs/02-groeningepoort.jpg
+- refs/03-05: side and back of the monument, the Groeningepoort from the square (Commons)
+- refs/06-07: orthophoto top views (Digitaal Vlaanderen)
 
 Sources and licences: refs/SOURCES.md.

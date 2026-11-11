@@ -1,0 +1,27 @@
+{
+ "_doc": "Colour override for the two lower volumes of the Sint-Janstoren complex (GRB 4600899, 44 m, and 4601992, 39 m, just south of the main tower 363006 whose massing.json is next to this file): white render walls and a green roof garden, as on the Commons photos (k-in-kortrijk/refs). The polygon is a 31 x 14 m box in Lambert 72 around their centres.",
+ "wall": "whitewash",
+ "roof": "green",
+ "polygon": [
+  [
+   50.8265954,
+   3.272046
+  ],
+  [
+   50.8265995,
+   3.2724859
+  ],
+  [
+   50.8267254,
+   3.272483
+  ],
+  [
+   50.8267213,
+   3.2720431
+  ],
+  [
+   50.8265954,
+   3.272046
+  ]
+ ]
+}
