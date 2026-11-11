@@ -35,6 +35,11 @@
   "lat": 50.8333,
   "lon": 3.2677
  },
+ "damiaankerk": {
+  "prio": "P2",
+  "lat": 50.8223072,
+  "lon": 3.2593796
+ },
  "groeningeabdij": {
   "prio": "P3",
   "lat": 50.8295292,

@@ -13,13 +13,15 @@ Post-war station (1951-1956, Pierre Pauwels): long symmetrical building of yello
 
 Station: a long symmetrical yellow-beige brick building with a taller central hall and flat roofs, long concrete canopies over the tracks.
 
-## Render fixes needed
+## Render fixes
 
-- Wall colour buff brick (palette may pick red); flat roof light grey; gable from LiDAR should be dropped (flat roof).
+**Done (piece 5, 2026-11-11):** `massing.json`: the building in buff brick with flat light roofs and the raised central hall; on the track side the dark canopy along platform 1 and four light grey island canopies traced on the 2024 orthophoto (OSM platforms 298913068 and others are `covered=partial`); south of the tracks the covered bike parking in timber slats (Street View look-up).
 
 ## References
 
 - refs/01-station-kortrijk-2022.jpg
 - refs/02-voorzijde-station-kortrijk-1.jpg
+- refs/03-07: Commons 2022 and 2026 (platforms, canopies, front)
+- refs/08-09: orthophoto top views of the station and the tracks south of it
 
 Sources and licences: refs/SOURCES.md.

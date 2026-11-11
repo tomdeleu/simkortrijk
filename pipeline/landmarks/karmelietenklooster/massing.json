@@ -1,0 +1,128 @@
+{
+ "_doc": "Render massing for the Karmelietenklooster (Aalbeeksesteenweg 13, south of the Damiaankerk), read by pipeline/src/scene.ts. GRB 1739207 (61.9 x 49.2 m around a courtyard) rendered as a flat 14 m block with a coral flat roof. Metres in Lambert 72 around 'anchor' (footprint centre), u along 'axis_deg' 168.1 (u towards west-north-west), v towards south-south-west. Wings from the DHMV II grid (ridges 13-16 m, the low corridor along the church 5-9 m) and the 2024 orthophoto: brick wings with red pantile gable roofs around the cloister garth. The scattered DSM in the garden south of the long wing is trees, not building.",
+ "anchor": [
+  50.8220517,
+  3.2589985
+ ],
+ "axis_deg": 168.1,
+ "replace_oidn": [
+  1739207
+ ],
+ "parts": [
+  {
+   "id": "long wing south of the cloister",
+   "rect": [
+    -38,
+    24,
+    0,
+    9.5
+   ],
+   "h": 14.5,
+   "eave": 9,
+   "shape": "gable-u",
+   "style": 2,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  },
+  {
+   "id": "west wing",
+   "rect": [
+    -1,
+    8,
+    -25,
+    0
+   ],
+   "h": 13,
+   "eave": 8,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  },
+  {
+   "id": "east wing",
+   "rect": [
+    -36,
+    -25,
+    -25,
+    0
+   ],
+   "h": 14,
+   "eave": 8,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  },
+  {
+   "id": "low corridor along the church",
+   "rect": [
+    -38,
+    8,
+    -29,
+    -21
+   ],
+   "h": 9,
+   "eave": 5,
+   "shape": "gable-u",
+   "style": 2,
+   "wall": [
+    0.6,
+    0.42,
+    0.34
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  },
+  {
+   "id": "street wing",
+   "rect": [
+    8,
+    25,
+    -17,
+    -8
+   ],
+   "h": 13,
+   "eave": 8,
+   "shape": "gable-u",
+   "style": 2,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  }
+ ]
+}
