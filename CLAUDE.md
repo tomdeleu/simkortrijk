@@ -102,6 +102,8 @@ Only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any ot
 
 ## Where the binnenstad paint stands
 
+**`docs/PAINT_STATUS.md` is the single source of truth**: what is painted and what is not, the tile and window grid, cost, excluded windows, landmark status, and restore points. Update it (and `docs/paint-status.png`) after every paint run and every publish. In short, as of 2026-11-11: 6 of 29 binnenstad tiles are painted (20.7%), 23 are coloured render, and the municipality is not started.
+
 Live since 2026-11-11, published to R2: 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours (`--soften 0.5`) and the Sint-Maartenskerk `massing.json`. Six are painted in **Style A + real colours** with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high, `PAINT_ATTEMPTS=1`): `tx` -2..0, `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render (`assemble_block.py --skip=-2_-3,-1_-3`). Cost was 11 calls, about $1. Windows and paint tiles live in `data/derived` (gitignored), and the published copies are on R2.
 
 Restore points are on the build box (`/workspace/paintrun/`, not in git). Each holds `paint/`, `windows/` and `paint.json`; copy those into `data/derived/kortrijk-binnenstad/`, export, and publish only if Tom asks. `PUBLISH.md` in each folder has the exact commands.

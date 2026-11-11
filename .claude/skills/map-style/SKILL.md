@@ -5,6 +5,8 @@ description: The live SimKortrijk look, "Style A + real colours" (approved by To
 
 # Style A + real colours (live)
 
+Where this style is painted so far: `docs/PAINT_STATUS.md`. Update it after every paint run and every publish.
+
 What the live Broeltorens block looks like, and how every new block must be made so it matches. Approved by Tom on 2026-11-11 after "de kleur moet er ergens tussen liggen, nu is het vrij donker en te realistisch".
 
 ## The look

@@ -5,6 +5,8 @@ description: Repaint SimKortrijk render windows. New painting should use OpenAI 
 
 # Paint tiles
 
+Check `docs/PAINT_STATUS.md` first for what is painted, and **update it (and `docs/paint-status.png`) after every paint run and every publish**.
+
 Optional. Export already shows the 3D render wherever `paint/` has no tile. Do not run a paid paint until the user has set a key and asked for it. `npm test` covers the Gemini request, the batch upload/poll, and the accept/retry decision with a mocked `fetch`.
 
 ## Providers
