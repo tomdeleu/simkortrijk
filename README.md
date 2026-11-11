@@ -52,18 +52,29 @@ npm run dev
 
 Not run in the default build. The viewer shows the render until a painter fills `data/derived/<area>/paint/`.
 
-Two providers, chosen with `PAINT_PROVIDER` (see `.env.example`):
+The default painter is Gemini Nano Banana, model `gemini-nano-banana-2.1` (override with `GEMINI_IMAGE_MODEL`). Secret **`GEMINI_API_KEY`**. Each window sends the render, the height pass, `pipeline/style/reference.png` and `pipeline/style/trees.png`. A result that drifts from the render, or comes back with a black band, is rejected and retried up to three times (`pipeline/src/paintqa.ts`).
 
-- `codex` (default). The [Codex CLI](https://github.com/openai/codex) on `PATH`, logged into ChatGPT. No API key. This is the upstream tool.
-- `openai`. Secret **`OPENAI_API_KEY`**. Optional `OPENAI_IMAGE_MODEL` (default `gpt-image-1`). Calls `POST https://api.openai.com/v1/images/edits` with the render, the height pass, `pipeline/style/reference.png` and `pipeline/style/trees.png`.
+| | |
+|---|---|
+| 1K image (what we request; windows are 1024 px) | $0.0336 |
+| 2K image | $0.0504 |
+| Batch API | half of those |
+
+A handful of windows (12 or fewer, or `--interactive`) calls `generateContent` one window at a time. A larger run, including the whole city, uses the Gemini Batch API (`--batch` forces it). `--near` around the Belfort stays interactive.
 
 ```sh
-npm run paint -- kortrijk-binnenstad --near 50.82757,3.26562 --radius 1   # a few windows around the Belfort
-npm run paint -- kortrijk-binnenstad -j 2                                  # the whole binnenstad
+npm test                                                                  # mocks; no key, no spend
+npm run paint -- kortrijk-binnenstad --near 50.82757,3.26562 --radius 1  # interactive, a few dollars at most
+npm run paint -- kortrijk-binnenstad --batch                              # whole area, half price
 npm run export -- kortrijk-binnenstad
 ```
 
-Each window is registered back onto the render (`pipeline/src/register.ts`). A weak match or a black band is repainted, up to three times. Replace the placeholder style sheets with a painted Flemish reference before spending on the whole city. A binnenstad paint is a few dollars; the municipality is larger (see the scale notes below).
+Other providers, if you set `PAINT_PROVIDER`:
+
+- `codex`. The [Codex CLI](https://github.com/openai/codex) on `PATH`, logged into ChatGPT. No API key. This is the upstream tool. No batch mode.
+- `openai`. Secret **`OPENAI_API_KEY`**. Optional `OPENAI_IMAGE_MODEL` (default `gpt-image-1`).
+
+Replace the placeholder style sheets with a painted Flemish reference before spending on the whole city.
 
 ## Publishing
 
@@ -111,7 +122,7 @@ npm run render -- kortrijk -j 2
 npm run export -- kortrijk-binnenstad kortrijk
 ```
 
-Expect a long fetch: on the order of 54,000 building-height lookups (the binnenstad run did about 30 per second, and `data/raw/<area>/3dgrb.json` resumes). DHMV for the whole municipality is a large raster. Render tiles grow from a few dozen to several hundred. Paint after you are happy with a binnenstad sample. Hosting still fits a small R2 bucket; put `TILES_ORIGIN` in `.env` before you publish.
+Expect a long fetch: on the order of 54,000 building-height lookups (the binnenstad run did about 30 per second, and `data/raw/<area>/3dgrb.json` resumes). DHMV for the whole municipality is a large raster. Render tiles grow from a few dozen to several hundred. Paint a binnenstad sample first (`--interactive`), then the municipality with `npm run paint -- kortrijk --batch` (half of $0.0336 per 1K image). Hosting still fits a small R2 bucket; put `TILES_ORIGIN` in `.env` before you publish.
 
 Neighbouring towns (Kuurne, Harelbeke, …) can share this region: add them to `municipalities` in `places.ts`, run `npm run boundaries -- kortrijk`, and add areas. Anything much beyond ~150 km needs its own region.
 

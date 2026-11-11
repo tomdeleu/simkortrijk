@@ -12,7 +12,8 @@
     "scene": "tsx src/scene.ts",
     "ground": "tsx src/ground.ts",
     "publish": "tsx src/publish.ts",
-    "og": "tsx src/og.ts"
+    "og": "tsx src/og.ts",
+    "test": "node --import tsx --test src/gemini.test.ts"
   },
   "dependencies": {
     "geotiff": "^3.0.5",

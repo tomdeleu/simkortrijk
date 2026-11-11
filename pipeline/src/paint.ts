@@ -1,15 +1,20 @@
 /**
- * Repaint the open-data 3D render into crisp, realistic isometric art with the local Codex CLI
- * (ChatGPT login, built-in image generation; no API key).
+ * Repaint the open-data 3D render into one illustrated style.
+ *
+ * Default painter: Gemini Nano Banana (`gemini-nano-banana-2.1`) via GEMINI_API_KEY.
+ * A small run calls generateContent per window. More than 12 windows (or `--batch`)
+ * uses the Gemini Batch API at half price. `--interactive` forces per-window calls.
+ * Codex (`PAINT_PROVIDER=codex`) and OpenAI (`PAINT_PROVIDER=openai`) stay available.
  *
  * Painting happens in overlapping 1024px windows on a global grid (stride 896). Each window gets
  * its already-painted neighbours (any side) pasted into the 128 px overlap, then windows are feather-blended
- * into 1024px art tiles aligned with the render tiles.
+ * into 1024px art tiles aligned with the render tiles. Every result is checked against the render
+ * and repainted up to three times.
  *
  *   npm run paint -- kortrijk-binnenstad --plan
- *   npm run paint -- tlv-core --window 4,-3
- *   npm run paint -- tlv-core --near 32.064,34.775 --radius 2   # a patch of windows
- *   npm run paint -- tlv-core -j 3                              # everything, centre first (--center lat,lon)
+ *   npm run paint -- kortrijk-binnenstad --near 50.82757,3.26562 --radius 1
+ *   npm run paint -- kortrijk-binnenstad --window 4,-3
+ *   npm run paint -- kortrijk-binnenstad --batch
  */
 import { spawn, spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, openSync, closeSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -21,6 +26,10 @@ import { CAMERA, llhToPixel } from "./camera.ts";
 import { DERIVED, PIPELINE, readJson, writeAtomic } from "./paths.ts";
 import { SEA_H, readHeights } from "./heights.ts";
 import { applyRegistration, register } from "./register.ts";
+import {
+  PRICE_1K_USD, choosePaintMode, estimateUsd, geminiEdit, runGeminiBatch, type GeminiImage,
+} from "./gemini.ts";
+import { MIN_MATCH, MIN_TEXTURE, paintVerdict, shouldWarp } from "./paintqa.ts";
 
 const WIN = 1024, OVERLAP = 128, STRIDE = WIN - OVERLAP, T = CAMERA.tile;
 /** Blend band in the middle of each overlap; outside it a window's own pixels win outright. */
@@ -28,11 +37,6 @@ const FEATHER = 64;
 const STYLE = join(PIPELINE, "style", "reference.png");
 const TREES = join(PIPELINE, "style", "trees.png"); // species sheet (painted once with Codex)
 const SEA = join(PIPELINE, "style", "sea.png");
-/** Minimum edge-map correlation between render and painted window (pilot range 0.58–0.90). */
-const MIN_MATCH = 0.45;
-/** Below this share of strong edges in the render (sea, sand, empty lots) the match check is skipped. */
-const MIN_TEXTURE = 0.05;
-
 const PROMPT = `Use your image generation tool. Four images are attached:
 1. input.png: an orthographic aerial render (camera tilted 45° down, no perspective) of a simple 3D model \
 of {title}, Belgium, built from Flemish open data. ~256 m across. The layout is exact; the colours are flat \
@@ -83,6 +87,8 @@ const { values: args, positionals } = parseArgs({
     // repaint windows painted before this time (e.g. after a style change); runs alongside a normal paint
     older: { type: "string" },
     assemble: { type: "boolean", default: false }, // only rebuild every art tile from the windows
+    batch: { type: "boolean", default: false }, // Gemini Batch API (half price; default above 12 windows)
+    interactive: { type: "boolean", default: false }, // one Gemini generateContent call per window
     j: { type: "string", default: "3" },
     center: { type: "string", default: "50.8275738,3.2656171" }, // Belfort, painted first
   },
@@ -198,29 +204,50 @@ function limitWait(log: string) {
   return backoff * 60_000;
 }
 
-let painter: "codex" | "openai" = "codex";
+type Painter = "gemini" | "codex" | "openai";
+let painter: Painter = "gemini";
 
-/** Codex CLI (default, ChatGPT login, no key) or OpenAI Images (secret OPENAI_API_KEY). */
-function ensurePainter(): "codex" | "openai" {
+/** Gemini (default), Codex CLI, or OpenAI Images. */
+function ensurePainter(): Painter {
   for (const f of [STYLE, TREES]) {
     if (!existsSync(f)) throw new Error(`missing ${f}. pipeline/style/ holds original SimKortrijk sheets, not the Tel Aviv images from isometricworld.`);
   }
-  const provider = (process.env.PAINT_PROVIDER || "codex").toLowerCase();
+  const provider = (process.env.PAINT_PROVIDER || "gemini").toLowerCase();
+  if (provider === "gemini") {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error("PAINT_PROVIDER=gemini needs secret GEMINI_API_KEY. Optional GEMINI_IMAGE_MODEL (default gemini-nano-banana-2.1).");
+    }
+    return "gemini";
+  }
   if (provider === "openai") {
     if (!process.env.OPENAI_API_KEY) throw new Error("PAINT_PROVIDER=openai needs secret OPENAI_API_KEY (Images API). Optional OPENAI_IMAGE_MODEL (default gpt-image-1).");
     return "openai";
   }
-  if (provider !== "codex") throw new Error(`unknown PAINT_PROVIDER=${provider} (use codex or openai)`);
+  if (provider !== "codex") throw new Error(`unknown PAINT_PROVIDER=${provider} (use gemini, codex, or openai)`);
   const which = spawnSync("codex", ["--version"], { encoding: "utf8" });
   if (which.status !== 0) {
     throw new Error([
-      "Painting needs an image model. Default: Codex CLI (`codex` on PATH, ChatGPT login, no API key).",
-      "Alternative: PAINT_PROVIDER=openai and secret OPENAI_API_KEY.",
+      "PAINT_PROVIDER=codex needs the Codex CLI (`codex` on PATH, ChatGPT login, no API key).",
+      "The default painter is Gemini: set GEMINI_API_KEY (model gemini-nano-banana-2.1).",
       "Style sheets: pipeline/style/reference.png and pipeline/style/trees.png.",
       "Without a painter, npm run export still builds the viewer from the 3D render.",
     ].join("\n"));
   }
   return "codex";
+}
+
+function windowImages(work: string): GeminiImage[] {
+  return ["input.png", "height.png", "style.png", "trees.png"].map((name) => ({
+    name, mimeType: "image/png", bytes: readFileSync(join(work, name)),
+  }));
+}
+
+function providerLog(work: string): string {
+  for (const name of ["paint.log", "codex.log"]) {
+    const file = join(work, name);
+    if (existsSync(file)) return readFileSync(file, "utf8");
+  }
+  return "";
 }
 
 async function openaiPaint(cwd: string, prompt: string): Promise<void> {
@@ -319,46 +346,111 @@ async function paintWindow(i: number, j: number) {
   const edges = await composeInput(i, j, join(work, "input.png"), join(work, "height.png"));
   copyFileSync(STYLE, join(work, "style.png"));
   copyFileSync(TREES, join(work, "trees.png"));
-  const prompt = PROMPT.replace("{title}", title).replace("{out}", join(work, "out.png"))
-    .replace("{continuation}", edges.length ? CONTINUATION.replace("{edges}", edges.join(" and ")) : "");
+  const prompt = windowPrompt(edges, join(work, "out.png"), painter === "gemini");
   for (let attempt = 1; attempt <= 3; attempt++) {
     while (Date.now() < resumeAt) await sleep(Math.min(60_000, resumeAt - Date.now()));
     rmSync(join(work, "out.png"), { force: true });
     const t0 = Date.now();
-    if (painter === "openai") await openaiPaint(work, prompt);
+    if (painter === "gemini") {
+      const edited = await geminiEdit(prompt, windowImages(work));
+      writeFileSync(join(work, "paint.log"), edited.log);
+      if (edited.png) writeFileSync(join(work, "out.png"), edited.png);
+    } else if (painter === "openai") await openaiPaint(work, prompt);
     else await codex(work, prompt);
     if (!existsSync(join(work, "out.png"))) {
-      const log = readFileSync(join(work, "codex.log"), "utf8").slice(-4000);
+      const log = providerLog(work).slice(-4000);
       if (LIMIT.test(log)) {
         const wait = limitWait(log);
         resumeAt = Math.max(resumeAt, Date.now() + wait);
-        console.warn(`  ${i}_${j}: Codex limit reached, pausing all workers until ${new Date(resumeAt).toLocaleTimeString()}`);
+        console.warn(`  ${i}_${j}: painter limit reached, pausing all workers until ${new Date(resumeAt).toLocaleTimeString()}`);
         attempt--; // a limit is not the window's fault: retry without using up an attempt
         continue;
       }
     } else backoff = 0;
-    if (existsSync(join(work, "out.png"))) {
-      // geometric QA: undo any shift/scale drift; repaint if the output doesn't follow the render
-      const r = await register(join(work, "input.png"), join(work, "out.png"));
-      writeFileSync(join(work, "qa.json"), JSON.stringify(r));
-      if ((await hasDarkPatch(join(work, "out.png"), join(work, "input.png"))) && attempt < 3) {
-        console.warn(`  ${i}_${j}: black band or patch in the paint, repainting`);
-        continue;
-      }
-      const structured = r.texture >= MIN_TEXTURE; // open sea / empty land: correlation is meaningless
-      if (structured && r.score < MIN_MATCH && attempt < 3) {
-        console.warn(`  ${i}_${j}: match ${r.score.toFixed(2)} < ${MIN_MATCH}, repainting`);
-        continue;
-      }
-      const warp = structured && r.score > r.identity + 0.01;
-      await applyRegistration(join(work, "out.png"), winFile(i, j), warp ? r : { ...r, scale: 1, dx: 0, dy: 0 });
-      console.log(`  ${i}_${j}: ${((Date.now() - t0) / 1000).toFixed(0)}s edges=${edges.join("+") || "-"} match=${r.score.toFixed(2)}`
-        + (structured ? "" : " (low texture)") + (warp ? ` shift=(${r.dx},${r.dy}) scale=${r.scale.toFixed(2)}` : ""));
-      // keep qa.json + codex.log for debugging; the images are ~6 MB per window
-      for (const f of ["input.png", "height.png", "style.png", "trees.png", "out.png"]) rmSync(join(work, f), { force: true });
-      return;
+    if (existsSync(join(work, "out.png")) && await acceptOrRetry({ i, j, work, edges }, attempt, t0) === "accept") return;
+    if (!existsSync(join(work, "out.png"))) console.error(`  ${i}_${j}: attempt ${attempt} failed, see ${join(work, "paint.log")} or ${join(work, "codex.log")}`);
+  }
+}
+
+interface Prepared { i: number; j: number; work: string; edges: string[] }
+
+function windowPrompt(edges: string[], out: string, gemini: boolean) {
+  const prompt = PROMPT.replace("{title}", title).replace("{out}", out)
+    .replace("{continuation}", edges.length ? CONTINUATION.replace("{edges}", edges.join(" and ")) : "");
+  return gemini
+    ? prompt.replace(/When done, copy the final PNG to [\s\S]* and reply only with that path\./, "Return one square image and no other text.")
+    : prompt;
+}
+
+/** Register the paint against the render. Retry a black band or a weak match; otherwise keep it. */
+async function acceptOrRetry(job: Prepared, attempt: number, started: number): Promise<"accept" | "retry"> {
+  const { i, j, work, edges } = job;
+  const r = await register(join(work, "input.png"), join(work, "out.png"));
+  writeFileSync(join(work, "qa.json"), JSON.stringify(r));
+  const dark = await hasDarkPatch(join(work, "out.png"), join(work, "input.png"));
+  if (paintVerdict({ score: r.score, identity: r.identity, texture: r.texture, dark, attempt }) === "retry") {
+    console.warn(`  ${i}_${j}: ${dark ? "black band or patch" : `match ${r.score.toFixed(2)} < ${MIN_MATCH}`}, repainting`);
+    return "retry";
+  }
+  const structured = r.texture >= MIN_TEXTURE;
+  const warp = shouldWarp(r);
+  await applyRegistration(join(work, "out.png"), winFile(i, j), warp ? r : { ...r, scale: 1, dx: 0, dy: 0 });
+  console.log(`  ${i}_${j}: ${((Date.now() - started) / 1000).toFixed(0)}s edges=${edges.join("+") || "-"} match=${r.score.toFixed(2)}`
+    + (structured ? "" : " (low texture)") + (warp ? ` shift=(${r.dx},${r.dy}) scale=${r.scale.toFixed(2)}` : ""));
+  for (const f of ["input.png", "height.png", "style.png", "trees.png", "out.png"]) rmSync(join(work, f), { force: true });
+  return "accept";
+}
+
+/** One ring-pass through the Gemini Batch API, then the same per-window validation and up to two retries. */
+async function paintGeminiPass(todo: Array<[number, number]>) {
+  const jobs: Array<Prepared & { prompt: string }> = [];
+  for (const [i, j] of todo) {
+    if (existsSync(winFile(i, j)) && !args.force && !(OLDER && !current(i, j))) continue;
+    if (existsSync(SEA) && (await seaFraction(i, j)) >= 0.995) {
+      let img = sharp(SEA).resize(WIN, WIN);
+      if ((i + j) & 1) img = img.flop();
+      if (j & 1) img = img.flip();
+      await writeAtomic(img.png(), winFile(i, j));
+      console.log(`  ${i}_${j}: sea texture`);
+      continue;
     }
-    console.error(`  ${i}_${j}: attempt ${attempt} failed, see ${join(work, "codex.log")}`);
+    const work = join(base, "work", `${i}_${j}`);
+    mkdirSync(work, { recursive: true });
+    const edges = await composeInput(i, j, join(work, "input.png"), join(work, "height.png"));
+    copyFileSync(STYLE, join(work, "style.png"));
+    copyFileSync(TREES, join(work, "trees.png"));
+    jobs.push({ i, j, work, edges, prompt: windowPrompt(edges, join(work, "out.png"), true) });
+  }
+  let left = jobs;
+  for (let attempt = 1; attempt <= 3 && left.length; attempt++) {
+    console.log(`  gemini batch: ${left.length} windows, about $${estimateUsd(left.length, true).toFixed(2)} at 1K (half of $${PRICE_1K_USD})`);
+    const started = Date.now();
+    let images: Map<string, Buffer>;
+    try {
+      images = await runGeminiBatch(left.map((job) => ({
+        key: `${job.i}_${job.j}`, prompt: job.prompt, images: windowImages(job.work),
+      })), { displayName: `simkortrijk-${areaName}` });
+    } catch (err) {
+      const msg = (err as Error).message;
+      for (const job of left) writeFileSync(join(job.work, "paint.log"), msg);
+      if (LIMIT.test(msg)) {
+        const wait = limitWait(msg);
+        console.warn(`  gemini batch limited, pausing until ${new Date(Date.now() + wait).toLocaleTimeString()}`);
+        await sleep(wait);
+        attempt--;
+        continue;
+      }
+      throw err;
+    }
+    const again: typeof left = [];
+    for (const job of left) {
+      const png = images.get(`${job.i}_${job.j}`);
+      if (png) writeFileSync(join(job.work, "out.png"), png);
+      else writeFileSync(join(job.work, "paint.log"), "missing from gemini batch output");
+      if (existsSync(join(job.work, "out.png")) && await acceptOrRetry(job, attempt, started) === "accept") continue;
+      again.push(job);
+    }
+    left = again;
   }
 }
 
@@ -510,6 +602,9 @@ async function main() {
   if (args.plan) return console.log(`${wins.length} windows`);
   if (args.assemble) { await harmoniseSea(); return assemble(true); }
   painter = ensurePainter();
+  if (args.batch && painter !== "gemini") throw new Error("--batch uses the Gemini Batch API. Leave PAINT_PROVIDER unset (gemini) and set GEMINI_API_KEY.");
+  const mode = painter === "gemini" ? choosePaintMode(wins.length, { batch: args.batch, interactive: args.interactive }) : "interactive";
+  console.log(`  painter ${painter}${painter === "gemini" ? ` (${mode})` : ""}`);
   // centre first: square rings around the city centre. Each ring runs in two passes over its
   // perimeter (even, then odd positions) so every window continues its painted inner/ring neighbours.
   const [cx, cy] = args.center.split(",").map(Number);
@@ -549,7 +644,8 @@ async function main() {
     }
     for (const pass of [0, 1]) {
       const todo = ring.filter(([i, j], k) => k % 2 === pass && have.has(`${i}_${j}`));
-      await pool(todo, Number(args.j), ([i, j]) => paintWindow(i, j));
+      if (mode === "batch") await paintGeminiPass(todo);
+      else await pool(todo, Number(args.j), ([i, j]) => paintWindow(i, j));
     }
     await assemble(); // finished tiles become visible ring by ring
   }

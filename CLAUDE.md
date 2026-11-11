@@ -16,7 +16,7 @@ Adapted from [Isometric World](https://github.com/krasun/isometricworld) (Dmytro
 | `pipeline/src/scene.ts` | Buildings, LiDAR spires, trees, binned per render tile |
 | `pipeline/src/render.ts` | Headless Chrome render |
 | `pipeline/page/renderer.ts` | three.js page the renderer loads |
-| `pipeline/src/paint.ts` | Optional repaint. `register.ts` checks geometry |
+| `pipeline/src/paint.ts`, `gemini.ts`, `paintqa.ts` | Optional Gemini repaint. Batch API above 12 windows. `register.ts` checks geometry |
 | `pipeline/src/export.ts` | AVIF pyramid into `data/web/regions/kortrijk/` |
 | `pipeline/src/hosting.ts` | R2 bucket `simkortrijk-tiles` |
 | `web/` | Astro viewer. `/` and `/kortrijk` |
@@ -74,7 +74,9 @@ None for fetch, render, export or `npm run dev`.
 
 | Name | When |
 |---|---|
-| `PAINT_PROVIDER` | `codex` (default) or `openai` |
+| `PAINT_PROVIDER` | `gemini` (default), `codex`, or `openai` |
+| `GEMINI_API_KEY` | Default painter. Image edits on `gemini-nano-banana-2.1` |
+| `GEMINI_IMAGE_MODEL` | Optional. Default `gemini-nano-banana-2.1` |
 | `OPENAI_API_KEY` | Only if `PAINT_PROVIDER=openai` |
 | `OPENAI_IMAGE_MODEL` | Optional, default `gpt-image-1` |
 | `TILES_ORIGIN` | Public R2 origin. Empty is fine for local dev. |
@@ -84,7 +86,7 @@ None for fetch, render, export or `npm run dev`.
 | `PIRSCH_ACCESS_KEY` | Optional Worker analytics |
 | `CHROME_PATH`, `CHROME_ARGS`, `SITE_URL` | Optional |
 
-Codex itself has no API key: `codex` must be on `PATH` and logged into ChatGPT.
+Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` mocks the Gemini calls and spends nothing. More than 12 windows uses the Batch API (half of $0.0336 per 1K image); `--interactive` forces one `generateContent` call per window. Codex (`PAINT_PROVIDER=codex`) has no API key: `codex` must be on `PATH` and logged into ChatGPT.
 
 ## Gotchas
 

@@ -28,7 +28,7 @@ Flemish open data is published for reuse with attribution (Modellicentie voor gr
 
 ## AI painting
 
-Optional. Render tiles can be repainted by the Codex CLI (ChatGPT login, no API key) or by OpenAI's Images API (`OPENAI_API_KEY`, model `gpt-image-1` unless `OPENAI_IMAGE_MODEL` is set). Label painted clips "Painted with AI". The binnenstad viewer ships the unpainted render until that step has been run.
+Optional. The default painter is Google's Gemini image model `gemini-nano-banana-2.1` (`GEMINI_API_KEY`; `GEMINI_IMAGE_MODEL` overrides the id). Codex (`PAINT_PROVIDER=codex`, ChatGPT login, no API key) and OpenAI (`OPENAI_API_KEY`) remain available. Label painted clips "Painted with AI". The binnenstad viewer ships the unpainted render until that step has been run.
 
 `pipeline/style/reference.png` and `pipeline/style/trees.png` are original placeholders (a flat isometric sketch and a crown sheet). They are not the Tel Aviv style images. Replace them with a painted Flemish reference before a large paint run.
 
