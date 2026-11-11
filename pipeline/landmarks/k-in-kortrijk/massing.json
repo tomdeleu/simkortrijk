@@ -1,5 +1,5 @@
 {
- "_doc": "Render massing for K in Kortrijk (shopping centre, Robbrecht en Daem 2010), read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (OSM way 1014884611 centroid), u along 'axis_deg' (the glass roof's long axis on the 2024 orthophoto, degrees CCW from grid east). Heights from DHMV II: flat roofs 16.5-17.2 m (north wing 12-15 m), glass roof top 25 m. Shape from the Digitaal Vlaanderen orthophotos (summer 2024, winter 2025; open data) and Commons photos (refs/): a dark stone block with a flat dark roof and a large glass HIP roof (112 x 28 m, light blue-grey, flat light strip on top) over the inner square, not a barrel. The hip is a gable along u plus a pyramid at each end. Sint-Janstoren (GRB 363006, 46 m in OSM, DSM 43.5 m): white stepped residential tower on a dark grey plinth, roof garden; its massing is in ../sint-janstoren/massing.json (own anchor). GRB 944613 (a 'verdieping' strip under the west end of the glass, 25.4 m from 3D GRB) is replaced too: it is the glass roof, not a building. GRB 4600487 (the south-west wing, 3D GRB 20.9 m, rendered as a big slate gable) is the same flat dark roof on the orthophoto (DSM 16.5 m) and is replaced by the block too. Glass rect checked against the orthophoto overlay.",
+ "_doc": "Render massing for K in Kortrijk (shopping centre, Robbrecht en Daem 2010), read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (OSM way 1014884611 centroid), u along 'axis_deg' (the glass roof's long axis on the 2024 orthophoto, degrees CCW from grid east). Heights from DHMV II: flat roofs 16.5-17.2 m (north wing 12-15 m), glass roof top 25 m. Facades (Street View screenshots from Tom, look-up only, AGENTS.md rule 1): light grey concrete, tall framed shop windows, a recessed top storey clad in vertical timber slats; the south entrance (Koeiekop, the notch at u -46..-39 in the GRB footprint) is a glass atrium under a big angled canopy with a hole, with a large red 'K' logo left of it (canopy and logo are a 2D edit, edit_k.ts). Shape from the Digitaal Vlaanderen orthophotos (summer 2024, winter 2025; open data) and Commons photos (refs/): a block with a flat dark roof and a large glass HIP roof (112 x 28 m, light blue-grey, flat light strip on top) over the inner square, not a barrel. The hip is a gable along u plus a pyramid at each end. Sint-Janstoren (GRB 363006, 46 m in OSM, DSM 43.5 m): white stepped residential tower on a dark grey plinth, roof garden; its massing is in ../sint-janstoren/massing.json (own anchor). GRB 944613 (a 'verdieping' strip under the west end of the glass, 25.4 m from 3D GRB) is replaced too: it is the glass roof, not a building. GRB 4600487 (the south-west wing, 3D GRB 20.9 m, rendered as a big slate gable) is the same flat dark roof on the orthophoto (DSM 16.5 m) and is replaced by the block too. Glass rect checked against the orthophoto overlay.",
  "anchor": [
   50.8266458,
   3.2703011
@@ -12,20 +12,276 @@
  ],
  "parts": [
   {
-   "id": "dark stone block (GRB footprint)",
+   "id": "podium: light grey concrete, tall framed shop windows (GRB footprint)",
    "footprint": "grb",
+   "h": 13,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.8,
+    0.78
+   ],
+   "roof": [
+    0.78,
+    0.77,
+    0.74
+   ]
+  },
+  {
+   "id": "recessed top storey: timber slats and big windows (GRB footprint shrunk 3.5 m)",
+   "poly": [
+    [
+     75.11,
+     -40.09
+    ],
+    [
+     66.11,
+     -34.84
+    ],
+    [
+     63.36,
+     -34.59
+    ],
+    [
+     60.11,
+     -35.84
+    ],
+    [
+     56.86,
+     -38.59
+    ],
+    [
+     56.61,
+     -42.34
+    ],
+    [
+     57.36,
+     -43.84
+    ],
+    [
+     -35.89,
+     -42.34
+    ],
+    [
+     -36.89,
+     -33.34
+    ],
+    [
+     -37.89,
+     -30.59
+    ],
+    [
+     -40.89,
+     -29.09
+    ],
+    [
+     -47.14,
+     -29.09
+    ],
+    [
+     -49.39,
+     -29.84
+    ],
+    [
+     -50.89,
+     -32.09
+    ],
+    [
+     -49.64,
+     -42.59
+    ],
+    [
+     -82.39,
+     -42.09
+    ],
+    [
+     -82.89,
+     -19.59
+    ],
+    [
+     -86.89,
+     5.91
+    ],
+    [
+     -84.89,
+     9.41
+    ],
+    [
+     -85.14,
+     12.66
+    ],
+    [
+     -70.89,
+     15.41
+    ],
+    [
+     -54.89,
+     17.41
+    ],
+    [
+     -52.89,
+     18.66
+    ],
+    [
+     -47.89,
+     19.41
+    ],
+    [
+     -45.64,
+     20.91
+    ],
+    [
+     -44.89,
+     22.41
+    ],
+    [
+     -44.14,
+     58.66
+    ],
+    [
+     -38.64,
+     59.16
+    ],
+    [
+     -37.14,
+     47.91
+    ],
+    [
+     -34.64,
+     45.41
+    ],
+    [
+     -31.39,
+     45.16
+    ],
+    [
+     -29.64,
+     32.16
+    ],
+    [
+     -28.14,
+     30.16
+    ],
+    [
+     -25.89,
+     29.41
+    ],
+    [
+     -2.89,
+     34.41
+    ],
+    [
+     1.36,
+     37.66
+    ],
+    [
+     21.86,
+     46.41
+    ],
+    [
+     24.61,
+     49.41
+    ],
+    [
+     24.11,
+     53.91
+    ],
+    [
+     31.11,
+     56.91
+    ],
+    [
+     34.11,
+     59.16
+    ],
+    [
+     35.36,
+     56.66
+    ],
+    [
+     37.11,
+     55.41
+    ],
+    [
+     39.36,
+     55.16
+    ],
+    [
+     42.86,
+     56.41
+    ],
+    [
+     49.86,
+     36.91
+    ],
+    [
+     46.36,
+     27.41
+    ],
+    [
+     47.11,
+     23.16
+    ],
+    [
+     50.61,
+     19.41
+    ],
+    [
+     52.86,
+     18.66
+    ],
+    [
+     56.11,
+     19.41
+    ],
+    [
+     58.86,
+     21.91
+    ],
+    [
+     62.86,
+     17.91
+    ],
+    [
+     83.11,
+     4.16
+    ]
+   ],
    "h": 16.8,
    "shape": "flat",
-   "style": 4,
+   "style": 5,
    "wall": [
-    0.4,
-    0.39,
-    0.4
+    0.62,
+    0.5,
+    0.38
    ],
    "roof": [
     0.44,
     0.41,
     0.4
+   ]
+  },
+  {
+   "id": "glass atrium wall at the back of the south entrance passage",
+   "rect": [
+    -45.6,
+    -39.2,
+    -33.4,
+    -32.0
+   ],
+   "h": 13,
+   "shape": "flat",
+   "style": 3,
+   "wall": [
+    0.62,
+    0.76,
+    0.88
+   ],
+   "roof": [
+    0.78,
+    0.77,
+    0.74
    ]
   },
   {

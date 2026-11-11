@@ -1,0 +1,139 @@
+{
+ "_doc": "Render massing for the Groeningemonument (1906, Groeningepark), read by pipeline/src/scene.ts. GRB KNW 27592 is the 8.2 m octagonal plinth, rendered as an 8 m brick 'house'. Metres in Lambert 72 around 'anchor' (centre of the footprint), u along 'axis_deg' (a footprint edge). Look from Commons photos (refs/) and the photo Tom shared: a low stepped grey stone base, a grey stone pedestal with bronze-grey relief groups against its sides, the gilded Maiden of Flanders with a lion on top holding a spear up. DHMV II is too coarse for the statue (p95 8.1 m); heights are estimated from the photos: base 1.2 m, pedestal 6.5 m, statue to 10.5 m, spear tip 13 m. Parts cannot start in mid-air, so the statue and spear rise from the ground inside the pedestal.",
+ "anchor": [
+  50.8287073,
+  3.2758077
+ ],
+ "axis_deg": 125.6,
+ "replace_oidn": [
+  27592
+ ],
+ "parts": [
+  {
+   "id": "stepped base (GRB octagon)",
+   "footprint": "grb",
+   "h": 0.6,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.72,
+    0.72,
+    0.69
+   ],
+   "roof": [
+    0.72,
+    0.72,
+    0.69
+   ]
+  },
+  {
+   "id": "upper step",
+   "oct": [
+    0,
+    0,
+    3.6
+   ],
+   "h": 1.2,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.72,
+    0.72,
+    0.69
+   ],
+   "roof": [
+    0.72,
+    0.72,
+    0.69
+   ]
+  },
+  {
+   "id": "relief groups against the pedestal",
+   "rect": [
+    -2.9,
+    2.9,
+    -2.9,
+    2.9
+   ],
+   "h": 3.6,
+   "shape": "pyramid",
+   "eave": 2.6,
+   "style": 4,
+   "wall": [
+    0.64,
+    0.64,
+    0.62
+   ],
+   "roof": [
+    0.64,
+    0.64,
+    0.62
+   ]
+  },
+  {
+   "id": "pedestal",
+   "rect": [
+    -1.8,
+    1.8,
+    -1.8,
+    1.8
+   ],
+   "h": 6.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.72,
+    0.72,
+    0.69
+   ],
+   "roof": [
+    0.72,
+    0.72,
+    0.69
+   ]
+  },
+  {
+   "id": "gilded statue (Maiden of Flanders with lion)",
+   "oct": [
+    0,
+    0,
+    1.1
+   ],
+   "h": 10.5,
+   "eave": 9.4,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.9,
+    0.7,
+    0.24
+   ],
+   "roof": [
+    0.9,
+    0.7,
+    0.24
+   ]
+  },
+  {
+   "id": "gilded spear",
+   "oct": [
+    0.5,
+    0.3,
+    0.15
+   ],
+   "h": 13,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.9,
+    0.7,
+    0.24
+   ],
+   "roof": [
+    0.9,
+    0.7,
+    0.24
+   ]
+  }
+ ]
+}

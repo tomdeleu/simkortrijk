@@ -15,7 +15,7 @@ Groeningemonument: a tall statue monument in a green park, entered through a gre
 
 ## Render fixes needed
 
-- Small; a dark pedestal and statue in the park is enough.
+**Done (2026-11-11, after Tom: "dat is een beeld, geen huisje"):** `massing.json` replaces GRB KNW 27592 (an 8 m brick octagon in the render) with a stepped grey stone base, pedestal with relief groups, and the gilded statue with its spear.
 
 ## References
 

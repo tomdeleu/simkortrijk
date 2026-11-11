@@ -17,6 +17,8 @@ K in Kortrijk: a large dark-stone shopping block with a long glass barrel roof; 
 
 **Done (piece 4, 2026-11-11):** `massing.json` replaces GRB 4600431 (the 26.6 m box), 944613 (a 25.4 m strip that is the glass roof) and 4600487 (the south-west wing, rendered as a slate gable) with a dark stone block at 16.8 m (DHMV: flat roofs 16.5-17.2 m) and a glass hip roof from 17.5 to 25 m (a gable along the axis plus a pyramid at each end), checked against an orthophoto overlay. The Sint-Janstoren is in `../sint-janstoren/` (own anchor).
 
+**Revised after Tom's Street View screenshots (look-up only):** the facades are light grey concrete with tall framed shop windows (podium to 13 m, style 2) under a top storey set back 3.5 m and clad in vertical timber slats (`poly` part, the GRB footprint eroded 3.5 m). The Koeiekop entrance (the notch in the south facade) has a glass atrium at the back, a big angled canopy with a hole and a ring lamp, and a red K logo west of it: `edit_k.ts` draws canopy and logo into the render before painting, and `--logo-on-paint` puts the logo back on the paint tile after assembling.
+
 ## References
 
 - refs/01-view-of-k-in-kortrijk-from-the-tower-of-sint-maartenskerk-ko.jpg
