@@ -39,7 +39,7 @@ Ramps, pillars and `overbrugging` footprints are dropped. Buildings with no 3D G
 | `grb_roads.geojson`, `grb_water.geojson` | WBN, WTZ |
 | `dhm/dtm.f32`, `dhm/dsm.f32`, `dhm/raster.json` | 1 m Lambert grid, row 0 = north, TAW metres |
 | `3dgrb.json` | Checkpoint `{ "Gbg:<OIDN>": metres or null }` |
-| `osm.json`, `roads.json`, `ground.json` | Overpass |
+| `osm.json`, `roads.json`, `ground.json` | Overpass, then the OSM map API if Overpass is unreachable |
 | `trees.geojson` | Detected crowns plus OSM `natural=tree` more than 4 m from a detection |
 
 Existing files are skipped. A GetFeatureInfo failure is stored as `null` in `3dgrb.json` and that building keeps its DHMV height. Re-run still resumes: keys already in `3dgrb.json` are not requested again. Delete `buildings.geojson` (keep `3dgrb.json`) to rebuild the GeoJSON without repeating the successful lookups.

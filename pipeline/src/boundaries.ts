@@ -1,28 +1,13 @@
 /**
  * Fetch a region's municipal boundaries (OSM admin_level=8) from Overpass.
  *
- *   npm -w pipeline run boundaries -- israel-center      -> data/raw/boundaries/<region>.json
+ *   npm run boundaries -- kortrijk      -> data/raw/boundaries/<region>.json
  */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { overpass } from "./osm.ts";
 import { REGIONS } from "./places.ts";
 import { RAW } from "./paths.ts";
-
-const OVERPASS = "https://overpass-api.de/api/interpreter";
-
-async function overpass(query: string) {
-  for (let attempt = 1; attempt <= 4; attempt++) {
-    const r = await fetch(OVERPASS, {
-      method: "POST",
-      headers: { "User-Agent": "isometric-world/0.3", "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ data: query }),
-    });
-    if (r.ok) return r.json();
-    console.warn(`  overpass ${r.status}, retrying…`);
-    await new Promise((res) => setTimeout(res, 10_000 * attempt));
-  }
-  throw new Error("overpass failed");
-}
 
 const id = process.argv[2] ?? "kortrijk", region = REGIONS[id];
 if (!region) throw new Error(`unknown region ${id}`);

@@ -23,6 +23,7 @@ import { openArea } from "./areas.ts";
 import { fetchDhmv, fillPolygon, lambertBounds, loadRaster, sampleNearest, saveRaster, toLambert, UA } from "./flanders.ts";
 import { RAW } from "./paths.ts";
 import { detectTrees } from "./trees.ts";
+import { keepBuildingsAndTrees, keepGround, keepRoads, osmOrMap, type BBox } from "./osm.ts";
 
 const WFS = "https://geo.api.vlaanderen.be/GRB/wfs";
 const WMS3D = "https://geo.api.vlaanderen.be/3DGRB/wms";
@@ -30,7 +31,6 @@ const LAYERS = ["GBG", "GBA", "KNW"] as const;
 const ENT: Record<string, string> = { GBG: "Gbg", GBA: "Gba", KNW: "Knw" };
 const SKIP = new Set(["trap", "ingezonken garagetoegang", "verheven garagetoegang", "pijler", "overbrugging"]);
 
-type BBox = [number, number, number, number];
 type Feature = { type: "Feature"; geometry: { type: string; coordinates: number[][][] | number[][][][] }; properties: Record<string, unknown> };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -50,19 +50,6 @@ async function getJson(url: string, ms = 180_000): Promise<any> {
     }
   }
   throw new Error(last);
-}
-
-async function overpass(query: string) {
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    const r = await fetch("https://overpass-api.de/api/interpreter", {
-      method: "POST", headers: { ...UA, "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ data: query }), signal: AbortSignal.timeout(180_000),
-    });
-    if (r.ok) return r.json();
-    console.warn(`  overpass ${r.status}, retrying…`);
-    await sleep(10_000 * attempt);
-  }
-  throw new Error("overpass failed");
 }
 
 /** WFS 2.0 GeoJSON. bbox is west,south,east,north. Paged; cells keep a full-city run from timing out. */
@@ -266,25 +253,29 @@ await saveLayer(join(dir, "grb_roads.geojson"), "WBN");
 await saveLayer(join(dir, "grb_water.geojson"), "WTZ");
 
 const [s, w, n, e] = area.bbox;
+const box = (bbox: BBox) => `(${bbox[0]},${bbox[1]},${bbox[2]},${bbox[3]})`;
 if (!existsSync(join(dir, "osm.json"))) {
-  const b = `(${s},${w},${n},${e})`;
-  const data = await overpass(`[out:json][timeout:180];
+  const bbox: BBox = [s, w, n, e];
+  const b = box(bbox);
+  const data = await osmOrMap(`[out:json][timeout:180];
 (way["building"]${b}; relation["building"]${b}; node["natural"="tree"]${b}; node["historic"="tower"]${b}; node["man_made"="tower"]${b};);
-out body geom;`);
+out body geom;`, bbox, keepBuildingsAndTrees);
   writeFileSync(join(dir, "osm.json"), JSON.stringify(data));
   console.log(`  osm: ${data.elements.length} elements`);
 }
 if (!existsSync(join(dir, "roads.json"))) {
-  const data = await overpass(`[out:json][timeout:180];
-way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link|living_street|service)$"]["area"!="yes"](${s},${w},${n},${e});
-out body geom;`);
+  const bbox: BBox = [s, w, n, e];
+  const data = await osmOrMap(`[out:json][timeout:180];
+way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential|motorway_link|trunk_link|primary_link|secondary_link|tertiary_link|living_street|service)$"]["area"!="yes"]${box(bbox)};
+out body geom;`, bbox, keepRoads);
   writeFileSync(join(dir, "roads.json"), JSON.stringify(data));
   console.log(`  roads: ${data.elements.length} ways`);
 }
 if (!existsSync(join(dir, "ground.json"))) {
   const m = 0.006;
-  const b = `(${s - m},${w - m},${n + m},${e + m})`;
-  const data = await overpass(`[out:json][timeout:240];
+  const bbox: BBox = [s - m, w - m, n + m, e + m];
+  const b = box(bbox);
+  const data = await osmOrMap(`[out:json][timeout:240];
 (
   way["highway"]["tunnel"!~"yes|building_passage"]${b};
   way["area:highway"]${b};
@@ -298,7 +289,7 @@ if (!existsSync(join(dir, "ground.json"))) {
   nwr["place"="square"]${b};
   nwr["historic"="tower"]${b};
 );
-out body geom;`);
+out body geom;`, bbox, keepGround);
   writeFileSync(join(dir, "ground.json"), JSON.stringify(data));
   console.log(`  ground: ${data.elements.length} elements`);
 }

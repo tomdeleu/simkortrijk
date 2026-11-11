@@ -6,6 +6,7 @@ import { spawnSync } from "node:child_process";
 import { ROOT } from "./paths.ts";
 
 const domain = process.env.SITE_DOMAIN;
-if (!domain) throw new Error("SITE_DOMAIN is not set: add it to .env (see .env.example)");
-const r = spawnSync("npx", ["wrangler", "deploy", "--domain", domain], { cwd: ROOT, stdio: "inherit" });
+// No SITE_DOMAIN: workers.dev (wrangler.jsonc workers_dev). A domain adds that route.
+const args = ["wrangler", "deploy", ...(domain ? ["--domain", domain] : [])];
+const r = spawnSync("npx", args, { cwd: ROOT, stdio: "inherit" });
 process.exit(r.status ?? 1);

@@ -1,21 +1,20 @@
-// Cloudflare Workers static site: only the built pages (web/dist, a few hundred KB).
-// Map tiles and region data are served from R2 (pipeline/src/hosting.ts), not from here.
-// worker/index.ts runs only for /p/* (first-party Pirsch Analytics proxy; secret PIRSCH_ACCESS_KEY).
-// Deploy with `npm run deploy` (needs SITE_DOMAIN in .env).
+// One Worker. Pages and map tiles are static assets of web/dist.
+// `npm run build` copies data/web/regions into web/dist/regions, so /regions/... is
+// same-origin and R2 is not required. worker/index.ts runs only for /p/* (optional Pirsch).
+// Deploy: npx wrangler deploy   (workers.dev; name simkortrijk)
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "simkortrijk",
+  "workers_dev": true,
   "compatibility_date": "2026-11-01",
   "main": "./worker/index.ts",
   "assets": {
     "directory": "./web/dist",
     "binding": "ASSETS",
-    // everything else is served straight from assets, without invoking the Worker
+    // tiles and pages are assets; the Worker runs only for the analytics proxy
     "run_worker_first": ["/p/*"],
-    // unknown paths get 404.html, which sends capitalised city links (/Tel-Aviv-Yafo) to /tel-aviv-yafo
+    // unknown paths get 404.html, which sends /Kortrijk to /kortrijk
     "not_found_handling": "404-page",
-    // /tel-aviv-yafo, not /tel-aviv-yafo/
     "html_handling": "drop-trailing-slash"
   }
-  // custom domain: SITE_DOMAIN in .env, passed by `npm run deploy` (pipeline/src/deploy.ts)
 }

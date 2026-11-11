@@ -46,6 +46,17 @@ npm run export -- kortrijk-binnenstad
 npm run dev
 ```
 
+Deploy as one Worker, tiles same-origin, no R2. `TILES_ORIGIN` stays empty. `wrangler.jsonc` is `name: simkortrijk`, `workers_dev: true`, assets directory `web/dist`.
+
+```sh
+npm run binnenstad
+npm run build            # astro build, then scripts/copy-regions.mjs -> web/dist/regions
+npx wrangler login       # once
+npx wrangler deploy
+```
+
+The build reads `data/web/regions/<region>/data/world.json` so the HTML preloads `tiles-map.<hash>.json` and the preview, not the legacy `tiles.json`. Wrangler prints `https://simkortrijk.<account>.workers.dev`.
+
 Typecheck: `npm run typecheck` (pipeline `tsc`, then `astro check`). Chrome is auto-detected (`CHROME_PATH` overrides).
 
 ## Data
@@ -79,7 +90,7 @@ None for fetch, render, export or `npm run dev`.
 | `GEMINI_IMAGE_MODEL` | Optional. Default `gemini-nano-banana-2.1` |
 | `OPENAI_API_KEY` | Only if `PAINT_PROVIDER=openai` |
 | `OPENAI_IMAGE_MODEL` | Optional, default `gpt-image-1` |
-| `TILES_ORIGIN` | Public R2 origin. Empty is fine for local dev. |
+| `TILES_ORIGIN` | Leave empty for the Worker bundle. Set only when tiles are on R2. |
 | `CLOUDFLARE_ACCOUNT_ID` | publish / deploy |
 | `CLOUDFLARE_API_TOKEN` | publish, if you are not using `wrangler login` |
 | `SITE_DOMAIN` | `npm run deploy` |
@@ -95,7 +106,8 @@ Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` 
 - 3D GRB misses buildings newer than about 2015. Those keep a DHMV height. The binnenstad is roughly 6,500 footprints after dropping ramps and bridge decks.
 - A failed height lookup is stored as `null` in `3dgrb.json` and that building uses DHMV. Keys already in the checkpoint are not requested again.
 - Render uses software WebGL if there is no GPU (`--enable-unsafe-swiftshader`). `-j 2` is a safe default.
-- The dev server 404s `/regions/...` that are not in `data/web` when `TILES_ORIGIN` is empty. Export first.
+- The dev server 404s `/regions/...` that are not in `data/web` when `TILES_ORIGIN` is empty. Export first. A production build with an empty origin reads that same cache; run `npm run build` after export so `web/dist/regions` exists before `npx wrangler deploy`.
+- If Overpass is unreachable, `fetch` retries a second Overpass server and then the OSM map API (`api.openstreetmap.org/api/0.6/map.json`) for the same bbox. The map API is a fallback: it downloads every object and this repo filters it.
 - `uitest` treats any HTTP 400+ as a failure, including a tile the index should not have requested.
 - Paint style is variant C: blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets. The prompt in `paint.ts` is the geometry lock plus that paragraph. Flat LOD1 roofs stay flat; tile colour is allowed, new hips and ridges are not.
 - `roofNovelty` in `register.ts` retries a paint when more than 4% of flat roof and wall interiors grow a strong new edge. Fine tile texture stays under that. Do not copy Tel Aviv style images into `pipeline/style/`.

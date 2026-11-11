@@ -16,7 +16,7 @@ const regionBase = `${tilesOrigin}/regions/${c.region}`, data = `${regionBase}/d
 // names of the current content-hashed files to preload, and the city's preview
 async function loadWorld(): Promise<World> {
   const local = `${__WEB_CACHE__}regions/${c.region}/data/world.json`;
-  if (import.meta.env.DEV && existsSync(local)) return JSON.parse(readFileSync(local, "utf8"));
+  if ((import.meta.env.DEV || !HOSTING.origin) && existsSync(local)) return JSON.parse(readFileSync(local, "utf8"));
   if (!HOSTING.origin) return {};
   try {
     const r = await fetch(`${HOSTING.origin}/regions/${c.region}/data/world.json?build=${Date.now()}`);

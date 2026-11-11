@@ -1,42 +1,61 @@
 ---
 name: publish-r2
-description: Upload a SimKortrijk export cache to Cloudflare R2 and optionally deploy the Astro site. Use only when the user explicitly asked to publish or deploy. Do not point this at the Isometric World bucket.
+description: Deploy SimKortrijk as one Cloudflare Worker with tiles in the static assets (npx wrangler deploy, no R2), or upload the tile cache to R2. Use only when the user explicitly asked to deploy or publish.
 ---
 
-# Publish to R2
+# Deploy
 
-Outward-facing. Do not run this because a local preview looks finished. The user has to ask.
+Outward-facing. Do not deploy because a local preview looks finished. The user has to ask.
 
-The bucket name is `simkortrijk-tiles` (`pipeline/src/hosting.ts`). Create that bucket in the user's Cloudflare account. Do not upload into `isometricworldtiles`.
+## Deploy as one Worker (no R2)
 
-## Commands
+Tiles and pages are the same Worker. `wrangler.jsonc` sets `name` to `simkortrijk`, `workers_dev` to true, and `assets.directory` to `./web/dist`. Leave `TILES_ORIGIN` empty so the build reads the export cache and the browser loads `/regions/...` from the Worker, not from a bucket.
+
+```sh
+npm run binnenstad
+npm run build
+npx wrangler login
+npx wrangler deploy
+```
+
+What each step does:
+
+1. `npm run binnenstad` fetches, renders, and exports into `data/web/regions/kortrijk`.
+2. `npm run build` runs Astro, then `scripts/copy-regions.mjs`, which copies `data/web/regions` to `web/dist/regions`. With `TILES_ORIGIN` empty, `MapPage.astro` reads `data/web/regions/<region>/data/world.json` during the build, so the HTML preloads `tiles-map.<hash>.json` and the city preview. It must not preload `tiles.json` or `borders.json`.
+3. `npx wrangler login` once, in a browser.
+4. `npx wrangler deploy` from the repo root. Wrangler prints `https://simkortrijk.<account>.workers.dev`.
+
+`npm run deploy` is that same `npx wrangler deploy`. If `SITE_DOMAIN` is set, it also passes `--domain`. The workers.dev URL works without `SITE_DOMAIN`.
+
+No `CLOUDFLARE_API_TOKEN` is required after `wrangler login`. `PIRSCH_ACCESS_KEY` is optional (`npx wrangler secret put PIRSCH_ACCESS_KEY`); the site runs without it.
+
+## Verify
+
+- `web/dist/index.html` contains `tiles-map.` and does not reference `tiles.json` as the preload.
+- `web/dist/regions/kortrijk/data/world.json` exists, and `web/dist/regions/kortrijk/tiles/map/` has avif files.
+- The workers.dev URL shows the binnenstad, pan and zoom work, and the footer still names Digitaal Vlaanderen and OpenStreetMap.
+- A tile request in the network panel is same-origin (`/regions/kortrijk/tiles/...`), not another host.
+
+## Upload tiles to R2
+
+Optional. The bucket name is `simkortrijk-tiles` (`pipeline/src/hosting.ts`). Do not upload into `isometricworldtiles`.
 
 ```sh
 npm run publish -- kortrijk
-npm run deploy
 ```
 
 `publish` asks `publish? [y/N]`. `--yes` skips the question (only after the user said to publish). `--keep` leaves `data/web/` in place; the default deletes the cache after a checked upload.
 
 Order inside `pipeline/src/publish.ts`: tiles and previews first, `world.json` last. Each object is checked (stored size equals local size). The published manifest is copied to `data/web-state/kortrijk.json`.
 
-`npm run deploy` runs `npm run build`, then `wrangler deploy` on `SITE_DOMAIN` (`pipeline/src/deploy.ts`). Deploy after every publish so the HTML picks up new hashed filenames. The site still works without that redeploy (the viewer reads live `world.json`), but preloads and the preview image go stale.
-
-## Env
+Set `TILES_ORIGIN` to the bucket’s public origin before the next `npm run build` if the site should load tiles from R2 instead of the bundle. Then redeploy.
 
 | Name | Required | Secret |
 |---|---|---|
-| `TILES_ORIGIN` | Yes for publish | No. Public bucket origin, no trailing slash. |
-| `CLOUDFLARE_ACCOUNT_ID` | Yes | Account id, not a token. |
-| `CLOUDFLARE_API_TOKEN` | Yes, unless `npx wrangler login` has been done | R2 Object Read & Write on `simkortrijk-tiles`. |
-| `SITE_DOMAIN` | Yes for deploy | No. Hostname only, e.g. `maps.example.com`. |
-| `PIRSCH_ACCESS_KEY` | No | Worker secret for analytics. `npx wrangler secret put PIRSCH_ACCESS_KEY`. The site runs without it. |
+| `TILES_ORIGIN` | Only for R2 | No. Public origin, no trailing slash. Empty for the Worker bundle. |
+| `CLOUDFLARE_ACCOUNT_ID` | For publish | Account id, not a token. |
+| `CLOUDFLARE_API_TOKEN` | For publish, unless `npx wrangler login` | R2 Object Read & Write on `simkortrijk-tiles`. |
+| `SITE_DOMAIN` | No | Custom hostname for `npm run deploy`. |
+| `PIRSCH_ACCESS_KEY` | No | Worker secret for analytics. |
 
 Copy names from `.env.example`. Never commit `.env`.
-
-## Verify
-
-- Publish prints an upload count and does not exit on a size mismatch.
-- `curl -I "$TILES_ORIGIN/regions/kortrijk/data/world.json"` returns 200.
-- A production build with `TILES_ORIGIN` set loads `/kortrijk` from that origin, and the footer credits are still the Flemish line plus OpenStreetMap.
-- Local `npm run dev` after a publish with the cache deleted should proxy `/regions/` to `TILES_ORIGIN`. If `TILES_ORIGIN` is unset, dev only serves files still in `data/web`.
