@@ -18,7 +18,7 @@ Adapted from [Isometric World](https://github.com/krasun/isometricworld) (Dmytro
 | `pipeline/page/renderer.ts` | three.js page the renderer loads |
 | `pipeline/src/paint.ts`, `gemini.ts`, `paintqa.ts` | Optional Gemini repaint. Batch API above 12 windows. `register.ts` checks geometry |
 | `pipeline/src/export.ts` | AVIF pyramid into `data/web/regions/kortrijk/` |
-| `pipeline/src/hosting.ts` | R2 bucket `simkortrijk-tiles` |
+| `pipeline/src/hosting.ts` | R2 bucket `simkortrijk`, default `TILES_ORIGIN` (its r2.dev URL) |
 | `web/` | Astro viewer. `/` and `/kortrijk` |
 | `pipeline/style/` | Style C (pastel game-like). `reference.png` is the painted Grote Markt tile. `trees.png` is mint/sage crowns. Not Tel Aviv imagery. |
 | `.claude/skills/` | One skill per step |
@@ -46,7 +46,7 @@ npm run export -- kortrijk-binnenstad
 npm run dev
 ```
 
-Deploy as one Worker, tiles same-origin, no R2. `TILES_ORIGIN` stays empty. `wrangler.jsonc` is `name: simkortrijk`, `workers_dev: true`, assets directory `web/dist`.
+Deploy as one Worker `simkortrijk`; tiles load from the R2 bucket `simkortrijk` (https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev, the default `TILES_ORIGIN`). `npm run publish -- kortrijk --yes --keep` uploads new exports there. Set `TILES_ORIGIN=` (empty) to bundle tiles into the Worker instead. `wrangler.jsonc` is `name: simkortrijk`, `workers_dev: true`, assets directory `web/dist`.
 
 ```sh
 npm run binnenstad
@@ -90,7 +90,7 @@ None for fetch, render, export or `npm run dev`.
 | `GEMINI_IMAGE_MODEL` | Optional. Default `gemini-nano-banana-2.1` |
 | `OPENAI_API_KEY` | Only if `PAINT_PROVIDER=openai` |
 | `OPENAI_IMAGE_MODEL` | Optional, default `gpt-image-1` |
-| `TILES_ORIGIN` | Leave empty for the Worker bundle. Set only when tiles are on R2. |
+| `TILES_ORIGIN` | Unset: the `simkortrijk` bucket on r2.dev. Empty: tiles bundled in the Worker. A custom domain is better for production (r2.dev is rate-limited). |
 | `CLOUDFLARE_ACCOUNT_ID` | publish / deploy |
 | `CLOUDFLARE_API_TOKEN` | publish, if you are not using `wrangler login` |
 | `SITE_DOMAIN` | `npm run deploy` |
@@ -106,7 +106,7 @@ Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` 
 - 3D GRB misses buildings newer than about 2015. Those keep a DHMV height. The binnenstad is roughly 6,500 footprints after dropping ramps and bridge decks.
 - A failed height lookup is stored as `null` in `3dgrb.json` and that building uses DHMV. Keys already in the checkpoint are not requested again.
 - Render uses software WebGL if there is no GPU (`--enable-unsafe-swiftshader`). `-j 2` is a safe default.
-- The dev server 404s `/regions/...` that are not in `data/web` when `TILES_ORIGIN` is empty. Export first. A production build with an empty origin reads that same cache; run `npm run build` after export so `web/dist/regions` exists before `npx wrangler deploy`.
+- `npm run dev` serves `/regions/...` from `data/web` first and proxies everything else to R2, so a fresh clone shows the published tiles with no export. With `TILES_ORIGIN=` (empty) it 404s `/regions/...` that are not in `data/web`. Export first. A production build with an empty origin reads that same cache; run `npm run build` after export so `web/dist/regions` exists before `npx wrangler deploy`.
 - If Overpass is unreachable, `fetch` retries a second Overpass server and then the OSM map API (`api.openstreetmap.org/api/0.6/map.json`) for the same bbox. The map API is a fallback: it downloads every object and this repo filters it.
 - `uitest` treats any HTTP 400+ as a failure, including a tile the index should not have requested.
 - Paint style is variant C: blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets. The prompt in `paint.ts` is the geometry lock plus that paragraph. Flat LOD1 roofs stay flat; tile colour is allowed, new hips and ridges are not.

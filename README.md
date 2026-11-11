@@ -78,7 +78,7 @@ Style C is already the reference. Do not swap in another city's painted tiles.
 
 ## Deploy as one Worker
 
-Tiles are not in git. They are copied into the Worker’s static assets at build time, and the site serves them from the same origin. Leave `TILES_ORIGIN` empty. No R2 bucket.
+Tiles are not in git. They live in the R2 bucket `simkortrijk`, public at https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev (the default `TILES_ORIGIN` in `pipeline/src/hosting.ts`). `npm run dev` and the deployed Worker both load them from there, so local and live show the same tiles. Set `TILES_ORIGIN=` (empty) to copy tiles into the Worker’s static assets instead.
 
 ```sh
 npm run binnenstad          # fetch, render, export into data/web/regions/kortrijk
@@ -89,13 +89,13 @@ npx wrangler deploy
 
 `wrangler.jsonc` names the Worker `simkortrijk`, sets `workers_dev: true`, and uploads `web/dist` (pages and `/regions/...`). Wrangler prints a URL like `https://simkortrijk.<account>.workers.dev`. The map, the preview, and the tiles all come from that host.
 
-`npm run build` reads `data/web/regions/<region>/data/world.json` when `TILES_ORIGIN` is empty, so the HTML preloads the real hashed tile index and shows the city preview. Without an export first, the build warns and the Worker has pages only.
+`npm run build` reads the published `world.json` from R2 (or, with `TILES_ORIGIN=` empty, `data/web/regions/<region>/data/world.json`), so the HTML preloads the real hashed tile index and shows the city preview. Without an export first, the build warns and the Worker has pages only.
 
 `npm run deploy` is the same `npx wrangler deploy`. If `SITE_DOMAIN` is set, it also binds that custom domain.
 
 ## Publishing to R2
 
-Optional, for a bucket of tiles separate from the Worker. Create `simkortrijk-tiles` (not the Isometric World bucket) and set `TILES_ORIGIN`, `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN` (or `npx wrangler login`). `npm run publish -- kortrijk` uploads the cache and asks first (`--yes` skips the question, `--keep` leaves the cache). A production build with `TILES_ORIGIN` set loads tiles from that origin instead of the bundle.
+Optional, for a bucket of tiles separate from the Worker. The bucket is `simkortrijk` (not the Isometric World bucket). Set `CLOUDFLARE_ACCOUNT_ID`, and `CLOUDFLARE_API_TOKEN` (or `npx wrangler login`). `npm run publish -- kortrijk` uploads the cache and asks first (`--yes` skips the question, `--keep` leaves the cache). A production build with `TILES_ORIGIN` set loads tiles from that origin instead of the bundle.
 
 ## Data
 
