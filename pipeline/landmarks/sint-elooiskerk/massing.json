@@ -1,0 +1,14 @@
+{
+  "_doc": "Render massing for the Sint-Elooiskerk, read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (centre of GRB footprint 7376474), u along 'axis_deg' (west tower -> east choir), v to the north. From DHMV II: nave ridge 23 m along v ~ -5 (aisles ~10 m), a transept or chapels around u 15-21 to ~18 m, the west tower at u -18..-12, v 1..7 with its slate spire (LiDAR 50 m on a 1 m grid, 56 m per notes.md). Neo-Gothic red brick with a slate needle on an octagonal base, a round stair turret beside the tower (photos of the Overleiestraat, look-up only).",
+  "anchor": [50.8334284, 3.2596045],
+  "axis_deg": 35.7,
+  "replace_oidn": [7376474],
+  "parts": [
+    { "id": "aisles and chapels (GRB footprint)", "footprint": "grb", "h": 10, "shape": "flat", "style": 6, "wall": [0.82, 0.52, 0.43], "roof": [0.50, 0.54, 0.63] },
+    { "id": "nave and choir", "rect": [-12, 37, -12.5, 2.5], "h": 23, "eave": 12, "shape": "gable-u", "style": 6, "wall": [0.82, 0.52, 0.43], "roof": [0.46, 0.50, 0.60] },
+    { "id": "transept", "rect": [15, 21, -17, 7], "h": 19, "eave": 11, "shape": "gable-v", "style": 6, "wall": [0.82, 0.52, 0.43], "roof": [0.46, 0.50, 0.60] },
+    { "id": "west tower (brick, clock stage)", "rect": [-18.5, -12, 0.5, 7], "h": 31, "shape": "flat", "style": 6, "wall": [0.82, 0.52, 0.43], "roof": [0.46, 0.50, 0.60] },
+    { "id": "slate needle on an octagonal base", "oct": [-15.2, 3.8, 3.0], "h": 56, "eave": 34, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] },
+    { "id": "round stair turret", "oct": [-12.3, 6.6, 1.2], "h": 27, "eave": 22, "shape": "pyramid", "style": 4, "wall": [0.82, 0.52, 0.43], "roof": [0.46, 0.50, 0.60] }
+  ]
+}
