@@ -15,6 +15,8 @@ Belfort on the Grote Markt: a slender free-standing square red-brick tower with 
 
 ## Render fixes needed
 
+- **Done (2026-11-11): `massing.json`.** Brick shaft to 21 m on the GRB footprint, octagonal belfry lantern and slate needle to 36 m, four corner turrets with needles to 29 m (inside the shaft corners). White quoins and the stone ground storey are left to the paint.
+
 - Rendered as a 39 m² brick box to 21 m, flat roof, colour brown tile from the orthophoto (that is the spire seen from above). Too short and no spire.
 - Edit: keep the shaft to ~21 m in red brick, add the octagonal slate spire (~15 m, to ~36 m), four corner turrets with needle spires, and keep the square around it empty.
 - Force roof to slate in building_colours.py (OIDN 1742536).

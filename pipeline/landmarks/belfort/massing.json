@@ -1,0 +1,140 @@
+{
+  "_doc": "Render massing for the Belfort (Halletoren), read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (centre of GRB footprint 1742536, 6.6 x 6.5 m), u along 'axis_deg' (the footprint's edge, degrees CCW from grid east). Heights from DHMV II: brick shaft top ~21 m, corner turrets 24-26 m, LiDAR peak 32 m on a 1 m grid (the needle is thinner than a cell, so the real tip is higher; notes.md: ~36 m with the weathervane). Shape checked by eye against photos of the square (look-up only, AGENTS.md rule 1): square red-brick shaft with pale stone quoins, an octagonal belfry lantern under a constricted slate needle, four corner turrets with their own slate needles. Turrets sit inside the shaft corners (a part cannot start in mid-air), so only their tops show above the parapet.",
+  "anchor": [
+    50.8275683,
+    3.2655926
+  ],
+  "axis_deg": 71.3,
+  "replace_oidn": [
+    1742536
+  ],
+  "parts": [
+    {
+      "id": "brick shaft (GRB footprint)",
+      "footprint": "grb",
+      "h": 21,
+      "shape": "flat",
+      "style": 6,
+      "wall": [
+        0.8,
+        0.5,
+        0.41
+      ],
+      "roof": [
+        0.62,
+        0.4,
+        0.34
+      ]
+    },
+    {
+      "id": "belfry lantern and slate needle",
+      "oct": [
+        0,
+        0,
+        2.0
+      ],
+      "h": 36,
+      "eave": 27,
+      "shape": "pyramid",
+      "style": 4,
+      "wall": [
+        0.48,
+        0.52,
+        0.61
+      ],
+      "roof": [
+        0.46,
+        0.5,
+        0.6
+      ]
+    },
+    {
+      "id": "turret SW",
+      "oct": [
+        -2.3,
+        -2.3,
+        0.9
+      ],
+      "h": 29,
+      "eave": 24,
+      "shape": "pyramid",
+      "style": 4,
+      "wall": [
+        0.8,
+        0.5,
+        0.41
+      ],
+      "roof": [
+        0.46,
+        0.5,
+        0.6
+      ]
+    },
+    {
+      "id": "turret SE",
+      "oct": [
+        2.3,
+        -2.3,
+        0.9
+      ],
+      "h": 29,
+      "eave": 24,
+      "shape": "pyramid",
+      "style": 4,
+      "wall": [
+        0.8,
+        0.5,
+        0.41
+      ],
+      "roof": [
+        0.46,
+        0.5,
+        0.6
+      ]
+    },
+    {
+      "id": "turret NW",
+      "oct": [
+        -2.3,
+        2.3,
+        0.9
+      ],
+      "h": 29,
+      "eave": 24,
+      "shape": "pyramid",
+      "style": 4,
+      "wall": [
+        0.8,
+        0.5,
+        0.41
+      ],
+      "roof": [
+        0.46,
+        0.5,
+        0.6
+      ]
+    },
+    {
+      "id": "turret NE",
+      "oct": [
+        2.3,
+        2.3,
+        0.9
+      ],
+      "h": 29,
+      "eave": 24,
+      "shape": "pyramid",
+      "style": 4,
+      "wall": [
+        0.8,
+        0.5,
+        0.41
+      ],
+      "roof": [
+        0.46,
+        0.5,
+        0.6
+      ]
+    }
+  ]
+}

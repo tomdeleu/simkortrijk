@@ -6,7 +6,7 @@ The code is adapted from [Isometric World](https://github.com/krasun/isometricwo
 
 ## Hard rules
 
-1. Open data only. Never use Google, Apple, Bing or other proprietary imagery or geometry, not even as a style reference.
+1. Open data only in anything that ends up in the map or the repo. Proprietary imagery (Google Street View / Maps, Apple, Bing) may be **looked at** to read off the shape, proportions and colours of a building (Tom's decision, 2026-11-11), the way you would look at the real square. It is never stored in the repo, never sent to a paint model, never traced, composited or used as a style image, and never a source of geometry or heights (those come from GRB, 3D GRB, DHMV and OSM).
 2. Credit every source. The footer and `places.ts` `credits` must keep `Bron: Grootschalig Referentie Bestand Vlaanderen, Digitaal Vlaanderen` and `© OpenStreetMap contributors`.
 3. Do not change `origin` or `headingDeg` for a region that already has tiles.
 4. Do not delete `data/derived/` (renders and any paintings) or `data/web-state/`. `data/web/` is only the unpublished cache.
@@ -17,7 +17,7 @@ The code is adapted from [Isometric World](https://github.com/krasun/isometricwo
 
 - **Paint one piece at a time, with Tom in the loop.** Before each piece: show `docs/paint-status.png`, propose tiles, landmarks, render fixes, cost and useful references, and wait for Tom's go and any reference material he adds. After each piece: update the piece table and summary in `docs/PAINT_STATUS.md` and regenerate `docs/paint-status.png`. Full rule in `docs/PAINT_STATUS.md` ("Working rule").
 
-Single source of truth: [docs/PAINT_STATUS.md](docs/PAINT_STATUS.md). Update it after every paint run and every publish. As of 2026-11-11: 6 of 29 tiles painted (20.7%), and windows `-2_-3` / `-1_-3` are excluded.
+Single source of truth: [docs/PAINT_STATUS.md](docs/PAINT_STATUS.md). Update it after every paint run and every publish. As of 2026-11-11: 8 of 29 tiles painted (27.6%, all live), and windows `-2_-3` / `-1_-3` are excluded.
 
 The live map (published 2026-11-11) is 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours and the Sint-Maartenskerk massing. Six tiles are painted in **Style A + real colours** with OpenAI `gpt-image-2.6-flare`: `tx` -2..0 × `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render. The rest is unpainted render. Paint files are in `data/derived` (not in git) and on R2. Restore points (live, previous coral GPT, pre-colour snapshot, Gemini) are listed in `CLAUDE.md` under "Where the binnenstad paint stands".
 

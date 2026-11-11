@@ -1,0 +1,93 @@
+{
+ "_doc": "Map position of each landmark (OSM building centre, else the notes), for the paint status map (pipeline/src/paintstatus.ts).",
+ "artillerietoren": {
+  "prio": "P2",
+  "lat": 50.8288933,
+  "lon": 3.267984
+ },
+ "baggaertshof": {
+  "prio": "P3",
+  "lat": 50.8272711,
+  "lon": 3.2718167
+ },
+ "begijnhof": {
+  "prio": "P1",
+  "lat": 50.8284278,
+  "lon": 3.2675521
+ },
+ "belfort": {
+  "prio": "P1",
+  "lat": 50.8275651,
+  "lon": 3.2656095
+ },
+ "broeltorens": {
+  "prio": "P1",
+  "lat": 50.8304849,
+  "lon": 3.2670372
+ },
+ "buda": {
+  "prio": "P2",
+  "lat": 50.8311165,
+  "lon": 3.2656529
+ },
+ "collegebrug": {
+  "prio": "P2",
+  "lat": 50.8333,
+  "lon": 3.2677
+ },
+ "groeningeabdij": {
+  "prio": "P3",
+  "lat": 50.8295292,
+  "lon": 3.2698779
+ },
+ "groeningemonument": {
+  "prio": "P3",
+  "lat": 50.8287083,
+  "lon": 3.2758141
+ },
+ "k-in-kortrijk": {
+  "prio": "P2",
+  "lat": 50.8266458,
+  "lon": 3.2703011
+ },
+ "leiebruggen": {
+  "prio": "P2",
+  "lat": 50.8296328,
+  "lon": 3.2643128
+ },
+ "onze-lieve-vrouwekerk": {
+  "prio": "P1",
+  "lat": 50.8290822,
+  "lon": 3.2674481
+ },
+ "schouwburg": {
+  "prio": "P2",
+  "lat": 50.826249,
+  "lon": 3.2656322
+ },
+ "sint-elooiskerk": {
+  "prio": "P2",
+  "lat": 50.8334641,
+  "lon": 3.2597362
+ },
+ "sint-maartenskerk": {
+  "prio": "P1",
+  "lat": 50.8275835,
+  "lon": 3.2683178
+ },
+ "sint-michielskerk": {
+  "prio": "P2",
+  "lat": 50.8282803,
+  "lon": 3.2629972
+ },
+ "stadhuis": {
+  "prio": "P1",
+  "lat": 50.8281775,
+  "lon": 3.2644149
+ },
+ "station": {
+  "prio": "P2",
+  "lat": 50.8245192,
+  "lon": 3.2642942
+ }
+}
