@@ -30,7 +30,7 @@ Flemish open data is published for reuse with attribution (Modellicentie voor gr
 
 Optional. The default painter is Google's Gemini image model `gemini-nano-banana-2.1` (`GEMINI_API_KEY`; `GEMINI_IMAGE_MODEL` overrides the id). Codex (`PAINT_PROVIDER=codex`, ChatGPT login, no API key) and OpenAI (`OPENAI_API_KEY`) remain available. Label painted clips "Painted with AI". The binnenstad viewer ships the unpainted render until that step has been run.
 
-`pipeline/style/reference.png` and `pipeline/style/trees.png` are original placeholders (a flat isometric sketch and a crown sheet). They are not the Tel Aviv style images. Replace them with a painted Flemish reference before a large paint run.
+`pipeline/style/reference.png` is a Kortrijk Grote Markt tile painted in style C (pastel, game-like). `pipeline/style/trees.png` is a mint and sage crown sheet drawn for the same palette. Neither image is from Isometric World's Tel Aviv set.
 
 ## Software
 

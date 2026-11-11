@@ -57,6 +57,50 @@ export async function register(reference: string, painted: string, size = 1024):
   return { scale: best.scale, dx: best.dx * k, dy: best.dy * k, score: best.score, identity, texture };
 }
 
+const ROOF_S = 256;
+const ROOF_BLUR = 1.4;
+
+function sobelGrey(g: Buffer): Float32Array {
+  const e = new Float32Array(ROOF_S * ROOF_S);
+  for (let y = 1; y < ROOF_S - 1; y++) for (let x = 1; x < ROOF_S - 1; x++) {
+    const i = y * ROOF_S + x;
+    const gx = g[i + 1 - ROOF_S] + 2 * g[i + 1] + g[i + 1 + ROOF_S] - g[i - 1 - ROOF_S] - 2 * g[i - 1] - g[i - 1 + ROOF_S];
+    const gy = g[i + ROOF_S - 1] + 2 * g[i + ROOF_S] + g[i + ROOF_S + 1] - g[i - ROOF_S - 1] - 2 * g[i - ROOF_S] - g[i - ROOF_S + 1];
+    e[i] = Math.hypot(gx, gy);
+  }
+  return e;
+}
+
+/**
+ * Share of the render's flat, darker-than-ground surfaces (roof planes and blank wall faces)
+ * where the paint grew a strong new edge.
+ * Fine roof-tile texture stays near 0. A hip, ridge, or gable added to a flat LOD1 roof does not.
+ */
+export async function roofNovelty(reference: string | Buffer, painted: string | Buffer): Promise<number> {
+  const fit = { fit: "fill" as const };
+  const [raw, rg, pg] = await Promise.all([
+    sharp(reference).resize(ROOF_S, ROOF_S, fit).removeAlpha().raw().toBuffer(),
+    sharp(reference).resize(ROOF_S, ROOF_S, fit).greyscale().blur(ROOF_BLUR).raw().toBuffer(),
+    sharp(painted).resize(ROOF_S, ROOF_S, fit).greyscale().blur(ROOF_BLUR).raw().toBuffer(),
+  ]);
+  const re = sobelGrey(rg), pe = sobelGrey(pg);
+  const lums: number[] = [];
+  for (let i = 0; i < ROOF_S * ROOF_S; i++) if (re[i] < 22)
+    lums.push(0.3 * raw[i * 3] + 0.5 * raw[i * 3 + 1] + 0.2 * raw[i * 3 + 2]);
+  if (lums.length < 500) return 0;
+  lums.sort((a, b) => a - b);
+  const med = lums[lums.length >> 1]!;
+  let n = 0, hot = 0;
+  for (let i = 0; i < ROOF_S * ROOF_S; i++) {
+    if (re[i] >= 22) continue;
+    const lum = 0.3 * raw[i * 3] + 0.5 * raw[i * 3 + 1] + 0.2 * raw[i * 3 + 2];
+    if (lum > med - 8) continue;
+    n++;
+    if (pe[i] > 36) hot++;
+  }
+  return n ? hot / n : 0;
+}
+
 /** Warp the painted image by the registration so it overlays the reference. */
 export async function applyRegistration(painted: string, out: string, r: Registration, size = 1024) {
   if (r.scale === 1 && r.dx === 0 && r.dy === 0) return writeAtomic(sharp(painted).resize(size, size).png(), out);

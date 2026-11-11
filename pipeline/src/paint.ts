@@ -25,49 +25,50 @@ import { GROUND_H, openArea } from "./areas.ts";
 import { CAMERA, llhToPixel } from "./camera.ts";
 import { DERIVED, PIPELINE, readJson, writeAtomic } from "./paths.ts";
 import { SEA_H, readHeights } from "./heights.ts";
-import { applyRegistration, register } from "./register.ts";
+import { applyRegistration, register, roofNovelty } from "./register.ts";
 import {
   PRICE_1K_USD, choosePaintMode, estimateUsd, geminiEdit, runGeminiBatch, type GeminiImage,
 } from "./gemini.ts";
-import { MIN_MATCH, MIN_TEXTURE, paintVerdict, shouldWarp } from "./paintqa.ts";
+import { MAX_ROOF_NOVELTY, MIN_MATCH, MIN_TEXTURE, paintVerdict, shouldWarp } from "./paintqa.ts";
 
 const WIN = 1024, OVERLAP = 128, STRIDE = WIN - OVERLAP, T = CAMERA.tile;
 /** Blend band in the middle of each overlap; outside it a window's own pixels win outright. */
 const FEATHER = 64;
 const STYLE = join(PIPELINE, "style", "reference.png");
-const TREES = join(PIPELINE, "style", "trees.png"); // species sheet (painted once with Codex)
+const TREES = join(PIPELINE, "style", "trees.png"); // pastel mint and sage crowns, style C
 const SEA = join(PIPELINE, "style", "sea.png");
-const PROMPT = `Use your image generation tool. Four images are attached:
-1. input.png: an orthographic aerial render (camera tilted 45° down, no perspective) of a simple 3D model \
-of {title}, Belgium, built from Flemish open data. ~256 m across. The layout is exact; the colours are flat \
-placeholders (grey = asphalt with lane markings, pale = pavement/plaza, green = grass/park, \
-blue = the Leie or another waterway, brown dashes = rail, terracotta = bike path) and the window patterns are schematic hints. \
-Tree crowns are colour-coded by species (see image 4): yellow-green = linden, dark green = plane, \
-deep green = beech, bright green = horse chestnut, blue-green and narrow = poplar, mid green = hornbeam, darker rounded = oak.
-2. height.png: the height map from the SAME camera, pixel-aligned with image 1. Black = ground \
-(streets, squares, water), grey→white = buildings and trees, brighter = taller. Use it to find exact \
-building footprints, edges and heights; open black areas are streets/plazas, not trees. Church spires and the belfry stay the tallest objects.
-3. style.png: the STYLE REFERENCE (a Flemish street, not a photo).
-4. trees.png: crown shapes in the same style. Left to right, top row: linden, plane, beech; bottom row: horse chestnut, poplar, hornbeam, oak.
+/** Style C, pastel game-like, plus the shared geometry lock. Used by every painter. */
+const GEOMETRY_LOCK = `Follow the source massing render as a strict geometric template. Preserve every \
+building position, footprint, height, roof outline, street, square, water, and \
+tree. Do not add, remove, move, merge, or invent buildings, towers, bridges, \
+rivers, vehicles, people, or landmarks. Do not copy objects from any style \
+reference (no glass skyscrapers, palm trees, jacarandas, solar farms, or extra \
+churches). You may add painted windows, shutters, facade color variation, \
+roof-tile texture, cobblestones, and richer deciduous tree canopies, but \
+silhouettes and positions must stay identical. Keep the same isometric camera, \
+framing, and crop. Empty map-edge background stays empty. No text, labels, \
+borders, or watermarks.
+Flat roof planes in the massing stay flat. Paint blush or coral tile colour on that existing plane only. \
+Do not add hips, ridges, gables, or pitched roofs that change the silhouette.`;
 
-Redraw image 1 as a detailed isometric illustrated city in EXACTLY the style of image 3: \
-clean crisp 3D blocks with straight vertical walls, brick townhouses with regular window grids, \
-stone churches and the belfry, stepped gables where the footprint already suggests them, dark tile roofs, \
-saturated but natural colours, realistic varied trees drawn as the species of image 4 seen from above, \
-smooth grey asphalt with lane markings, pale stone pavements, the river in its real banks, soft even daylight, \
-light ambient occlusion, no long shadows, no haze, no photographic noise.
+const STYLE_C = `Bright, stylised, pastel isometric city-map illustration with a cozy \
+city-builder / storybook-game finish. Blush and coral roofs, peach and cream \
+walls, mint and sage tree canopies, pale lavender-grey streets, soft peachy \
+shadows, simplified charming window dots, clean soft shapes, high-key pastel \
+palette, no grit. Still a clear illustrated map, not photorealistic.`;
 
-Geometry comes ONLY from images 1 and 2 — this is a tracing job:
-- Same orthographic camera, framing and scale: the output overlays image 1 pixel-for-pixel.
-- Every building keeps its exact footprint, position, height and roof outline. Draw believable Kortrijk \
-materials: red-brown brick, whitewashed beguinage walls, grey stone churches, dark ceramic roofs. \
-Tall towers stay tall. Do not add, remove, merge or move buildings or trees; do not invent trees over open streets.
-- Streets, squares, parks and the river stay exactly where they are; give them real texture \
-(pale grey stone paving, crosswalks at junctions, grass, water). Parked cars along kerbs only, \
-no cars in the driving lanes.
-- Layering is exactly as in image 1: where a bridge crosses the river or another road, the \
-bridge deck is continuous and on top, and whatever passes underneath is hidden beneath it.
-- Image 3 is only for style. Do not copy its buildings, layout or architecture.
+const PROMPT = `Four images are attached, in order:
+1. input.png: an orthographic massing render (camera tilted 45° down, no perspective) of {title}, Belgium, \
+built from Flemish open data. ~256 m across. Layout is exact. Colours are flat placeholders.
+2. height.png: the height map from the SAME camera, pixel-aligned with image 1. Black = ground, \
+brighter = taller. Use it for footprints and heights. Church spires and the belfry stay the tallest objects.
+3. style.png: STYLE ONLY. A pastel painted tile. Do not copy its buildings, streets, or towers into this frame.
+4. trees.png: pastel crowns for this style. Round mint and sage canopies, one narrow poplar. \
+Repaint every tree already in image 1 with these canopies. Do not add or move trees. Do not use dark forest green.
+
+${GEOMETRY_LOCK}
+
+Style: ${STYLE_C}
 {continuation}Output: one square 1024x1024 image, no text, no labels, no border, no vignette.
 
 When done, copy the final PNG to {out} and reply only with that path.
@@ -386,10 +387,13 @@ function windowPrompt(edges: string[], out: string, gemini: boolean) {
 async function acceptOrRetry(job: Prepared, attempt: number, started: number): Promise<"accept" | "retry"> {
   const { i, j, work, edges } = job;
   const r = await register(join(work, "input.png"), join(work, "out.png"));
-  writeFileSync(join(work, "qa.json"), JSON.stringify(r));
+  const roofs = await roofNovelty(join(work, "input.png"), join(work, "out.png"));
+  writeFileSync(join(work, "qa.json"), JSON.stringify({ ...r, roofNovelty: roofs }));
   const dark = await hasDarkPatch(join(work, "out.png"), join(work, "input.png"));
-  if (paintVerdict({ score: r.score, identity: r.identity, texture: r.texture, dark, attempt }) === "retry") {
-    console.warn(`  ${i}_${j}: ${dark ? "black band or patch" : `match ${r.score.toFixed(2)} < ${MIN_MATCH}`}, repainting`);
+  if (paintVerdict({ score: r.score, identity: r.identity, texture: r.texture, dark, attempt, roofNovelty: roofs }) === "retry") {
+    const why = roofs > MAX_ROOF_NOVELTY ? `roof silhouette changed (${roofs.toFixed(2)})`
+      : dark ? "black band or patch" : `match ${r.score.toFixed(2)} < ${MIN_MATCH}`;
+    console.warn(`  ${i}_${j}: ${why}, repainting`);
     return "retry";
   }
   const structured = r.texture >= MIN_TEXTURE;

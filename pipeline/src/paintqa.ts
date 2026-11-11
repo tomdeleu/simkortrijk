@@ -9,6 +9,11 @@
 
 export const MIN_MATCH = 0.45;
 export const MIN_TEXTURE = 0.05;
+/**
+ * Max share of flat roof/wall interiors that grew a strong new edge.
+ * Tile texture on the existing plane stays under this. A pitched roof on a flat block does not.
+ */
+export const MAX_ROOF_NOVELTY = 0.04;
 export const MAX_ATTEMPTS = 3;
 
 export interface PaintScore {
@@ -18,10 +23,13 @@ export interface PaintScore {
   dark: boolean;
   /** 1-based attempt. */
   attempt: number;
+  /** From register.roofNovelty. Omitted in tests that only check the edge-map score. */
+  roofNovelty?: number;
 }
 
 export function paintVerdict(input: PaintScore): "accept" | "retry" {
   if (input.dark && input.attempt < MAX_ATTEMPTS) return "retry";
+  if ((input.roofNovelty ?? 0) > MAX_ROOF_NOVELTY && input.attempt < MAX_ATTEMPTS) return "retry";
   const structured = input.texture >= MIN_TEXTURE;
   if (structured && input.score < MIN_MATCH && input.attempt < MAX_ATTEMPTS) return "retry";
   return "accept";

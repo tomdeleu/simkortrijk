@@ -197,8 +197,8 @@ const buildingMaterial = new THREE.ShaderMaterial({
 });
 
 /**
- * Street and park trees of Flanders, as placeholder colours the paint step turns into drawn crowns
- * (style/trees.png). [name, weight, crown colour, crown scale xy, crown scale z, palm?]
+ * Massing colours for tree crowns. The paint step recolours them mint and sage
+ * (style/trees.png, style C). [name, weight, crown colour, crown scale xy, crown scale z, palm?]
  */
 const SPECIES: Array<[string, number, number[], number, number, boolean]> = [
   ["linden", 26, [0.29, 0.55, 0.18], 1.05, 0.8, false],

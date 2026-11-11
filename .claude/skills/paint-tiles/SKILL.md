@@ -17,12 +17,12 @@ Optional. Export already shows the 3D render wherever `paint/` has no tile. Do n
 
 Gemini prices for `gemini-nano-banana-2.1`: **$0.0336 per 1K image**, **$0.0504 per 2K**. This painter requests 1K (windows are 1024 px). The Batch API is half of that ($0.0168 per 1K image).
 
-Style sheets (original placeholders, not from isometricworld):
+Style is variant C, pastel and game-like. Do not replace these with Tel Aviv imagery.
 
-- `pipeline/style/reference.png`
-- `pipeline/style/trees.png`
+- `pipeline/style/reference.png`: a painted Grote Markt and Belfort tile. Blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets. Style only. The prompt forbids copying its buildings into another window.
+- `pipeline/style/trees.png`: round mint and sage canopies and one narrow poplar, on a cream ground.
 
-Replace them with a painted Flemish street and crown sheet before a large spend. The prompt is in `pipeline/src/paint.ts`. The HTTP client is `pipeline/src/gemini.ts`.
+The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style C paragraph. Flat roof planes stay flat. Tile colour on that plane is allowed. Hips, ridges, and gables that change the silhouette are not. The HTTP client is `pipeline/src/gemini.ts`.
 
 ## Commands
 
@@ -55,7 +55,7 @@ Mode, only for `PAINT_PROVIDER=gemini`:
 3. Sends four PNGs, in order: `input.png` (the render), `height.png`, `style.png`, `trees.png`.
 4. Interactive: `POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent` with header `x-goog-api-key`.
 5. Batch: upload a JSONL to the Files API, `POST .../models/{model}:batchGenerateContent`, poll `GET /v1beta/batches/...` until `BATCH_STATE_SUCCEEDED`, download the output JSONL.
-6. `pipeline/src/register.ts` compares edge maps. `pipeline/src/paintqa.ts` retries (up to 3 attempts) when the match is under 0.45 on a textured window or the paint has a black band the render does not. A small shift is warped back.
+6. `pipeline/src/register.ts` compares edge maps, and `roofNovelty` measures strong new edges on surfaces that were flat in the render. `pipeline/src/paintqa.ts` retries (up to 3 attempts) when the match is under 0.45 on a textured window, when roof novelty is over 0.04 (a new ridge on a flat block), or when the paint has a black band the render does not. Roof-tile texture stays under 0.04. A small shift is warped back.
 7. Assembles accepted windows into `paint/<tx>_<ty>.png`.
 
 Open sea reuses `pipeline/style/sea.png` when that file exists. Kortrijk binnenstad has no open sea; the Leie is not at `SEA_H`.

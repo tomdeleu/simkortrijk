@@ -20,7 +20,7 @@ Adapted from [Isometric World](https://github.com/krasun/isometricworld) (Dmytro
 | `pipeline/src/export.ts` | AVIF pyramid into `data/web/regions/kortrijk/` |
 | `pipeline/src/hosting.ts` | R2 bucket `simkortrijk-tiles` |
 | `web/` | Astro viewer. `/` and `/kortrijk` |
-| `pipeline/style/` | Original placeholder style sheets, not Tel Aviv's |
+| `pipeline/style/` | Style C (pastel game-like). `reference.png` is the painted Grote Markt tile. `trees.png` is mint/sage crowns. Not Tel Aviv imagery. |
 | `.claude/skills/` | One skill per step |
 
 `data/` is gitignored. Raw downloads are `data/raw/<area>/`. Renders and paints are `data/derived/<area>/`. The viewer reads `data/web/`.
@@ -97,7 +97,8 @@ Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` 
 - Render uses software WebGL if there is no GPU (`--enable-unsafe-swiftshader`). `-j 2` is a safe default.
 - The dev server 404s `/regions/...` that are not in `data/web` when `TILES_ORIGIN` is empty. Export first.
 - `uitest` treats any HTTP 400+ as a failure, including a tile the index should not have requested.
-- Style sheets in `pipeline/style/` are flat sketches. A real paint run wants a painted reference or the model will follow the sketch.
+- Paint style is variant C: blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets. The prompt in `paint.ts` is the geometry lock plus that paragraph. Flat LOD1 roofs stay flat; tile colour is allowed, new hips and ridges are not.
+- `roofNovelty` in `register.ts` retries a paint when more than 4% of flat roof and wall interiors grow a strong new edge. Fine tile texture stays under that. Do not copy Tel Aviv style images into `pipeline/style/`.
 - Whole-city DHMV is a large raster and tens of thousands of GetFeatureInfo calls. Use the binnenstad area until that is what you want.
 
 ## Skills

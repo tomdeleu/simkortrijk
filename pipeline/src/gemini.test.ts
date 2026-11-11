@@ -10,7 +10,9 @@ import {
   imagesFromBatchJsonl, readBatchState, requireGeminiKey, runGeminiBatch,
   type FetchImpl, type GeminiImage,
 } from "./gemini.ts";
-import { paintVerdict, shouldWarp } from "./paintqa.ts";
+import { MAX_ROOF_NOVELTY, paintVerdict, shouldWarp } from "./paintqa.ts";
+import { roofNovelty } from "./register.ts";
+import sharp from "sharp";
 
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
 
@@ -166,11 +168,37 @@ test("small tests stay interactive and a whole area uses the batch API", () => {
   assert.equal(estimateUsd(10, true), 5 * PRICE_1K_USD);
 });
 
+async function flatBlock(mode: "plain" | "tiles" | "ridge") {
+  const s = 256;
+  const raw = Buffer.alloc(s * s * 3, 230);
+  for (let y = 40; y < 180; y++) for (let x = 40; x < 200; x++) {
+    const i = (y * s + x) * 3;
+    let r = 170, g = 80, b = 60;
+    if (mode === "tiles" && (x % 6 === 0 || y % 8 === 0)) { r -= 14; g -= 8; b -= 6; }
+    if (mode === "ridge" && Math.abs((y - 40) - (x - 40) * 0.4) < 2) { r = 230; g = 210; b = 190; }
+    raw[i] = r; raw[i + 1] = g; raw[i + 2] = b;
+  }
+  return sharp(raw, { raw: { width: s, height: s, channels: 3 } }).png().toBuffer();
+}
+
+test("roof check allows tile texture and rejects a new ridge on a flat block", async () => {
+  const plain = await flatBlock("plain");
+  const tiles = await flatBlock("tiles");
+  const ridge = await flatBlock("ridge");
+  const texture = await roofNovelty(plain, tiles);
+  const pitched = await roofNovelty(plain, ridge);
+  assert.ok(texture <= MAX_ROOF_NOVELTY, `texture novelty ${texture}`);
+  assert.ok(pitched > MAX_ROOF_NOVELTY, `ridge novelty ${pitched}`);
+});
+
 test("a weak or black paint is retried, then kept on the third attempt", () => {
   assert.equal(paintVerdict({ score: 0.2, identity: 0.9, texture: 0.4, dark: false, attempt: 1 }), "retry");
   assert.equal(paintVerdict({ score: 0.9, identity: 0.8, texture: 0.4, dark: true, attempt: 1 }), "retry");
   assert.equal(paintVerdict({ score: 0.2, identity: 0.9, texture: 0.01, dark: false, attempt: 1 }), "accept");
   assert.equal(paintVerdict({ score: 0.2, identity: 0.9, texture: 0.4, dark: true, attempt: 3 }), "accept");
+  assert.equal(paintVerdict({ score: 0.8, identity: 0.7, texture: 0.4, dark: false, attempt: 1, roofNovelty: 0.1 }), "retry");
+  assert.equal(paintVerdict({ score: 0.8, identity: 0.7, texture: 0.4, dark: false, attempt: 1, roofNovelty: 0.01 }), "accept");
+  assert.ok(MAX_ROOF_NOVELTY < 0.1);
   assert.equal(shouldWarp({ score: 0.7, identity: 0.6, texture: 0.4 }), true);
   assert.equal(shouldWarp({ score: 0.7, identity: 0.6, texture: 0.01 }), false);
 });
