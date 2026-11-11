@@ -19,6 +19,13 @@ export const CAMERA = {
   tile: 1024,
 } as const;
 
+/**
+ * Full-resolution render and web pixels per art pixel. Art pixels (MPP above) stay the coordinate
+ * system of everything (tiles, roads, borders, enu2px, deep links); the render and the top zoom level
+ * just carry HD× more detail: 1024 art px tile = 2048 px render-hd/ = z9 web tiles at 0.125 m/px.
+ */
+export const HD = 2;
+
 let region = "kortrijk";
 /** Full camera of the active region (style + origin + heading), as written to manifests/world.json. */
 export function camera() {

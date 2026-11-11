@@ -37,10 +37,10 @@ for (const [name, [lat, lon]] of Object.entries(PLACES)) {
   const [x, y] = llhToPixel(lat, lon, GROUND_H);
   for (const scale of [1, 0.35]) {
     await page.evaluate(([gx, gy, s]) => {
-      const v = (window as any).__viewer, world = (window as any).__world;
-      const w = v.world.getItemAt(0).getContentSize().x;
+      const v = (window as any).__viewer, world = (window as any).__world, S = world.scale ?? 1; // image px = art px × S
+      const w = v.world.getItemAt(0).getContentSize().x / S;
       v.viewport.zoomTo((w / v.container.clientWidth) * s, undefined, true);
-      v.viewport.panTo(v.world.getItemAt(0).imageToViewportCoordinates(gx - world.origin[0], gy - world.origin[1]), true);
+      v.viewport.panTo(v.world.getItemAt(0).imageToViewportCoordinates((gx - world.origin[0]) * S, (gy - world.origin[1]) * S), true);
     }, [x, y, scale]);
     await page.waitForTimeout(400);
     await page.waitForFunction(() => (window as any).__viewer.world.getItemAt(0).getFullyLoaded(), null, { timeout: 30_000 }).catch(() => problems.push(`${name}: tiles not loaded`));

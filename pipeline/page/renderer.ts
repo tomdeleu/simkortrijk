@@ -10,10 +10,12 @@ import { drawGround, type Feature } from "./ground.ts";
 const params = new URLSearchParams(location.search);
 useRegion(params.get("region") ?? "israel-center"); // before any projection below
 const SS = Number(params.get("ss") ?? 2); // supersampling
-const SIZE = CAMERA.tile * SS;
+const HD = Number(params.get("hd") ?? 1); // output px per art px (camera.ts HD)
+const SIZE = CAMERA.tile * HD * SS;
 const HEIGHT_SIZE = 256;
-/** Ground texture resolution (m per texel); the render samples ~0.125 m across, 0.18 m in depth. */
-const GROUND_MPT = 0.15;
+/** Ground texture resolution (m per texel); at HD 1 the render samples ~0.125 m across, 0.18 m in
+ *  depth, and HD× finer above that. */
+const GROUND_MPT = 0.15 / HD;
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true, alpha: false });
 renderer.setPixelRatio(1);

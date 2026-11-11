@@ -104,7 +104,7 @@ Only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any ot
 
 **`docs/PAINT_STATUS.md` is the single source of truth**: what is painted and what is not, the tile and window grid, cost, excluded windows, landmark status, and restore points. Update it (and `docs/paint-status.png`) after every paint run and every publish. In short, as of 2026-11-11: 6 of 29 binnenstad tiles are painted (20.7%), 23 are coloured render, and the municipality is not started.
 
-Live since 2026-11-11, published to R2: 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours (`--soften 0.5`) and the Sint-Maartenskerk `massing.json`. Six are painted in **Style A + real colours** with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high, `PAINT_ATTEMPTS=1`): `tx` -2..0, `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render (`assemble_block.py --skip=-2_-3,-1_-3`). Cost was 11 calls, about $1. Windows and paint tiles live in `data/derived` (gitignored), and the published copies are on R2.
+Live since 2026-11-11, published to R2 in HD (native zoom 9, 0.125 m/px from `render-hd/`, AVIF q65; viewer reads `scale` from world.json): 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours (`--soften 0.5`) and the Sint-Maartenskerk `massing.json`. Six are painted in **Style A + real colours** with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high, `PAINT_ATTEMPTS=1`): `tx` -2..0, `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render (`assemble_block.py --skip=-2_-3,-1_-3`). Cost was 11 calls, about $1. Windows and paint tiles live in `data/derived` (gitignored), and the published copies are on R2.
 
 Restore points are on the build box (`/workspace/paintrun/`, not in git). Each holds `paint/`, `windows/` and `paint.json`; copy those into `data/derived/kortrijk-binnenstad/`, export, and publish only if Tom asks. `PUBLISH.md` in each folder has the exact commands.
 
@@ -162,6 +162,9 @@ None for fetch, render, export or `npm run dev`.
 Do not run `npm run paint` until `GEMINI_API_KEY` is set on purpose. `npm test` mocks the Gemini calls and spends nothing. More than 12 windows uses the Batch API (half of $0.0336 per 1K image); `--interactive` forces one `generateContent` call per window. Codex (`PAINT_PROVIDER=codex`) has no API key: `codex` must be on `PATH` and logged into ChatGPT.
 
 ## Gotchas
+
+- HD: `HD = 2` in `camera.ts`. `npm run render` writes `render/` (1024, for paint and tools) and `render-hd/` (2048) from one render; export builds z9 from the HD file and upscales a 1024 paint. Art px stay the coordinate system everywhere; only the pyramid and OpenSeadragon's image px are ×HD. Deploy a viewer change before publishing a `world.json` it does not understand.
+- Cloudflare auth on Tom's Mac: the `CLOUDFLARE_API_TOKEN` in `.env` gets 403 on Workers and R2 for account `fa71ab6722bdece3cb45e84ff630e3c0`. Use the wrangler OAuth login instead: `npx wrangler deploy --env-file <empty file>`, and for publish `CLOUDFLARE_API_TOKEN=$(npx wrangler auth token) CLOUDFLARE_ACCOUNT_ID=fa71ab6722bdece3cb45e84ff630e3c0` (run `auth token` outside the repo so `.env` is not loaded). Build with `TILES_ORIGIN=https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev` so the site loads tiles from R2 like production.
 
 - WFS 2.0 bbox for EPSG:4326 on this server is west,south,east,north. Geometries are lon, lat.
 - DHMV GeoTIFFs are north-up (origin at the north edge, negative y scale). `flanders.ts` normalises row 0 = north.

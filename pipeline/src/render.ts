@@ -6,8 +6,10 @@
  *   npm run render -- tlv-core --only 0,5 # a single tile
  *   npm run render -- tlv-core -j 4       # parallel browser pages
  *
- * Output: data/derived/<area>/render/<tx>_<ty>.png  (1024² colour)
- *         data/derived/<area>/height/<tx>_<ty>.png  (256², ellipsoid height cm+10000 in R<<8|G)
+ * Output: data/derived/<area>/render/<tx>_<ty>.png     (1024² colour: paint, QA, tools)
+ *         data/derived/<area>/render-hd/<tx>_<ty>.png  (2048² colour, HD in camera.ts: the web's z9)
+ *         data/derived/<area>/height/<tx>_<ty>.png     (256², ellipsoid height cm+10000 in R<<8|G)
+ * Both colour files come from one render at 1024·HD·ss px (--hd 1: no render-hd/).
  *         data/derived/<area>/manifest.json
  */
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -17,7 +19,7 @@ import * as esbuild from "esbuild";
 import { chromium, type Page } from "playwright-core";
 import sharp from "sharp";
 import { areaTiles, openArea } from "./areas.ts";
-import { CAMERA, camera, llhToPixel } from "./camera.ts";
+import { CAMERA, HD, camera, llhToPixel } from "./camera.ts";
 import { CHROME, CHROME_ARGS, DERIVED, PIPELINE, writeAtomic } from "./paths.ts";
 
 const { values: args, positionals } = parseArgs({
@@ -27,6 +29,7 @@ const { values: args, positionals } = parseArgs({
     only: { type: "string" },
     force: { type: "boolean", default: false },
     ss: { type: "string", default: "2" },
+    hd: { type: "string", default: String(HD) },
     markers: { type: "string", default: "" },
   },
 });
@@ -41,6 +44,8 @@ export const ATTRIBUTIONS = [
 ];
 
 const T = CAMERA.tile;
+const H = Number(args.hd);
+const hdFile = (outDir: string, tx: number, ty: number) => join(outDir, "render-hd", `${tx}_${ty}.png`);
 
 
 
@@ -69,7 +74,7 @@ async function openPage(browser: Awaited<ReturnType<typeof chromium.launch>>, di
     return route.fulfill({ body: readFileSync(file), contentType: type });
   });
   page.on("pageerror", (e) => console.error("  [page]", e.message));
-  await page.goto(`http://iso.local/?region=${area.region}&ss=${args.ss}&markers=${encodeURIComponent(args.markers!)}`);
+  await page.goto(`http://iso.local/?region=${area.region}&ss=${args.ss}&hd=${H}&markers=${encodeURIComponent(args.markers!)}`);
   await page.waitForFunction(() => window.ready === true, null, { timeout: 30_000 });
   return page;
 }
@@ -81,6 +86,7 @@ async function renderOne(page: Page, tx: number, ty: number, outDir: string) {
   const r = await page.evaluate(([x, y, o]) => window.renderTile(x, y, o), [tx, ty, objects] as const);
   const color = Buffer.from(r.color.split(",")[1], "base64");
   await writeAtomic(sharp(color).resize(T, T, { kernel: "lanczos3" }).png({ compressionLevel: 6 }), join(outDir, "render", `${tx}_${ty}.png`));
+  if (H > 1) await writeAtomic(sharp(color).resize(T * H, T * H, { kernel: "lanczos3" }).png({ compressionLevel: 6 }), hdFile(outDir, tx, ty));
   // GL rows are bottom-up; flip so row 0 is the top of the tile.
   await writeAtomic(sharp(Buffer.from(r.height, "base64"), { raw: { width: 256, height: 256, channels: 4 } }).flip().png(), join(outDir, "height", `${tx}_${ty}.png`));
   console.log(`  ${tx}_${ty}: ${((Date.now() - t0) / 1000).toFixed(1)}s`);
@@ -88,11 +94,11 @@ async function renderOne(page: Page, tx: number, ty: number, outDir: string) {
 
 async function main() {
   const outDir = join(DERIVED, areaName);
-  for (const d of ["render", "height"]) mkdirSync(join(outDir, d), { recursive: true });
+  for (const d of ["render", "height", ...(H > 1 ? ["render-hd"] : [])]) mkdirSync(join(outDir, d), { recursive: true });
   let tiles = areaTiles(area.bbox);
   const all = tiles;
   if (args.only) tiles = [args.only.split(",").map(Number) as [number, number]];
-  const todo = tiles.filter(([x, y]) => args.force || !existsSync(join(outDir, "render", `${x}_${y}.png`)));
+  const todo = tiles.filter(([x, y]) => args.force || !existsSync(join(outDir, "render", `${x}_${y}.png`)) || (H > 1 && !existsSync(hdFile(outDir, x, y))));
   console.log(`${areaName}: ${all.length} tiles, ${todo.length} to render`);
 
   const manifestPath = join(outDir, "manifest.json");

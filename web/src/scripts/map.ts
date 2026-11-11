@@ -15,6 +15,9 @@ interface World {
   bounds: [[number, number], [number, number]]; // [[y0, x0], [y1, x1]] global art px
   origin: [number, number];                     // global px of image (0, 0)
   size: [number, number];
+  /** web px per art px at native_zoom (export.ts HD); absent in older exports: 1. The tile pyramid is
+   *  the only thing in web px: bounds, origin, size, enu2px, borders and roads stay in art px. */
+  scale?: number;
   enu2px: number[][];
   camera: { headingDeg: number; origin: { lat: number; lon: number } };
   airport: Airport | null;
@@ -52,16 +55,17 @@ const legacy = modern ? null : json<Record<string, Index>>("tiles.json");
 const layerIndex = (layer: "map" | "photo") => (legacy ? legacy.then((all) => all[layer] ?? {}) : json<Index>(files[`tiles-${layer}`]!));
 const [borders, mapIndex] = await Promise.all([json<Border[]>(files.borders ?? "borders.json"), layerIndex("map")]);
 const [ox, oy] = world.origin;
-const TS = world.tile_size, NZ = world.native_zoom;
+const TS = world.tile_size, NZ = world.native_zoom, S = world.scale ?? 1;
 
-/** Sparse pyramid in global tile indices, exposed to OpenSeadragon with a non-negative origin. */
+/** Sparse pyramid in global tile indices, exposed to OpenSeadragon with a non-negative origin.
+ *  OpenSeadragon's image px are web px at native_zoom: art px × S. */
 function tileSource(layer: string, have: Index) {
   const global = (level: number, x: number, y: number) => {
-    const span = TS * 2 ** (NZ - level);
+    const span = (TS * 2 ** (NZ - level)) / S; // art px per tile at this level
     return [x + Math.round(ox / span), y + Math.round(oy / span)];
   };
   return {
-    width: world.size[0], height: world.size[1], tileSize: TS, tileOverlap: 0,
+    width: world.size[0] * S, height: world.size[1] * S, tileSize: TS, tileOverlap: 0,
     minLevel: world.min_zoom, maxLevel: NZ,
     getTileUrl: (level: number, x: number, y: number) => {
       const [tx, ty] = global(level, x, y);
@@ -89,7 +93,7 @@ const viewer = OpenSeadragon({
   minPixelRatio: 0.8,     // fetch the finer level only once it is really needed (~40% fewer bytes)
   maxImageCacheCount: 600,
   minZoomImageRatio: 0.01, // real limit is set on open: the whole metro
-  maxZoomPixelRatio: 2.5,
+  maxZoomPixelRatio: 2.5 / S, // deepest zoom: 2.5 CSS px per art px, whatever the tile resolution
   visibilityRatio: 0.4,
   zoomPerScroll: 1.35,
   smoothTileEdgesMinZoom: Infinity,
@@ -98,7 +102,7 @@ const viewer = OpenSeadragon({
 });
 Object.assign(window as object, { __viewer: viewer, OpenSeadragon, __world: world });
 
-// ---- coordinate helpers (global art px <-> canvas px) -----------------------------------------
+// ---- coordinate helpers (global art px <-> canvas px; OpenSeadragon image px = art px × S) ------
 const canvas = document.createElement("canvas");
 canvas.id = "overlay";
 document.getElementById("map")!.appendChild(canvas);
@@ -109,14 +113,14 @@ function updateTransform() {
   const vp = viewer.viewport, item = base();
   if (!item) return;
   const a = vp.viewportToViewerElementCoordinates(item.imageToViewportCoordinates(0, 0, true));
-  const b = vp.viewportToViewerElementCoordinates(item.imageToViewportCoordinates(1000, 0, true));
+  const b = vp.viewportToViewerElementCoordinates(item.imageToViewportCoordinates(1000 * S, 0, true));
   const dpr = window.devicePixelRatio || 1;
   k = ((b.x - a.x) / 1000) * dpr;
   tx = a.x * dpr - ox * k;
   ty = a.y * dpr - oy * k;
 }
 const toScreen = (x: number, y: number): [number, number] => [x * k + tx, y * k + ty];
-const globalToViewport = (x: number, y: number) => base().imageToViewportCoordinates(x - ox, y - oy);
+const globalToViewport = (x: number, y: number) => base().imageToViewportCoordinates((x - ox) * S, (y - oy) * S);
 
 // ---- overlay: borders, labels, traffic ------------------------------------------------------
 let showBorders = false, showTraffic = true;
@@ -277,7 +281,7 @@ viewer.addOnceHandler("open", () => {
   /** centre on lat/lon with `widthM` metres across the screen */
   const show = (lat: number, lon: number, widthM: number) => {
     const [x, y] = llhToPixel(lat, lon, GROUND_H), vp = viewer.viewport;
-    vp.zoomTo(base().getContentSize().x / (widthM / CAMERA.mpp), undefined, true);
+    vp.zoomTo(base().getContentSize().x / S / (widthM / CAMERA.mpp), undefined, true);
     vp.panTo(globalToViewport(x, y), true);
   };
   if (at) {
@@ -296,7 +300,7 @@ viewer.addOnceHandler("open", () => {
     if (viewer.viewport.getZoom() <= fitZoom * 1.03) viewer.viewport.panTo(metro.getCenter());
     if (location.hash === "#metro") return;
     const c = base().viewportToImageCoordinates(viewer.viewport.getCenter(true));
-    history.replaceState(null, "", `#@${Math.round(c.x + ox)},${Math.round(c.y + oy)},${viewer.viewport.getZoom(true).toFixed(2)}`);
+    history.replaceState(null, "", `#@${Math.round(c.x / S + ox)},${Math.round(c.y / S + oy)},${viewer.viewport.getZoom(true).toFixed(2)}`);
   });
 });
 

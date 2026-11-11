@@ -13,9 +13,9 @@ await page.evaluate(([gx, gy, s]) => {
   const w = v.world.getItemAt(0).getContentSize().x;
   const origin = v.viewport.viewportToImageCoordinates(new OSD.Point(0, 0));
   void origin;
-  const world = (window as any).__world;
-  v.viewport.zoomTo((w / v.container.clientWidth) * Number(s), undefined, true);
-  v.viewport.panTo(v.viewport.imageToViewportCoordinates(Number(gx) - world.origin[0], Number(gy) - world.origin[1]), true);
+  const world = (window as any).__world, S = world.scale ?? 1; // image px = art px × S
+  v.viewport.zoomTo((w / S / v.container.clientWidth) * Number(s), undefined, true);
+  v.viewport.panTo(v.viewport.imageToViewportCoordinates((Number(gx) - world.origin[0]) * S, (Number(gy) - world.origin[1]) * S), true);
 }, [x, y, scale]);
 await page.waitForTimeout(500);
 await page.waitForFunction(() => { const v = (window as any).__viewer; return v.world.getItemAt(0).getFullyLoaded(); }, null, { timeout: 30_000 }).catch(() => {});
