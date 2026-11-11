@@ -20,7 +20,9 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 | P2 | buda | Budatoren, Budafabriek, Budabrug | glass-clad tower, brick halls, steel bridge |
 | P2 | collegebrug | Collegebrug | zigzag deck, two leaning masts with cables |
 | P2 | leiebruggen | Leie bridges | modern flat decks, Noordbrug mast |
-| P2 | station | Station | buff brick, flat roofs, platform canopies |
+| P2 | station | Station | done (massing.json): buff brick, raised hall, platform canopies, bike parking |
+| P2 | damiaankerk | Damiaankerk (Karmelieten) | done (massing.json): brick nave with gable, rose window front, turret |
+| P3 | karmelietenklooster | Karmelietenklooster | done (massing.json): brick wings with red gable roofs around the garth |
 | P2 | schouwburg | Stadsschouwburg | brick + white stone, stepped gables, slate |
 | P3 | groeningeabdij | Groeningeabdij (Abby) | brick wings with steep tiled roofs |
 | P3 | baggaertshof | Baggaertshof | done (colours.json): whitewash + red pantiles |

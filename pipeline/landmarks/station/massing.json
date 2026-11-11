@@ -1,0 +1,184 @@
+{
+ "_doc": "Render massing for Station Kortrijk (OSM way 114133992, GRB 7711874), read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (centre of the 2024 orthophoto crop refs/top-station), u = grid east, v = grid north; the canopies and the bike parking were traced on that orthophoto (0.2 m/px). Look (Commons refs/, Street View look-up): post-war station of buff brick with a raised central hall and flat light roofs; on the track side a dark canopy along platform 1 and four long light grey island canopies (partly glazed) on slim columns; south of the tracks a long covered bike parking clad in timber slats. Canopies are boxes from the ground (parts cannot float): low, with dark 'walls' that read as the shade under the roof. Island canopies are 8 m wide around their centre lines (the traced strips include the platform edges), so the tracks show between them.",
+ "anchor": [
+  50.82455,
+  3.26425
+ ],
+ "axis_deg": 0,
+ "replace_oidn": [
+  7711874
+ ],
+ "parts": [
+  {
+   "id": "station building (GRB footprint): buff brick, flat light roof",
+   "footprint": "grb",
+   "h": 12,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.86,
+    0.77,
+    0.58
+   ],
+   "roof": [
+    0.78,
+    0.78,
+    0.76
+   ]
+  },
+  {
+   "id": "raised central hall with tall windows",
+   "rect": [
+    3.0,
+    22.0,
+    -3.0,
+    15.0
+   ],
+   "h": 16,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.86,
+    0.77,
+    0.58
+   ],
+   "roof": [
+    0.78,
+    0.78,
+    0.76
+   ]
+  },
+  {
+   "id": "platform 1 canopy (dark, along the building)",
+   "rect": [
+    -52.0,
+    60.0,
+    -8.5,
+    -2.5
+   ],
+   "h": 5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.36,
+    0.37,
+    0.4
+   ],
+   "roof": [
+    0.5,
+    0.38,
+    0.29
+   ]
+  },
+  {
+   "id": "island platform canopy 2",
+   "rect": [
+    -101.0,
+    65.0,
+    -28.2,
+    -20.2
+   ],
+   "h": 5.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.36,
+    0.37,
+    0.4
+   ],
+   "roof": [
+    0.84,
+    0.85,
+    0.86
+   ]
+  },
+  {
+   "id": "island platform canopy 3",
+   "rect": [
+    -100.0,
+    66.0,
+    -44.2,
+    -36.2
+   ],
+   "h": 5.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.36,
+    0.37,
+    0.4
+   ],
+   "roof": [
+    0.84,
+    0.85,
+    0.86
+   ]
+  },
+  {
+   "id": "island platform canopy 4",
+   "rect": [
+    -89.0,
+    57.0,
+    -59.6,
+    -51.6
+   ],
+   "h": 5.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.36,
+    0.37,
+    0.4
+   ],
+   "roof": [
+    0.84,
+    0.85,
+    0.86
+   ]
+  },
+  {
+   "id": "island platform canopy 5",
+   "rect": [
+    -98.0,
+    68.0,
+    -74.6,
+    -66.6
+   ],
+   "h": 5.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.36,
+    0.37,
+    0.4
+   ],
+   "roof": [
+    0.84,
+    0.85,
+    0.86
+   ]
+  },
+  {
+   "id": "covered bike parking on the south side (timber slats)",
+   "rect": [
+    -130.0,
+    -58.0,
+    -94.0,
+    -81.0
+   ],
+   "h": 4.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.62,
+    0.47,
+    0.33
+   ],
+   "roof": [
+    0.45,
+    0.34,
+    0.27
+   ]
+  }
+ ]
+}

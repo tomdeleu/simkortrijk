@@ -1,0 +1,75 @@
+{
+ "_doc": "Render massing for the Damiaankerk (former Sint-Jozefkerk of the Karmelieten, Aalbeeksesteenweg 7; OSM way 568089136, Q104684557), read by pipeline/src/scene.ts. GRB 1739208 rendered as one flat 16.6 m box with a coral flat roof. Metres in Lambert 72 around 'anchor' (centre of the footprint), u along 'axis_deg' 168 (u points west-north-west, so u +25 is the street front), v towards south-south-west. DHMV II: nave ridge 16 m on v ~ -2, eaves ~8-11 m, lower aisles and porches ~5 m. Look (Commons refs/, Street View and orthophoto look-up): dark brown brick, steep red pantile roofs, a big west gable with a round rose window, a short round turret with a conical roof at the south-west corner.",
+ "anchor": [
+  50.8223072,
+  3.2593796
+ ],
+ "axis_deg": 168.0,
+ "replace_oidn": [
+  1739208
+ ],
+ "parts": [
+  {
+   "id": "aisles, porch, sacristy (GRB footprint)",
+   "footprint": "grb",
+   "h": 5.5,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  },
+  {
+   "id": "nave with west gable (rose window)",
+   "rect": [
+    -17,
+    25.4,
+    -12.5,
+    6.5
+   ],
+   "h": 16.5,
+   "eave": 8,
+   "shape": "gable-u",
+   "style": 6,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  },
+  {
+   "id": "round turret with conical roof, south-west corner",
+   "oct": [
+    23,
+    7.5,
+    2.6
+   ],
+   "h": 12.5,
+   "eave": 8,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.56,
+    0.38,
+    0.31
+   ],
+   "roof": [
+    0.8,
+    0.45,
+    0.32
+   ]
+  }
+ ]
+}

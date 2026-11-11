@@ -156,10 +156,15 @@ const fc = readJson(buildingsFile);
 for (const f of fc.features ?? []) {
   const g = f.geometry, p = f.properties ?? {};
   const polys = g?.type === "Polygon" ? [g.coordinates] : g?.type === "MultiPolygon" ? g.coordinates : [];
-  const h = Math.max(2.5, Number(p.height_m) || 8);
+  const h0 = Math.max(2.5, Number(p.height_m) || 8);
+  // Annexes (GBA) measured on the DSM pick up trees and the walls behind them: a 0.6 m wide
+  // "verdieping" strip became a 26 m white wall. Cap DSM heights of canopies and small annexes.
+  const dsmAnnex = p.layer === "Gba" && String(p.height_src ?? "").startsWith("DHMV");
   for (const poly of polys) {
     const ring = ringFromLonLat(poly[0]);
     if (!ring) continue;
+    const small = Math.abs(area2(ring)) / 2 < 40;
+    const h = dsmAnnex && p.LBLTYPE === "afdak" ? Math.min(h0, 5) : dsmAnnex && small ? Math.min(h0, 9) : h0;
     const holes = (poly as number[][][]).slice(1).map((hole: number[][]) => ringFromLonLat(hole, true)).filter((r): r is P2[] => !!r);
     const c: P2 = [ring.reduce((a, q) => a + q[0], 0) / ring.length, ring.reduce((a, q) => a + q[1], 0) / ring.length];
     const id = Number(p.OIDN) || buildings.length;
@@ -240,6 +245,14 @@ console.log(`  GRB buildings: ${buildings.length}`);
     const c = chm(i);
     if (bid[i] && c > bh[i] + 8 && c < 110) mask[i] = 1;
   }
+  // Tree crowns (NDVI + CHM, trees.geojson): a crown overhanging a roof reads as a needle in the CHM.
+  const crowns: Array<[number, number, number, number]> = existsSync(join(raw, "trees.geojson"))
+    ? (readJson(join(raw, "trees.geojson")).features ?? []).map((f: any) => {
+      const [x, y] = toLambert(f.geometry.coordinates[0], f.geometry.coordinates[1]);
+      return [x, y, Number(f.properties?.crown_r) || 3, Number(f.properties?.h) || 0] as [number, number, number, number];
+    })
+    : [];
+  let treeNeedles = 0, notChurch = 0;
   const seen = new Uint8Array(n);
   const spires: Array<{ h: number; lat: number; lon: number }> = [];
   for (let start = 0; start < n; start++) {
@@ -266,6 +279,10 @@ console.log(`  GRB buildings: ${buildings.length}`);
     let owner = 0, best = 0;
     for (const [id, c] of counts) if (c > best) { owner = id; best = c; }
     if (!owner || max < buildings[owner - 1].h + 8) continue;
+    // Only churches and towers (OSM) get a needle: elsewhere the CHM spikes are cranes from the
+    // LiDAR survey or tree crowns (six 'towers' on the Groeninge site, a 37 m one on the Sint-Sebastiaanslaan).
+    const ob = buildings[owner - 1].ring;
+    if (!isChurch([ob.reduce((s, q) => s + q[0], 0) / ob.length, ob.reduce((s, q) => s + q[1], 0) / ob.length])) { notChurch++; continue; }
     // The needle is often one or two DSM cells. Lower the cut until a handful of cells remain,
     // and extrude to the maximum so Sint-Maartenskerk stays near its LiDAR height (~73 m).
     const base = buildings[owner - 1].h;
@@ -286,6 +303,7 @@ console.log(`  GRB buildings: ${buildings.length}`);
     });
     const poly = hull(pts);
     const cx = pts.reduce((s, q) => s + q[0], 0) / pts.length, cy = pts.reduce((s, q) => s + q[1], 0) / pts.length;
+    if (crowns.some(([x, y, r, th]) => Math.hypot(x - cx, y - cy) < r + 2 && Math.abs(th - spireH) < 4)) { treeNeedles++; continue; }
     let ring = poly.length >= 3 ? ringFromLonLat(poly.map(([x, y]) => fromLambert(x, y))) : null;
     if (!ring) {
       const hex: number[][] = [];
@@ -301,6 +319,8 @@ console.log(`  GRB buildings: ${buildings.length}`);
     spires.push({ h: spireH, lat, lon });
   }
   spires.sort((a, b) => b.h - a.h);
+  console.log(`  lidar needles skipped: ${notChurch} not on a church or tower, ${treeNeedles} tree crowns`);
+  if (process.env.SPIRES_ALL) for (const s of spires) console.log(`    spire ${s.h.toFixed(1)}m @${s.lat.toFixed(6)},${s.lon.toFixed(6)}`);
   console.log(`  lidar spires: ${spires.length}` + (spires.length ? `, tallest ${spires.slice(0, 6).map((s) => `${s.h.toFixed(0)}m@${s.lat.toFixed(5)},${s.lon.toFixed(5)}`).join(" ")}` : ""));
 }
 
