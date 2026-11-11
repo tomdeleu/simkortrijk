@@ -9,7 +9,7 @@ What is painted on the live map and what is not. **Update this file after every 
 
 Regenerate `docs/paint-status.png` when the grid changes.
 
-Last updated: **2026-11-11**, after the publish of about 16:23 CET (366 files to R2 bucket `simkortrijk`, region `kortrijk`).
+Last updated: **2026-11-11**, after the HD publish of about 17:32 CET (1 277 files to R2 bucket `simkortrijk`, region `kortrijk`). The 16:23 publish before it was the same map at z8.
 
 ![Paint status: painted block outlined in red, coloured render greyed, excluded edge windows dashed](paint-status.png)
 
@@ -19,6 +19,7 @@ Last updated: **2026-11-11**, after the publish of about 16:23 CET (366 files to
 |---|---|
 | Area on the live map | `kortrijk-binnenstad` only (bbox 50.820387,3.254240 – 50.834760,3.276994, about 800 m) |
 | Render tiles (1024 px, 0.25 m/px, 256 m) | **29**, `tx` -4..3 × `ty` -3..2 (irregular, see grid) |
+| Web resolution | **HD**: native zoom 9 at 0.125 m/px from `render-hd/` (2048 px per tile), AVIF q65. The 6 painted tiles are 1024 px paint upscaled: they are no sharper than before until they are repainted at 2K into `paint-hd/`. |
 | Painted tiles | **6**: `tx` -2..0 × `ty` -2..-1, the Broeltorens / Grote Markt / Sint-Maarten block |
 | Render-only tiles | **23**, showing the coloured 3D render (per-building colours, `--soften 0.5`), not painted |
 | Coverage | **20.7%** of the binnenstad map (6 of 29 equal tiles, all fully inside the map) |
@@ -93,6 +94,8 @@ Each landmark has notes, photos and a priority in `pipeline/landmarks/<slug>/` (
 Tiles are from the landmark's OSM position projected with `pipeline/src/camera.ts`. Station and Schouwburg are approximate.
 
 ## Restore points
+
+**Local `paint/` (since the HD publish, 2026-11-11):** the 6 live painted tiles were rebuilt from the published z8 map tiles (AVIF q50, so one generation of compression), with the baked map-edge fade divided back out of `-2_-2`, `-1_-2` and `0_-2`. The original lossless paint is on the build box (`styleA-colour-preview/`); copy it over `paint/` when you have it. The older local paint (29 tiles, pre-colour) is in `paint.old-local/`, and `backup-prehd-2026-11-11/` holds render, scene and paint as they were before the HD run.
 
 Restore points are on the build box under `/workspace/paintrun/` and are not in git. Each folder has `PUBLISH.md` with the exact commands.
 
