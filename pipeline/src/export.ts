@@ -19,7 +19,9 @@
  * What is published (tile sources + hashes) is tracked in data/web-state/<region>.json; an export not
  * yet published keeps its state next to the cache (data/web/<region>.state.json) so exports stack.
  *
- * Tile (x, y) at zoom z covers global art pixels [x·512·2^(8-z), …); z = 8 is 1:1.
+ * Tile (x, y) at zoom z covers global art pixels [x·512·2^(8-z), …); z = 8 is 1:1. The native zoom is
+ * 8 + log2(HD) (camera.ts): z9 holds HD (2) web px per art px, from render-hd/ (or paint-hd/; a 1024
+ * paint is upscaled). world.json `scale` = HD; everything else in world.json stays in art px.
  */
 import { isOneway, roadLanes, roadWidth } from "./roadspec.ts";
 import { createHash } from "node:crypto";
@@ -27,18 +29,20 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSy
 import { join } from "node:path";
 import sharp from "sharp";
 import { AREAS, GROUND_H, areaPolygon, insideDistance, openArea } from "./areas.ts";
-import { CAMERA, activeRegion, axes, camera, ecefToEnu, enuToPixel, llhToEcef, llhToPixel } from "./camera.ts";
+import { CAMERA, HD, activeRegion, axes, camera, ecefToEnu, enuToPixel, llhToEcef, llhToPixel } from "./camera.ts";
 import { HOSTING } from "./hosting.ts";
 import { DERIVED, RAW, WEB_CACHE, WEB_STATE, readJson } from "./paths.ts";
 import { CITIES, REGIONS } from "./places.ts";
 import { readHeights } from "./heights.ts";
 
-const TS = 512;                  // web tile size
-const SPLIT = CAMERA.tile / TS;  // web tiles per art tile edge
-const NATIVE_Z = 8;
+const TS = 512;                         // web tile size (px)
+const SPAN = TS / HD;                   // art px per native web tile
+const SPLIT = CAMERA.tile / SPAN;       // native web tiles per art tile edge
+const NATIVE_Z = 8 + Math.log2(HD);     // z8 = 1 web px per art px; above it, HD detail
 const MIN_Z = 2;
-/** AVIF q50 ≈ the old WebP q72 in PSNR at ~40% fewer bytes (measured on painted tiles). */
-const FORMAT = "avif", QUALITY = 50;
+/** AVIF q65: on a z9 (HD) render tile 17 KB at 39.4 dB, against q50 37.3 dB (12 KB); z8 tiles were
+ *  q50 (33 dB), visibly soft on thin lines and roof details. */
+const FORMAT = "avif", QUALITY = 65;
 const MARGIN = 16; // neighbour pixels used when building each zoomed-out tile
 /** Soft map edge: tiles fade out toward the areas' true outline instead of ending in tile steps.
  *  Fully transparent within EDGE0 of the outline (half a render tile's diagonal: the staircase
@@ -52,11 +56,11 @@ const edgeDistance = (x: number, y: number) => Math.max(0, ...outlines.map((o) =
 
 /** Native web tile at global art px (x0, y0): fade alpha near the map edge (null = fully inside). */
 function edgeAlpha(x0: number, y0: number): Buffer | null {
-  const corners = [[x0, y0], [x0 + TS, y0], [x0, y0 + TS], [x0 + TS, y0 + TS]];
+  const corners = [[x0, y0], [x0 + SPAN, y0], [x0, y0 + SPAN], [x0 + SPAN, y0 + SPAN]];
   if (Math.min(...corners.map(([x, y]) => edgeDistance(x, y))) >= EDGE1) return null;
   const a = Buffer.alloc(TS * TS), step = 8; // distance on an 8 px lattice, bilinear in between
   const n = TS / step + 1, grid = new Float32Array(n * n);
-  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) grid[j * n + i] = edgeDistance(x0 + i * step, y0 + j * step);
+  for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) grid[j * n + i] = edgeDistance(x0 + (i * step) / HD, y0 + (j * step) / HD);
   for (let y = 0; y < TS; y++) for (let x = 0; x < TS; x++) {
     const gx = x / step, gy = y / step, i = Math.floor(gx), j = Math.floor(gy), fx = gx - i, fy = gy - j;
     const d = (grid[j * n + i] * (1 - fx) + grid[j * n + i + 1] * fx) * (1 - fy) + (grid[(j + 1) * n + i] * (1 - fx) + grid[(j + 1) * n + i + 1] * fx) * fy;
@@ -150,16 +154,16 @@ function bridgeDecks(ways: Array<{ y: number; w: number; l: number; s: number[] 
   }
   decks.sort((a, b) => a.y - b.y);
 }
-/** SVG of the bridge decks crossing a web tile at global px (x0, y0), or null */
+/** SVG of the bridge decks crossing a native web tile at global art px (x0, y0), or null */
 function deckSvg(x0: number, y0: number) {
-  const hit = decks.filter((d) => d.box[0] < x0 + TS + d.w && d.box[2] > x0 - d.w && d.box[1] < y0 + TS + d.w && d.box[3] > y0 - d.w);
+  const hit = decks.filter((d) => d.box[0] < x0 + SPAN + d.w && d.box[2] > x0 - d.w && d.box[1] < y0 + SPAN + d.w && d.box[3] > y0 - d.w);
   if (!hit.length) return null;
   const line = (d: Deck, color: string, width: number, extra = "") =>
-    `<polyline points="${d.pts.map(([x, y]) => `${(x - x0).toFixed(1)},${(y - y0).toFixed(1)}`).join(" ")}" fill="none" stroke="${color}" stroke-width="${width.toFixed(1)}" stroke-linejoin="round" ${extra}/>`;
+    `<polyline points="${d.pts.map(([x, y]) => `${((x - x0) * HD).toFixed(1)},${((y - y0) * HD).toFixed(1)}`).join(" ")}" fill="none" stroke="${color}" stroke-width="${width.toFixed(1)}" stroke-linejoin="round" ${extra}/>`;
   const body = hit.map((d) => {
-    const m = d.m; // px per metre across the deck
-    return line(d, "#55565c", d.w + 1.5 * m, 'stroke-linecap="butt"') + line(d, "#e2ddd2", d.w + 0.9 * m, 'stroke-linecap="butt"')
-      + line(d, "#6e7078", d.w, 'stroke-linecap="butt"') + line(d, "#f4f1ea", 0.15 * m, `stroke-dasharray="${3 * m} ${3 * m}"`);
+    const m = d.m * HD, w = d.w * HD; // web px per metre across the deck, deck width in web px
+    return line(d, "#55565c", w + 1.5 * m, 'stroke-linecap="butt"') + line(d, "#e2ddd2", w + 0.9 * m, 'stroke-linecap="butt"')
+      + line(d, "#6e7078", w, 'stroke-linecap="butt"') + line(d, "#f4f1ea", 0.15 * m, `stroke-dasharray="${3 * m} ${3 * m}"`);
   }).join("");
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${TS}" height="${TS}">${body}</svg>`);
 }
@@ -183,14 +187,16 @@ async function exportLayer(layer: string, sources: Map<Key, string>) {
     writeFileSync(join(root, `${z}`, `${x}`, `${y}.${FORMAT}`), buf);
     hashes[`${z}/${x}_${y}`] = hash(buf);
   };
-  // native zoom: split each 1024 art tile into 512 web tiles (only when the source changed)
+  // native zoom: split each art tile (at HD: 2048 px) into 512 web tiles (only when the source changed)
   let level = new Map<Key, number>(); // key -> source mtime
   let changed = new Set<Key>();
   const jobs: Array<() => Promise<void>> = [];
+  const full = CAMERA.tile * HD;
   for (const [k, file] of sources) {
     const [tx, ty] = parse(k);
-    const painted = layer === "map" && file.includes("/paint/");
-    const m = statSync(file).mtimeMs, stamp = `${file}@${m}@edge${EDGE0}-${EDGE1}d${painted ? `@${DECK_STYLE}` : ""}@${FORMAT}${QUALITY}`;
+    const painted = layer === "map" && /\/paint(-hd)?\//.test(file);
+    const m = statSync(file).mtimeMs, stamp = `${file}@${m}@edge${EDGE0}-${EDGE1}d${painted ? `@${DECK_STYLE}` : ""}@${FORMAT}${QUALITY}@hd${HD}`;
+    const todo: Array<[number, number]> = [];
     for (let j = 0; j < SPLIT; j++)
       for (let i = 0; i < SPLIT; i++) {
         const x = tx * SPLIT + i, y = ty * SPLIT + j, h = st.hashes[`${NATIVE_Z}/${x}_${y}`];
@@ -198,18 +204,26 @@ async function exportLayer(layer: string, sources: Map<Key, string>) {
         nextSources[key(x, y)] = stamp;
         if (h && prevSources[key(x, y)] === stamp) { hashes[`${NATIVE_Z}/${x}_${y}`] = h; continue; }
         changed.add(key(x, y));
-        jobs.push(async () => {
-          let img = sharp(file).extract({ left: i * TS, top: j * TS, width: TS, height: TS });
-          const svg = painted ? deckSvg(x * TS, y * TS) : null;
-          if (svg) img = sharp(await img.png().toBuffer()).composite([{ input: svg }]);
-          const rgb = await img.removeAlpha().raw().toBuffer();
-          const alpha = edgeAlpha(x * TS, y * TS);
-          // fade baked toward the page background: opaque tiles, so no seams where tiles meet
-          if (alpha) for (let p = 0; p < TS * TS; p++) for (let c = 0; c < 3; c++)
-            rgb[p * 3 + c] = Math.round(BG[c] + (rgb[p * 3 + c] - BG[c]) * (alpha[p] / 255));
-          await save(sharp(rgb, { raw: { width: TS, height: TS, channels: 3 } }), NATIVE_Z, x, y);
-        });
+        todo.push([i, j]);
       }
+    if (!todo.length) continue;
+    jobs.push(async () => {
+      // a source below HD (a 1024 paint, a render without render-hd/) is upscaled once per art tile
+      const { width } = await sharp(file).metadata();
+      const src = width === full ? file : await sharp(file).resize(full, full, { kernel: "lanczos3" }).png({ compressionLevel: 0 }).toBuffer();
+      for (const [i, j] of todo) {
+        const x = tx * SPLIT + i, y = ty * SPLIT + j;
+        let img = sharp(src).extract({ left: i * TS, top: j * TS, width: TS, height: TS });
+        const svg = painted ? deckSvg(x * SPAN, y * SPAN) : null;
+        if (svg) img = sharp(await img.png().toBuffer()).composite([{ input: svg }]);
+        const rgb = await img.removeAlpha().raw().toBuffer();
+        const alpha = edgeAlpha(x * SPAN, y * SPAN);
+        // fade baked toward the page background: opaque tiles, so no seams where tiles meet
+        if (alpha) for (let p = 0; p < TS * TS; p++) for (let c = 0; c < 3; c++)
+          rgb[p * 3 + c] = Math.round(BG[c] + (rgb[p * 3 + c] - BG[c]) * (alpha[p] / 255));
+        await save(sharp(rgb, { raw: { width: TS, height: TS, channels: 3 } }), NATIVE_Z, x, y);
+      }
+    });
   }
   await pool(jobs);
   console.log(`  ${layer} z${NATIVE_Z}: ${level.size} (${changed.size} updated)`);
@@ -526,9 +540,9 @@ async function exportPreviews() {
     out[slug] = {};
     for (const [kind, { aspect, width }] of Object.entries(PREVIEWS)) {
       const H = W * aspect, height = Math.round(width * aspect);
-      // the finest zoom that still has at least `width` pixels across the view
-      const z = Math.min(NATIVE_Z, NATIVE_Z - Math.floor(Math.log2(W / width)));
-      const f = 2 ** (z - NATIVE_Z), span = TS / f;
+      // the finest zoom that still has at least `width` pixels across the view (f: web px per art px)
+      const z = Math.min(NATIVE_Z, NATIVE_Z - Math.floor(Math.log2((W * HD) / width)));
+      const f = HD * 2 ** (z - NATIVE_Z), span = TS / f;
       const x0 = cx - W / 2, y0 = cy - H / 2;
       const composite = [];
       for (let ty = Math.floor(y0 / span); ty <= Math.floor((y0 + H) / span); ty++)
@@ -580,7 +594,8 @@ async function main() {
       if (!existsSync(join(dir, layer))) continue;
       for (const f of readdirSync(join(dir, layer)).filter((f) => f.endsWith(".png"))) {
         const [tx, ty] = parse(f.replace(".png", ""));
-        map.set(key(tx, ty), join(dir, layer, f));
+        const hd = join(dir, `${layer}-hd`, f); // full resolution where it exists (render.ts --hd)
+        map.set(key(tx, ty), existsSync(hd) ? hd : join(dir, layer, f));
         x0 = Math.min(x0, tx * CAMERA.tile); y0 = Math.min(y0, ty * CAMERA.tile);
         x1 = Math.max(x1, (tx + 1) * CAMERA.tile); y1 = Math.max(y1, (ty + 1) * CAMERA.tile);
       }
@@ -596,12 +611,12 @@ async function main() {
   await exportBorders(heights);
   const previews = await exportPreviews();
   // OpenSeadragon wants non-negative tile indices at every level: origin aligned to a min-zoom tile
-  const block = TS * 2 ** (NATIVE_Z - MIN_Z);
+  const block = SPAN * 2 ** (NATIVE_Z - MIN_Z);
   const ox = Math.floor(x0 / block) * block, oy = Math.floor(y0 / block) * block;
   const { right: r, up: u } = axes();
   const m = CAMERA.mpp;
   const world = JSON.stringify({
-    tile_size: TS, native_zoom: NATIVE_Z, min_zoom: MIN_Z, bounds: [[y0, x0], [y1, x1]],
+    tile_size: TS, native_zoom: NATIVE_Z, min_zoom: MIN_Z, scale: HD, bounds: [[y0, x0], [y1, x1]],
     origin: [ox, oy], size: [Math.ceil((x1 - ox) / block) * block, Math.ceil((y1 - oy) / block) * block],
     // ENU meters -> art pixels (linear; ENU origin = pixel origin)
     enu2px: [[r[0] / m, r[1] / m, r[2] / m], [-u[0] / m, -u[1] / m, -u[2] / m]],

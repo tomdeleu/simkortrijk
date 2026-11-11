@@ -183,9 +183,9 @@ const motion = (a: P, b: P) => Math.hypot(a[0] - b[0], a[1] - b[1]) * Math.exp(a
 async function render(cam: P, dt: number, title: number) {
   const [cx, cy, u] = cam;
   await page.evaluate(([gx, gy, s, ti]) => {
-    const w = window as any, v = w.__viewer, item = v.world.getItemAt(0), world = w.__world;
-    v.viewport.zoomTo((item.getContentSize().x / v.container.clientWidth) * s, undefined, true);
-    v.viewport.panTo(item.imageToViewportCoordinates(gx - world.origin[0], gy - world.origin[1]), true);
+    const w = window as any, v = w.__viewer, item = v.world.getItemAt(0), world = w.__world, S = world.scale ?? 1; // image px = art px × S
+    v.viewport.zoomTo((item.getContentSize().x / S / v.container.clientWidth) * s, undefined, true);
+    v.viewport.panTo(item.imageToViewportCoordinates((gx - world.origin[0]) * S, (gy - world.origin[1]) * S), true);
     // title rises 1.5% of the frame while fading in
     const t = document.getElementById("film-title")!, e = ti * ti * (3 - 2 * ti);
     t.style.opacity = String(e);

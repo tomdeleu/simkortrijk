@@ -41,9 +41,9 @@ npm run dev
 | fetch | `pipeline/src/fetch.ts`, `trees.ts`, `flanders.ts` | GRB footprints, 3D GRB heights, DHMV II DSM/DTM, orthophoto crowns, OSM ground, roads and trees. |
 | ground | `pipeline/src/ground.ts` | DHMV II DTM as the terrain grid. GRB roads and water plus OSM parks, paths and lanes. |
 | scene | `pipeline/src/scene.ts` | Buildings extruded on the terrain. Spires that 3D GRB flattens are cut from the LiDAR canopy. |
-| render | `pipeline/src/render.ts`, `pipeline/page/renderer.ts` | Headless Chrome and three.js. One colour tile and one height tile per window. No network. |
+| render | `pipeline/src/render.ts`, `pipeline/page/renderer.ts` | Headless Chrome and three.js. Per tile a 1024 px colour render (paint, QA), a 2048 px `render-hd/` (0.125 m/px, the web's top zoom) and a height tile. No network. |
 | paint | `pipeline/src/paint.ts` | Optional. Repaints every 1024 px window and checks it against the render. |
-| export | `pipeline/src/export.ts` | AVIF pyramid into `data/web/regions/kortrijk/`. Unpainted tiles use the 3D render. |
+| export | `pipeline/src/export.ts` | AVIF pyramid (q65) into `data/web/regions/kortrijk/`, native zoom 9 at 2 px per art px (`HD` in `camera.ts`). Unpainted tiles use the 3D render; 1024 px paint is upscaled until there is a `paint-hd/`. |
 | web | `web/` | Astro + OpenSeadragon. Traffic, a few cats and parakeets, on top of the tiles. |
 
 `data/` is gitignored. Delete `data/derived/<area>/` only when you mean to throw away renders. Paintings, once you have them, live there too.

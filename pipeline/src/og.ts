@@ -11,13 +11,13 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import sharp, { type OverlayOptions } from "sharp";
 import { GROUND_H } from "./areas.ts";
-import { CAMERA, llhToPixel, useRegion } from "./camera.ts";
+import { CAMERA, HD, llhToPixel, useRegion } from "./camera.ts";
 import { HOSTING } from "./hosting.ts";
 import { ROOT, WEB_CACHE, WEB_STATE, readJson } from "./paths.ts";
 import { CITIES, DEFAULT_CITY, REGIONS } from "./places.ts";
 
 const W = 1200, H = 630;
-const TS = 512, NATIVE_Z = 8, FORMAT = "avif"; // as export.ts
+const TS = 512, NATIVE_Z = 8 + Math.log2(HD), FORMAT = "avif"; // as export.ts
 const BG = { r: 14, g: 15, b: 18 };
 const OUT = join(ROOT, "web", "public", "og");
 
@@ -45,8 +45,8 @@ async function og(slug: string, heading: string, name: string) {
   // the city's opening view, a bit tighter (a card is small): 70 % of widthM across
   const [cx, cy] = llhToPixel(city.center[0], city.center[1], GROUND_H);
   const viewW = (city.widthM * 0.7) / CAMERA.mpp, viewH = viewW * (H / W);
-  const z = Math.min(NATIVE_Z, NATIVE_Z - Math.floor(Math.log2(viewW / W)));
-  const f = 2 ** (z - NATIVE_Z), span = TS / f;
+  const z = Math.min(NATIVE_Z, NATIVE_Z - Math.floor(Math.log2((viewW * HD) / W)));
+  const f = HD * 2 ** (z - NATIVE_Z), span = TS / f; // web px per art px at z, art px per tile
   const x0 = cx - viewW / 2, y0 = cy - viewH / 2;
   const cw = Math.round(viewW * f), ch = Math.round(viewH * f);
   const parts: OverlayOptions[] = [];
