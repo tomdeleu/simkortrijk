@@ -70,6 +70,11 @@
   "lat": 50.8334641,
   "lon": 3.2597362
  },
+ "sint-janstoren": {
+  "prio": "P2",
+  "lat": 50.8267592,
+  "lon": 3.2722551
+ },
  "sint-maartenskerk": {
   "prio": "P1",
   "lat": 50.8275835,

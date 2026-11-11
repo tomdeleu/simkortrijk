@@ -9,7 +9,7 @@ What is painted on the live map and what is not. **Update this file after every 
 
 Regenerate `docs/paint-status.png` when the grid changes.
 
-Last updated: **2026-11-11**, after the 1600 m map publish of about 21:10 CET (4 697 files to R2 bucket `simkortrijk`, region `kortrijk`, every tile re-exported because the edge fade moved; Worker redeployed). Before that: piece 3 at 19:05, the HD publish at 17:32.
+Last updated: **2026-11-11**, after the piece 4 publish of about 22:00 CET (435 files). Before that: the 1600 m map publish of about 21:10 CET (4 697 files to R2 bucket `simkortrijk`, region `kortrijk`, every tile re-exported because the edge fade moved; Worker redeployed). Before that: piece 3 at 19:05, the HD publish at 17:32.
 
 ![Paint status: painted tiles outlined in red, render-only tiles greyed, landmarks by priority, the proposed next piece dashed blue](paint-status.png)
 
@@ -31,11 +31,12 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 | 2 | OLV-kerk, Begijnhof, east side | repaint `0_-1` after the OLV and Begijnhof fixes; paint `1_-2` `1_-1` | OLV-kerk + Gravenkapel, Begijnhof (P1, render fix first); K in Kortrijk + Sint-Janstoren (P2); Baggaertshof (P3) | **done**, live (published 18:46 CET, 236 files): OLV-kerk (`massing.json`) and Begijnhof (`colours.json`) fixed; windows `0_-2` `0_-1` repainted, `1_-2` `1_-1` painted, tiles `0_-2` `0_-1` `0_0` `1_-2` `1_-1` reassembled. K in Kortrijk, Sint-Janstoren and Baggaertshof painted from the uncorrected render | 6 / ~$0.54 (2 repaints after the OLV came out as a palace, see below) | 2026-11-11 |
 | 3 | West: Sint-Elooiskerk, Leie, Noordbrug | paint `-3_-2` `-3_-1` `-3_0` `-2_0` (scope widened: the Noordbrug pylon stands in `-3_0`, and `-2_0` closes the gap); repaint `-2_-2` `-2_-1` (their left edge was a feather) | Sint-Elooiskerk (`massing.json`), Noordbrug (render edit `leiebruggen/edit_noordbrug.ts`: pylon and stays drawn before painting, restored after) | **done**, live (published 19:05 CET, 455 files) | 9 / ~$0.81 | 2026-11-11 |
 | – | Bigger map (Tom chose option C of "map edge") | area `kortrijk-binnenstad` grown from 800 m to 1600 m around the Belfort: 29 → **109** tiles (80 new render tiles, 14 old edge tiles re-rendered with the data that was missing outside the old bbox). Fetch, colours, ground, scene, render, full re-export (the edge fade moved), publish, redeploy | – | **done**, live | 0 paint calls | 2026-11-11 |
-| 4 | East: K in Kortrijk, Baggaertshof, Groeningemonument | fix K in Kortrijk + Sint-Janstoren and Baggaertshof, repaint `1_-1`; paint `1_0` `2_-2` `2_-1` `2_0` (and repaint the edge windows that feather into them) | K in Kortrijk + Sint-Janstoren (P2), Baggaertshof (P3), Groeningemonument (P3) | **agreed as the next piece**; briefing in "Next up" | ~9 / ~$0.80 (estimate) | |
+| 4 | East: K in Kortrijk, Baggaertshof, Groeningemonument | fix K in Kortrijk + Sint-Janstoren and Baggaertshof, repaint `1_-1`; paint `1_0` `2_-2` `2_-1` `2_0` (and repaint the edge windows that feather into them) | K in Kortrijk + Sint-Janstoren (P2), Baggaertshof (P3), Groeningemonument (P3) | **done**, live (published about 22:00 CET, 435 files, Worker redeployed). References found online by Claude (Tom's request): Commons photos (side views) and Digitaal Vlaanderen orthophotos (top views) in the landmark `refs/`. Render fixed: `k-in-kortrijk/massing.json` (dark stone block 16.8 m + glass **hip** roof to 25 m; the orthophoto shows a hip, not a barrel), `sint-janstoren/massing.json` + `colours.json` (white stepped tower, dark plinth, roof garden), `baggaertshof/colours.json`. Window `1_-1` repainted; `1_0` `2_-3` `2_-2` `2_-1` `2_0` `3_-3` `3_-2` `3_-1` `3_0` painted (the `3_*` and `2_-3` windows cover the right and top 256 px of the new tiles and start the next pieces); tiles `0_-1` `0_0` `1_-2` `1_-1` `1_0` `2_-2` `2_-1` `2_0` reassembled. Edge windows `1_-2` / `0_0` were not repainted: the joins look seamless | 10 / ~$0.90 | 2026-11-11 |
+| 5 | South: below the railway | paint `-2_1` `-1_1` `0_1` `1_1` (Stationsplein side, Kortrijk Weide edge) | Station (P2, render check first) | **proposed** | ~8 / ~$0.70 (estimate) | |
 
-Progress: **14 of 109** tiles painted (12.8%), all live; of the old 800 m binnenstad (29 tiles) 14 are painted (48.3%). Total so far: 30 paint calls, about $2.70.
+Progress: **18 of 109** tiles painted (16.5%), all live; of the old 800 m binnenstad (29 tiles) 18 are painted (62.1%). Total so far: 40 paint calls, about $3.60.
 
-Open follow-ups (small pieces of their own, each a render fix plus one repaint): K in Kortrijk + Sint-Janstoren (dark stone block with glass barrel roof, white tower) and Baggaertshof (a `colours.json` like the Begijnhof) in window `1_-1`.
+Open follow-ups: none from piece 4. K in Kortrijk, the Sint-Janstoren and the Baggaertshof were fixed and repainted in piece 4.
 
 How piece 1 was painted (and how the next pieces go): the local `windows/` held old pre-colour windows, so they are in `windows.old-local/`. The windows of the live block (`-2_-2` `-1_-2` `0_-2` `-2_-1` `0_-1`) were cut back out of the live paint tiles so new windows continue the live paint. To publish only what changed: empty `data/web/regions/<region>` and `data/web/<region>.state.json`, then `TILES_ORIGIN=https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev npm run export -- kortrijk-binnenstad` (the lower zooms fetch unchanged tiles from R2, and `.env` leaves `TILES_ORIGIN` empty) and publish with the same `TILES_ORIGIN` plus the OAuth token (CLAUDE.md, Gotchas). Each window is painted alone (`npm run paint -- kortrijk-binnenstad --window=i,j [--force] --interactive`, `PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1`), and only the tiles that change are reassembled (`python3 pipeline/tools/assemble_tiles.py --target=<all painted tiles> --rewrite=<changed tiles>`), with the usual 220 px feather into the render wherever a painted tile meets an unpainted one. The bottom ~220 px of a block are a feather into the render, so a block that grows downward or sideways repaints its edge windows too.
 
@@ -49,7 +50,7 @@ Neighbour strips carry old paint along: in piece 2 the old `0_-1` window (OLV-ke
    - **A (recommended): cream paper.** Fade and fill to the style-A paper colour instead of black: `BG` in `export.ts` and `og.ts`, the page, map and preview backgrounds and `theme-color` in `web/src/components/MapPage.astro` (and `404.astro`). Then re-export everything (edge tiles and every lower zoom level are composited on `BG`), publish all tiles, rebuild and redeploy. No paint calls.
    - **B: a narrower fade** (smaller `EDGE0`/`EDGE1`) so less of the map is dimmed. Alone it shows the tile staircase along the outline; combine it with A or C.
    - **C: a bigger map**: a ring of extra render tiles around the binnenstad (new area: fetch, ground, scene, render, export). The edge moves outward but still exists; the new tiles are unpainted render.
-2. **Piece 4, east** (the briefing as proposed to Tom):
+2. **Piece 4, east** (done 2026-11-11, see the piece table; the briefing as proposed to Tom):
    - Render fixes first, then repaint window `1_-1`: K in Kortrijk (a large flat block in dark natural stone with a steel-and-glass barrel roof over the inner square), the Sint-Janstoren (11-storey residential tower, dark stone plinth, white cladding, trees on the roof), the Baggaertshof (whitewashed almshouses with red pantiles around a courtyard: a `colours.json` like the Begijnhof).
    - Then paint the east side: tiles `1_0` `2_-2` `2_-1` `2_0`, with the Groeningemonument and the rest of the Groeningepark. Repaint the existing windows whose edge feathers into these tiles (`1_-2`, `1_-1`, `0_0`) so the joins are seamless.
    - The south row (below the railway) was left out on purpose: it is mostly inside the map-edge fade.
@@ -63,9 +64,9 @@ Neighbour strips carry old paint along: in piece 2 the old `0_-1` window (OLV-ke
 | Area on the live map | `kortrijk-binnenstad`, since 2026-11-11 evening **1600 m** around the Belfort (bbox 50.813201,3.242863 – 50.841947,3.288372, 3.2 × 3.2 km: binnenstad, the whole ring, station quarter, Overleie, Kortrijk Weide, Sint-Jan). Before: 800 m (50.820387,3.254240 – 50.834760,3.276994), 29 tiles. The 800 m raw data is kept in `data/raw/kortrijk-binnenstad.800m/`, the replaced edge renders in `data/derived/kortrijk-binnenstad/pre-expand/`. |
 | Render tiles (1024 px, 0.25 m/px, 256 m) | **109**, `tx` -8..7 × `ty` -6..4 (irregular, see grid); tile coordinates did not change |
 | Web resolution | **HD**: native zoom 9 at 0.125 m/px from `render-hd/` (2048 px per tile), AVIF q65. The 6 painted tiles are 1024 px paint upscaled: they are no sharper than before until they are repainted at 2K into `paint-hd/`. |
-| Painted tiles | **14**: `tx` -2..0 × `ty` -2..-1 (Broeltorens / Sint-Maarten block), `-1_0` `0_0` (piece 1), `1_-2` `1_-1` (piece 2), `-3_-2` `-3_-1` `-3_0` `-2_0` (piece 3) |
-| Render-only tiles | **95**, showing the coloured 3D render (per-building colours, `--soften 0.5`), not painted |
-| Coverage | **12.8%** of the map (14 of 109 equal tiles); 48.3% of the old 800 m binnenstad (14 of 29) |
+| Painted tiles | **18**: `tx` -2..0 × `ty` -2..-1 (Broeltorens / Sint-Maarten block), `-1_0` `0_0` (piece 1), `1_-2` `1_-1` (piece 2), `-3_-2` `-3_-1` `-3_0` `-2_0` (piece 3), `1_0` `2_-2` `2_-1` `2_0` (piece 4) |
+| Render-only tiles | **91**, showing the coloured 3D render (per-building colours, `--soften 0.5`), not painted |
+| Coverage | **16.5%** of the map (18 of 109 equal tiles); 62.1% of the old 800 m binnenstad (18 of 29) |
 | Style | Style A + real colours (`.claude/skills/map-style`) |
 | Painter | OpenAI `gpt-image-2.6-flare`, quality high, input fidelity high, `PAINT_ATTEMPTS=1` |
 | Painted | 2026-11-11, 16:01–16:06 CET |
@@ -82,9 +83,9 @@ ty \ tx   -8  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7
   -5       .   .   .   .   .   .   .   n   n   n   n   n   .   .   .   .
   -4       .   .   .   n   n   n   n   n   n   n   n   n   n   .   .   .
   -3       n   n   n   n   n   n   n   n   r   r   n   n   n   .   .   .
-  -2       .   n   n   n   r   P   P   P   P   P   r   n   n   n   .   .
-  -1       .   n   n   n   r   P   P   P   P   P   r   n   n   n   .   .
-   0       .   .   n   n   n   P   P   P   P   r   r   r   n   n   n   .
+  -2       .   n   n   n   r   P   P   P   P   P   P   n   n   n   .   .
+  -1       .   n   n   n   r   P   P   P   P   P   P   n   n   n   .   .
+   0       .   .   n   n   n   P   P   P   P   P   P   r   n   n   n   .
    1       .   .   n   n   n   n   r   r   r   r   r   n   n   n   n   n
    2       .   .   .   n   n   n   r   n   n   n   n   n   n   n   n   n
    3       .   .   .   n   n   n   n   n   n   n   n   n   .   .   .   .
@@ -107,11 +108,10 @@ Assembled with `python3 pipeline/tools/assemble_block.py --skip=-2_-3,-1_-3`. Be
 
 ## Not painted yet
 
-- **The rest of the map:** 95 tiles (15 in the old binnenstad, 80 new). In order of interest:
-  - the Leie and Groeninge side to the east, `1_-2`, `1_-1`, `2_-2`, `2_-1`: K in Kortrijk, Baggaertshof, Groeningemonument;
-  - Sint-Elooiskerk and Noordbrug to the west, `-3_-2`, `-3_-1`;
-  - the station and Schouwburg to the south, row `ty` 0;
-  - then the outer rows.
+- **The rest of the map:** 91 tiles (11 in the old binnenstad, 80 new). In order of interest:
+  - the south, below the railway: `-2_1` `-1_1` `0_1` `1_1` (piece 5, proposed);
+  - the old binnenstad corners: `0_-3` `1_-3` `-4_-2` `-4_-1` `3_0` `2_1` `-2_2`;
+  - then the 80 tiles of the 1600 m ring, starting from the painted `2_-3` and `3_*` windows in the east.
 
   Paint outward from the block so every new window has painted neighbours. Skip mostly-empty edge windows.
 - **The whole municipality** (area `kortrijk`): nothing yet. It needs fetch, ground, scene and render first.
@@ -134,12 +134,13 @@ Each landmark has notes, photos and a priority in `pipeline/landmarks/<slug>/` (
 | P2 | Collegebrug | pending | `-1_-2` | yes, from the uncorrected render |
 | P2 | Leiebruggen | Noordbrug **done** (render edit, piece 3); others pending | `-1_-1`, `-2_-1`, `-3_-1` | yes (piece 3) |
 | P2 | Sint-Elooiskerk | **done** (`massing.json`, piece 3) | `-3_-2` | **yes** (piece 3); its spire was in the old map-edge fade (no longer: the map is bigger) |
-| P2 | K in Kortrijk + Sint-Janstoren | pending | `1_-1` | yes, from the uncorrected render (piece 2) |
+| P2 | K in Kortrijk | **done** (`massing.json`, piece 4) | `1_-1` | **yes** (piece 4) |
+| P2 | Sint-Janstoren | **done** (`massing.json` + `colours.json`, piece 4) | `1_-1` / `2_-1` | **yes** (piece 4) |
 | P2 | Station | pending | row `ty` 0 | yes, from the uncorrected render (piece 1) |
 | P2 | Stadsschouwburg | pending | row `ty` 0 | yes, from the uncorrected render (piece 1) |
 | P3 | Groeningeabdij | pending | `0_-2` | yes, from the uncorrected render |
-| P3 | Baggaertshof | pending | `1_-1` | yes, from the uncorrected render (piece 2) |
-| P3 | Groeningemonument | pending | `2_-2` | no |
+| P3 | Baggaertshof | **done** (`colours.json`, piece 4) | `1_-1` | **yes** (piece 4) |
+| P3 | Groeningemonument | none (too small for the massing; the park and plinth come from the render) | `2_-2` | **yes** (piece 4) |
 
 Tiles are from the landmark's OSM position projected with `pipeline/src/camera.ts`. Station and Schouwburg are approximate.
 
