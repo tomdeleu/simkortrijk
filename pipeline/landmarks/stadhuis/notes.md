@@ -15,6 +15,8 @@ Historic town hall: a long white-stone Gothic façade facing the Grote Markt wit
 
 ## Render fixes needed
 
+- **Done (2026-11-11): `massing.json`.** Whole GRB complex 1744586 flat at 12 m (was 18.6 m), market front u -10.6..29.7 as white Gothic stone under a slate saddle roof (eaves 12.5 m, ridge 17.5 m, from DHMV II), slate ridge turret to 25 m, corner and middle turrets. Statues, niches and dormers are left to the paint.
+
 - Generic row of houses: give the front block a slate gable along the market (eaves ~11 m, ridge ~19 m), pale stone walls, and a small slate ridge turret.
 
 ## References

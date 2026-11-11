@@ -27,7 +27,7 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 | # | Piece | Tiles | Landmarks | Status | Calls / cost | Date |
 |---|---|---|---|---|---|---|
 | 0 | Broeltorens block | `-2_-2` `-1_-2` `0_-2` `-2_-1` `-1_-1` `0_-1` | Broeltorens + Broelbrug, Sint-Maartenskerk (fixed); Belfort, stadhuis, OLV-kerk, Begijnhof, Buda, Collegebrug, Groeningeabdij painted from the uncorrected render | **done**, live | 11 / ~$0.98 | 2026-11-11 |
-| 1 | Grote Markt | repaint the Belfort and stadhuis windows in `-1_-1` / `0_-1`; paint `-1_0` `0_0` | Belfort, historisch stadhuis (P1, render fix first); Stadsschouwburg, station (P2) | **proposed**, waiting for Tom | ~10 / ~$0.90 (estimate) | |
+| 1 | Grote Markt | repaint the Belfort and stadhuis windows in `-1_-1` / `0_-1`; paint `-1_0` `0_0` | Belfort, historisch stadhuis (P1, render fix first); Stadsschouwburg, station (P2) | **in progress**: approved by Tom; Belfort and stadhuis render fixed, render check with Tom; no paint calls yet | ~10 / ~$0.90 (estimate) | 2026-11-11 |
 
 Progress: **6 of 29** binnenstad tiles painted (20.7%).
 
@@ -92,8 +92,8 @@ Each landmark has notes, photos and a priority in `pipeline/landmarks/<slug>/` (
 |---|---|---|---|---|
 | P1 | Broeltorens + Broelbrug | **done** (`edit_broel.py`) | `-1_-2` | **yes** |
 | P1 | Sint-Maartenskerk | **done** (`massing.json`) | `0_-1` | **yes** (church with spire) |
-| P1 | Belfort / Halletoren | pending | `-1_-1` | yes, but from the uncorrected render: it needs a fix and a repaint of its window |
-| P1 | Historisch stadhuis | pending | `-1_-1` | yes, from the uncorrected render |
+| P1 | Belfort / Halletoren | **done** (`massing.json`, piece 1) | `-1_-1` | yes, but from the uncorrected render: it needs a fix and a repaint of its window |
+| P1 | Historisch stadhuis | **done** (`massing.json`, piece 1) | `-1_-1` | yes, from the uncorrected render |
 | P1 | Onze-Lieve-Vrouwekerk | pending | `0_-1` | yes, from the uncorrected render |
 | P1 | Begijnhof | pending | `0_-1` | yes, from the uncorrected render |
 | P2 | Artillerietoren | pending | `0_-1` | yes, from the uncorrected render |

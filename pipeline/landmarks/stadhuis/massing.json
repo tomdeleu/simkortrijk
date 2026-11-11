@@ -1,0 +1,14 @@
+{
+  "_doc": "Render massing for the historic town hall, read by pipeline/src/scene.ts. Metres in Lambert 72 around 'anchor' (centre of GRB footprint 1744586, the whole complex), u along 'axis_deg' = 22 (the market facade), v towards the back (north-west). The facade runs u -10.6..29.7 at v = -21; DHMV II across it: eaves ~12.5 m, ridge ~17 m at v = -16, back wings 12-15 m flat or low. Shape checked by eye against photos of the square (look-up only, AGENTS.md rule 1): white stone facade with corbelled corner turrets, a steep slate saddle roof with dormers, a slender slate ridge turret.",
+  "anchor": [50.8281646, 3.2644988],
+  "axis_deg": 22,
+  "replace_oidn": [1744586],
+  "parts": [
+    { "id": "back wings around the courtyards (GRB footprint)", "footprint": "grb", "h": 12, "shape": "flat", "style": 4, "wall": [0.86, 0.62, 0.53], "roof": [0.55, 0.58, 0.65] },
+    { "id": "market front: white stone under a slate saddle roof", "rect": [-10.6, 29.7, -21.0, -11.5], "h": 17.5, "eave": 12.5, "shape": "gable-u", "style": 6, "wall": [0.93, 0.91, 0.86], "roof": [0.46, 0.50, 0.60] },
+    { "id": "ridge turret (dakruiter)", "oct": [9.5, -16.2, 0.8], "h": 25, "eave": 19, "shape": "pyramid", "style": 4, "wall": [0.48, 0.52, 0.61], "roof": [0.46, 0.50, 0.60] },
+    { "id": "corner turret west", "oct": [-10.0, -20.6, 0.9], "h": 18, "eave": 13, "shape": "pyramid", "style": 4, "wall": [0.93, 0.91, 0.86], "roof": [0.46, 0.50, 0.60] },
+    { "id": "middle turret", "oct": [9.5, -20.8, 0.8], "h": 17, "eave": 13, "shape": "pyramid", "style": 4, "wall": [0.93, 0.91, 0.86], "roof": [0.46, 0.50, 0.60] },
+    { "id": "corner turret east", "oct": [29.0, -20.6, 0.9], "h": 18, "eave": 13, "shape": "pyramid", "style": 4, "wall": [0.93, 0.91, 0.86], "roof": [0.46, 0.50, 0.60] }
+  ]
+}

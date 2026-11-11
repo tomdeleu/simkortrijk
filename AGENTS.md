@@ -6,7 +6,7 @@ The code is adapted from [Isometric World](https://github.com/krasun/isometricwo
 
 ## Hard rules
 
-1. Open data only. Never use Google, Apple, Bing or other proprietary imagery or geometry, not even as a style reference.
+1. Open data only in anything that ends up in the map or the repo. Proprietary imagery (Google Street View / Maps, Apple, Bing) may be **looked at** to read off the shape, proportions and colours of a building (Tom's decision, 2026-11-11), the way you would look at the real square. It is never stored in the repo, never sent to a paint model, never traced, composited or used as a style image, and never a source of geometry or heights (those come from GRB, 3D GRB, DHMV and OSM).
 2. Credit every source. The footer and `places.ts` `credits` must keep `Bron: Grootschalig Referentie Bestand Vlaanderen, Digitaal Vlaanderen` and `© OpenStreetMap contributors`.
 3. Do not change `origin` or `headingDeg` for a region that already has tiles.
 4. Do not delete `data/derived/` (renders and any paintings) or `data/web-state/`. `data/web/` is only the unpublished cache.

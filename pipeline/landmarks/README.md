@@ -33,4 +33,4 @@ Two ways to fix a landmark in the render:
 
 Workflow for a new landmark, as with the Broeltorens: look it up (Onroerend Erfgoed inventory text gives materials, Wikimedia Commons gives photos), write `notes.md`, then either add a `massing.json`, fix the scene data (heights, gables, colours in `pipeline/tools/building_colours.py`) or draw a render edit script like `edit_broel.py` that runs before painting and restores after. Paint the windows over it with `--near lat,lon`.
 
-Reference images are for look-up only. Do not paste them into the paint request as style images unless their licence allows it (most are CC BY / CC BY-SA, see SOURCES.md).
+Reference images are for look-up only. Screenshots Tom shares from Google Street View or Maps may be looked at for shapes and colours (AGENTS.md rule 1) but are not saved here. Do not paste them into the paint request as style images unless their licence allows it (most are CC BY / CC BY-SA, see SOURCES.md).
