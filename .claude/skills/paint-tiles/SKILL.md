@@ -22,7 +22,9 @@ Style is variant C, pastel and game-like. Do not replace these with Tel Aviv ima
 - `pipeline/style/reference.png`: a painted Grote Markt and Belfort tile. Blush and coral roofs, peach and cream walls, mint and sage trees, pale lavender streets. Style only. The prompt forbids copying its buildings into another window.
 - `pipeline/style/trees.png`: round mint and sage canopies and one narrow poplar, on a cream ground.
 
-The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style C paragraph. Flat roof planes stay flat. Tile colour on that plane is allowed. Hips, ridges, and gables that change the silhouette are not. The HTTP client is `pipeline/src/gemini.ts`.
+The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: the geometry lock, then the style C paragraph. Flat roof planes stay flat. Tile colour on that plane is allowed. Hips, ridges, and gables that change the silhouette are not. Empty map edge is cream paper (`PAPER` in `paint.ts`), and the prompt says to leave it empty. The HTTP client is `pipeline/src/gemini.ts`.
+
+`roofNovelty` currently fails every real window (scores about 0.07–0.29, limit 0.04). The painter keeps the third attempt, so ridges still land. Next change is a tighter prompt or a hard reject, not a higher limit. Land windows are not colour-matched to each other; only open sea is.
 
 ## Commands
 
@@ -30,6 +32,7 @@ The prompt in `pipeline/src/paint.ts` is shared by Gemini, Codex, and OpenAI: th
 npm test
 npm run paint -- kortrijk-binnenstad --plan
 npm run paint -- kortrijk-binnenstad --near 50.82757,3.26562 --radius 1   # interactive
+npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3   # Broeltorens, ~33 calls, ~$1.10
 npm run paint -- kortrijk-binnenstad --window 4,-3 --interactive
 npm run paint -- kortrijk-binnenstad --batch                                      # whole area
 npm run paint -- kortrijk-binnenstad --assemble
@@ -85,3 +88,22 @@ Without `GEMINI_API_KEY` the command exits naming that secret and does not write
 - A finished window log line includes `match=0.xx`. Reject lines say `match … repainting` or `black band`.
 - A batch log line includes `gemini batch: N windows, about $…`.
 - Overlay `paint/<tx>_<ty>.png` on `render/<tx>_<ty>.png`. Streets and the church must still meet. Then `npm run export -- <area>` and refresh `npm run dev`.
+
+## Broeltorens block
+
+The six painted tiles are `tx` -2..0, `ty` -2..-1. Before painting them, edit the raw render and restore it after the windows exist:
+
+```sh
+python3 pipeline/landmarks/broeltorens/edit_broel.py
+python3 pipeline/landmarks/broeltorens/edit_broel.py --restore
+```
+
+The edit draws cream stone towers with slate cones, and the Broelbrug from OSM way 567818112 (three arches, parapets, statue) low between the towers' feet. See `pipeline/landmarks/broeltorens/README.md`.
+
+A partial block is not `npm run paint -- --assemble` (that seams against unpainted tiles). Feather the finished windows ~220 px into the render:
+
+```sh
+python3 pipeline/tools/assemble_block.py
+```
+
+Deps and flags: `pipeline/tools/README.md`. Publish only when the user asks (`publish-r2`).

@@ -1,15 +1,25 @@
 ---
 name: publish-r2
-description: Deploy SimKortrijk as one Cloudflare Worker with tiles in the static assets (npx wrangler deploy, no R2), or upload the tile cache to R2. Use only when the user explicitly asked to deploy or publish.
+description: Deploy SimKortrijk as the Cloudflare Worker `simkortrijk` (npx wrangler deploy) and upload tiles to the R2 bucket `simkortrijk`. Use only when the user explicitly asked to deploy or publish.
 ---
 
 # Deploy
 
 Outward-facing. Do not deploy because a local preview looks finished. The user has to ask.
 
+In Cloudflare, only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any other bucket, worker, domain, DNS, or setting. Never delete objects outside `regions/kortrijk/`. Do not add a custom domain on the bucket unless Tom asks.
+
+The live map is 29 tiles of `kortrijk-binnenstad` on that bucket. Six are painted (`tx` -2..0, `ty` -2..-1, the Broeltorens, style C). The rest is unpainted render. After the rest is painted and the user has asked, the sequence is `npm run export -- kortrijk-binnenstad`, `npm run dev` to look, then:
+
+```sh
+npm run publish -- kortrijk --yes --keep
+npm run build
+npx wrangler deploy
+```
+
 ## Deploy as one Worker (no R2)
 
-Tiles and pages are the same Worker. `wrangler.jsonc` sets `name` to `simkortrijk`, `workers_dev` to true, and `assets.directory` to `./web/dist`. Leave `TILES_ORIGIN` empty so the build reads the export cache and the browser loads `/regions/...` from the Worker, not from a bucket.
+Tiles and pages are the same Worker. `wrangler.jsonc` sets `name` to `simkortrijk`, `workers_dev` to true, and `assets.directory` to `./web/dist`. By default tiles come from R2 (see below). Only with `TILES_ORIGIN=` (empty) does the build copy the export cache into `web/dist` so the browser loads `/regions/...` from the Worker.
 
 ```sh
 npm run binnenstad
@@ -38,7 +48,7 @@ No `CLOUDFLARE_API_TOKEN` is required after `wrangler login`. `PIRSCH_ACCESS_KEY
 
 ## Upload tiles to R2
 
-Optional. The bucket name is `simkortrijk-tiles` (`pipeline/src/hosting.ts`). Do not upload into `isometricworldtiles`.
+The bucket is `simkortrijk` (`pipeline/src/hosting.ts`), public at https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev with CORS GET/HEAD from any origin. That URL is the default `TILES_ORIGIN`, so `npm run dev` (fresh clone, no export) and `npm run build` load these tiles; the build then skips copying tiles into `web/dist`. Upload before you deploy: Do not upload into `isometricworldtiles`.
 
 ```sh
 npm run publish -- kortrijk
@@ -48,13 +58,13 @@ npm run publish -- kortrijk
 
 Order inside `pipeline/src/publish.ts`: tiles and previews first, `world.json` last. Each object is checked (stored size equals local size). The published manifest is copied to `data/web-state/kortrijk.json`.
 
-Set `TILES_ORIGIN` to the bucket’s public origin before the next `npm run build` if the site should load tiles from R2 instead of the bundle. Then redeploy.
+Leave `TILES_ORIGIN` unset so the site keeps loading this bucket. Set `TILES_ORIGIN=` (empty) only when tiles should be copied into the Worker instead.
 
 | Name | Required | Secret |
 |---|---|---|
-| `TILES_ORIGIN` | Only for R2 | No. Public origin, no trailing slash. Empty for the Worker bundle. |
+| `TILES_ORIGIN` | No | No. Default https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev. Empty for the Worker bundle. Prefer a custom domain for production; r2.dev is rate-limited. |
 | `CLOUDFLARE_ACCOUNT_ID` | For publish | Account id, not a token. |
-| `CLOUDFLARE_API_TOKEN` | For publish, unless `npx wrangler login` | R2 Object Read & Write on `simkortrijk-tiles`. |
+| `CLOUDFLARE_API_TOKEN` | For publish, unless `npx wrangler login` | R2 Object Read & Write on `simkortrijk`. |
 | `SITE_DOMAIN` | No | Custom hostname for `npm run deploy`. |
 | `PIRSCH_ACCESS_KEY` | No | Worker secret for analytics. |
 

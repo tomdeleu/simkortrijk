@@ -37,6 +37,8 @@ const FEATHER = 64;
 const STYLE = join(PIPELINE, "style", "reference.png");
 const TREES = join(PIPELINE, "style", "trees.png"); // pastel mint and sage crowns, style C
 const SEA = join(PIPELINE, "style", "sea.png");
+/** Background of the model input outside the map (cream paper). */
+const PAPER = { r: 246, g: 241, b: 231 };
 /** Style C, pastel game-like, plus the shared geometry lock. Used by every painter. */
 const GEOMETRY_LOCK = `Follow the source massing render as a strict geometric template. Preserve every \
 building position, footprint, height, roof outline, street, square, water, and \
@@ -46,7 +48,7 @@ reference (no glass skyscrapers, palm trees, jacarandas, solar farms, or extra \
 churches). You may add painted windows, shutters, facade color variation, \
 roof-tile texture, cobblestones, and richer deciduous tree canopies, but \
 silhouettes and positions must stay identical. Keep the same isometric camera, \
-framing, and crop. Empty map-edge background stays empty. No text, labels, \
+framing, and crop. Empty map-edge background (plain cream paper) stays empty: paint no city there. No text, labels, \
 borders, or watermarks.
 Flat roof planes in the massing stay flat. Paint blush or coral tile colour on that existing plane only. \
 Do not add hips, ridges, gables, or pitched roofs that change the silhouette.`;
@@ -112,7 +114,8 @@ const winFile = (i: number, j: number) => join(winDir, `${i}_${j}.png`);
 /** Crop a global-pixel box out of tiles produced by `load(tx, ty)` (1024² PNG buffers or null). */
 async function cropGlobal(x: number, y: number, w: number, h: number,
   load: (tx: number, ty: number) => Promise<Buffer | null> = async (tx, ty) =>
-    existsSync(renderFile(tx, ty)) ? sharp(renderFile(tx, ty)).png().toBuffer() : null) {
+    existsSync(renderFile(tx, ty)) ? sharp(renderFile(tx, ty)).png().toBuffer() : null,
+  background: { r: number; g: number; b: number } = { r: 0, g: 0, b: 0 }) {
   const comps: OverlayOptions[] = [];
   for (let ty = Math.floor(y / T); ty <= Math.floor((y + h - 1) / T); ty++)
     for (let tx = Math.floor(x / T); tx <= Math.floor((x + w - 1) / T); tx++) {
@@ -123,7 +126,7 @@ async function cropGlobal(x: number, y: number, w: number, h: number,
       const width = Math.min(T - sx, w - Math.max(0, left)), height = Math.min(T - sy, h - Math.max(0, top));
       comps.push({ input: await sharp(buf).extract({ left: sx, top: sy, width, height }).toBuffer(), left: Math.max(0, left), top: Math.max(0, top) });
     }
-  return sharp({ create: { width: w, height: h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 1 } } }).composite(comps);
+  return sharp({ create: { width: w, height: h, channels: 4, background: { ...background, alpha: 1 } } }).composite(comps);
 }
 
 /** Height pass as a grayscale structure image: black = ground, white = 60 m above `ground`. */
@@ -163,7 +166,9 @@ async function composeInput(i: number, j: number, file: string, heightFile: stri
   const ground = await windowGround(i * STRIDE, j * STRIDE);
   await (await cropGlobal(i * STRIDE, j * STRIDE, WIN, WIN, (tx, ty) => heightTile(tx, ty, ground))).png().toFile(heightFile);
   // lift baked photogrammetry shadows so footprints and streets read clearly
-  const lifted = await sharp(await (await cropGlobal(i * STRIDE, j * STRIDE, WIN, WIN)).png().toBuffer())
+  // outside the map is plain paper, not black: on black the model invents a city there and
+  // leaves the real part of the window unpainted
+  const lifted = await sharp(await (await cropGlobal(i * STRIDE, j * STRIDE, WIN, WIN, undefined, PAPER)).png().toBuffer())
     .removeAlpha().clahe({ width: 128, height: 128, maxSlope: 2 }).modulate({ saturation: 1.1 }).png().toBuffer();
   const img = sharp(lifted);
   const comps: OverlayOptions[] = [];

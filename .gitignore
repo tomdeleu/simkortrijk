@@ -9,6 +9,8 @@ web/dist/
 web/.astro/
 .wrangler/
 pipeline/page/dist/
+__pycache__/
+*.pyc
 
 # pipeline data (raw downloads, renders, paintings, export cache, publish state): local only, map data lives on R2
 data/
