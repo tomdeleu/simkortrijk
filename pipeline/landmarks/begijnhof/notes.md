@@ -15,6 +15,8 @@ Begijnhof: a tight cluster of small whitewashed houses with red pantile roofs ar
 
 ## Render fixes needed
 
+- **Done (2026-11-11): `colours.json`.** `pipeline/tools/building_colours.py` gives every GRB footprint inside OSM way 957934102 (44 footprints) whitewashed walls and red clay pantile roofs. The central tree comes from the tree data as before.
+
 - Colours: force walls whitewash and roofs terracotta for every GRB footprint inside way 957934102 (the palette picks brick for most).
 - Make sure the central tree is in trees.geojson; keep the square open.
 

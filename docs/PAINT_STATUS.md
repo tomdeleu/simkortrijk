@@ -28,7 +28,7 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 |---|---|---|---|---|---|---|
 | 0 | Broeltorens block | `-2_-2` `-1_-2` `0_-2` `-2_-1` `-1_-1` `0_-1` | Broeltorens + Broelbrug, Sint-Maartenskerk (fixed); Belfort, stadhuis, OLV-kerk, Begijnhof, Buda, Collegebrug, Groeningeabdij painted from the uncorrected render | **done**, live | 11 / ~$0.98 | 2026-11-11 |
 | 1 | Grote Markt | repaint the Belfort and stadhuis windows in `-1_-1` / `0_-1`; paint `-1_0` `0_0` | Belfort, historisch stadhuis (P1, render fix first); Stadsschouwburg, station (P2) | **done**, live (published 18:27 CET, 214 files): render fixed (`belfort/massing.json`, `stadhuis/massing.json`), windows `-1_-1` and `0_-1` repainted, `-1_0` and `0_0` painted, tiles `-1_-1` `0_-1` `-1_0` `0_0` reassembled | 4 / ~$0.36 | 2026-11-11 |
-| 2 | OLV-kerk, Begijnhof, east side | repaint `0_-1` after the OLV and Begijnhof fixes; paint `1_-2` `1_-1` | OLV-kerk + Gravenkapel, Begijnhof (P1, render fix first); K in Kortrijk + Sint-Janstoren (P2); Baggaertshof (P3) | **proposed** | ~5 / ~$0.45 (estimate) | |
+| 2 | OLV-kerk, Begijnhof, east side | repaint `0_-1` after the OLV and Begijnhof fixes; paint `1_-2` `1_-1` | OLV-kerk + Gravenkapel, Begijnhof (P1, render fix first); K in Kortrijk + Sint-Janstoren (P2); Baggaertshof (P3) | **in progress**: approved by Tom; OLV-kerk (`massing.json`) and Begijnhof (`colours.json`) render fixed, render check with Tom; no paint calls yet | ~5 / ~$0.45 (estimate) | 2026-11-11 |
 
 Progress: **8 of 29** binnenstad tiles painted (27.6%), all live.
 
@@ -97,8 +97,8 @@ Each landmark has notes, photos and a priority in `pipeline/landmarks/<slug>/` (
 | P1 | Sint-Maartenskerk | **done** (`massing.json`) | `0_-1` | **yes** (church with spire) |
 | P1 | Belfort / Halletoren | **done** (`massing.json`, piece 1) | `-1_-1` | yes, but from the uncorrected render: it needs a fix and a repaint of its window |
 | P1 | Historisch stadhuis | **done** (`massing.json`, piece 1) | `-1_-1` | yes, from the uncorrected render |
-| P1 | Onze-Lieve-Vrouwekerk | pending | `0_-1` | yes, from the uncorrected render |
-| P1 | Begijnhof | pending | `0_-1` | yes, from the uncorrected render |
+| P1 | Onze-Lieve-Vrouwekerk | **done** (`massing.json`, piece 2) | `0_-1` | yes, from the uncorrected render |
+| P1 | Begijnhof | **done** (`colours.json`, piece 2) | `0_-1` | yes, from the uncorrected render |
 | P2 | Artillerietoren | pending | `0_-1` | yes, from the uncorrected render |
 | P2 | Sint-Michielskerk | pending | `-1_-1` | yes, from the uncorrected render |
 | P2 | Buda (toren, fabriek, brug) | pending | `-1_-2` / `-2_-2` | yes, from the uncorrected render |
