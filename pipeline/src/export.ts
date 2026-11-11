@@ -113,11 +113,22 @@ async function readTile(layer: string, z: number, x: number, y: number): Promise
  */
 type Deck = { y: number; w: number; m: number; pts: Array<[number, number]>; box: number[] };
 let decks: Deck[] = [];
-const DECK_STYLE = "decks1"; // bump to re-export painted tiles after changing the deck drawing
+const DECK_STYLE = "decks2"; // bump to re-export painted tiles after changing the deck drawing
+/**
+ * Landmark bridges that are painted by hand into the art (render edit + repaint): no asphalt deck on
+ * top of them. Broelbrug (OSM way 567818112), next to the Broeltorens.
+ */
+const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }];
 function bridgeDecks(ways: Array<{ y: number; w: number; l: number; s: number[] }>) {
   decks = [];
+  const skip = PAINTED_BRIDGES.map((b) => ({ e: ecefToEnu(llhToEcef(b.lat, b.lon, GROUND_H)), r: b.r }));
+  const painted = (w: { s: number[] }) => {
+    for (let k = 0; k < w.s.length; k += 4)
+      if (skip.some(({ e, r }) => Math.hypot(w.s[k] - e[0], w.s[k + 1] - e[1]) < r)) return true;
+    return false;
+  };
   for (const w of ways) {
-    if (w.y <= 0) continue;
+    if (w.y <= 0 || painted(w)) continue;
     let run: Array<[number, number]> = [], scale = 0, n = 0;
     const flush = () => {
       if (run.length >= 2) {

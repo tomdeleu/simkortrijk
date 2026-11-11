@@ -7,6 +7,16 @@ description: Deploy SimKortrijk as the Cloudflare Worker `simkortrijk` (npx wran
 
 Outward-facing. Do not deploy because a local preview looks finished. The user has to ask.
 
+In Cloudflare, only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any other bucket, worker, domain, DNS, or setting. Never delete objects outside `regions/kortrijk/`. Do not add a custom domain on the bucket unless Tom asks.
+
+The live map is 29 tiles of `kortrijk-binnenstad` on that bucket. Six are painted (`tx` -2..0, `ty` -2..-1, the Broeltorens, style C). The rest is unpainted render. After the rest is painted and the user has asked, the sequence is `npm run export -- kortrijk-binnenstad`, `npm run dev` to look, then:
+
+```sh
+npm run publish -- kortrijk --yes --keep
+npm run build
+npx wrangler deploy
+```
+
 ## Deploy as one Worker (no R2)
 
 Tiles and pages are the same Worker. `wrangler.jsonc` sets `name` to `simkortrijk`, `workers_dev` to true, and `assets.directory` to `./web/dist`. By default tiles come from R2 (see below). Only with `TILES_ORIGIN=` (empty) does the build copy the export cache into `web/dist` so the browser loads `/regions/...` from the Worker.
@@ -48,7 +58,7 @@ npm run publish -- kortrijk
 
 Order inside `pipeline/src/publish.ts`: tiles and previews first, `world.json` last. Each object is checked (stored size equals local size). The published manifest is copied to `data/web-state/kortrijk.json`.
 
-Set `TILES_ORIGIN` to the bucket’s public origin before the next `npm run build` if the site should load tiles from R2 instead of the bundle. Then redeploy.
+Leave `TILES_ORIGIN` unset so the site keeps loading this bucket. Set `TILES_ORIGIN=` (empty) only when tiles should be copied into the Worker instead.
 
 | Name | Required | Secret |
 |---|---|---|

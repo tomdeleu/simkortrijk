@@ -22,6 +22,8 @@ Adapted from [Isometric World](https://github.com/krasun/isometricworld) (Dmytro
 | `web/` | Astro viewer. `/` and `/kortrijk` |
 | `pipeline/style/` | Style C (pastel game-like). `reference.png` is the painted Grote Markt tile. `trees.png` is mint/sage crowns. Not Tel Aviv imagery. |
 | `.claude/skills/` | One skill per step |
+| `pipeline/landmarks/broeltorens/edit_broel.py` | Hand edit of the Broeltorens render before that block is painted |
+| `pipeline/tools/assemble_block.py` | Paint tiles for a partial block, feathered into the render |
 
 `data/` is gitignored. Raw downloads are `data/raw/<area>/`. Renders and paints are `data/derived/<area>/`. The viewer reads `data/web/`.
 
@@ -78,6 +80,32 @@ Attribution on the map must include `Bron: Grootschalig Referentie Bestand Vlaan
 - Unpainted tiles are allowed. Export uses `paint/` where it exists and `render/` elsewhere.
 - Do not delete `data/derived/` or `data/web-state/`.
 - Do not run `npm run publish` or `npm run deploy` unless the user asked. Publish asks `[y/N]` unless `--yes`.
+
+## Cloudflare
+
+Only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any other bucket, worker, domain, DNS, or setting. Never delete objects outside `regions/kortrijk/`. A custom domain on the bucket only if Tom asks.
+
+## Where the binnenstad paint stands
+
+The live site serves 29 render tiles of `kortrijk-binnenstad`. Six are painted: `tx` -2..0, `ty` -2..-1, the Broeltorens block, style C, Nano Banana 2.1. The rest is unpainted render. Windows and paint tiles live in `data/derived` (gitignored) and the published copies are on R2.
+
+Before painting that block, run `python3 pipeline/landmarks/broeltorens/edit_broel.py` so the towers are cream stone with slate cones and the Broelbrug (OSM way 567818112) is drawn low between their feet. After the windows are accepted, `python3 pipeline/landmarks/broeltorens/edit_broel.py --restore` puts the raw render back. Assemble that block with `python3 pipeline/tools/assemble_block.py` (about 220 px of feather into the surrounding render). Do not use `npm run paint -- --assemble` for a partial block: it leaves a hard seam.
+
+A 3×3 around the towers is about 33 calls, about $1.10:
+
+```sh
+npm run paint -- kortrijk-binnenstad --near 50.83049,3.26704 --radius 1 --center 50.83049,3.26704 --interactive -j 3
+```
+
+Next, in this order:
+
+1. `roofNovelty` fails on every window (about 0.07–0.29, limit 0.04). The pipeline keeps the third attempt, so flat roofs still grow ridges. Tighten the prompt or enforce the check. Do not raise the limit to hide it.
+2. Land windows drift in colour. Only open sea is colour-matched. Add a match between neighbouring land windows.
+3. The Broeltorens cones are a bit squat.
+4. The beige quay downstream of the Broelbrug should be water. That is source data, not paint.
+5. Then paint the rest: `npm run paint -- kortrijk-binnenstad` (batch above 12 windows), `npm run export -- kortrijk-binnenstad`, `npm run dev` and look. Publish and deploy only when the user asks: `npm run publish -- kortrijk --yes --keep`, then `npm run build`, then `npx wrangler deploy`.
+6. Optional: the whole municipality, area `kortrijk`.
+7. A custom domain on the bucket only if Tom asks.
 
 ## Secrets
 
