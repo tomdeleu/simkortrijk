@@ -45,8 +45,9 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 | 13 | Corners around the block | paint `3_1` `3_2` `-3_2` `-3_3` `3_-3` `-3_-3`; windows `4_1` `4_2` `-4_2` `-4_3` `-4_4` `-3_4` `4_-4` `-4_-4` new (`4_1` `4_2` repainted once: invented water from the local style image), `3_-3` repainted (the 34 m chimney on the Groeningekaai is now in the render) | Hoog Mosscher (`massing.json`: brick château, slate hipped roof, turret; the render had a flat 17 m white block). `scene.ts` KNW fixes for the whole map, all checked on Street View: factory chimneys under 6 m² are kept and drawn in brick (Hof te Walle 35 m, Groeningekaai 34 m), high-voltage pylons and TV masts skipped (solid fake towers), DSM cabins capped at 4 m, DSM monuments at 8 m; Newfoundland Memorial (`massing.json`: granite cairn with the bronze caribou, not a 25 m cylinder). 41 unpainted render tiles re-rendered (these fixes plus the piece 6 shed cap) | **done**, live | 11 / ~$0.99 | 2026-11-13 |
 | 14 | North row above the canal | paint `-3_-4` `-2_-4` `-1_-4` `0_-4` `1_-4` `2_-4` `3_-4` `4_-4` `4_-3`; windows `-1_-5` `0_-5` `1_-5` `2_-5` `3_-5` new; windows above the tiles where row `-5` does not exist were skipped (half outside the map: their top fades into the render and the map-edge fade) | none named in the windows | **done**, live | 5 / ~$0.45 | 2026-11-13 |
 | 15 | South row below Pottelberg to Sint-Rochus | paint `-2_3` `-1_3` `0_3` `1_3` `2_3` `3_3`; windows `-2_4` `-1_4` new; `0_4` .. `3_4` skipped (row 4 ends at `tx` -1: the bottom of `0_3` .. `3_3` fades into the map edge) | Hoog Mosscher (window `-1_4`) | **done**, live | 2 / ~$0.18 | 2026-11-13 |
+| 15b | Tom's feedback: the R36 bridge over the Leie | repaint windows `-1_-3` `0_-3`; tiles `-1_-3` `0_-3` `-1_-2` `0_-2` reassembled | R36 bridge (Burgemeester Vercruysselaan, OSM way 826126060): the render drew the road on the ground, so the painter made a short dark slab on closed grass embankments. Street View: a long slender light-concrete deck on V piers, open below (park, skatebowl and quays pass under), white railings, lamp posts. New render edit `leiebruggen/edit_r36brug.ts` (fills the ground road under the deck with the water or grass beside it, then draws the raised deck, south edge, railings, lamps and piers; restored after painting) | **done**, live (published about 22:05 CET, 100 files) | 2 / ~$0.18 | 2026-11-13 |
 
-Progress: **64 of 109** tiles painted (58.7%), all live. The old 800 m binnenstad (29 tiles) is now fully painted. Total so far: 135 paint calls, about $12.15.
+Progress: **64 of 109** tiles painted (58.7%), all live. The old 800 m binnenstad (29 tiles) is now fully painted. Total so far: 137 paint calls, about $12.33.
 
 Open follow-ups: none from piece 4. K in Kortrijk, the Sint-Janstoren and the Baggaertshof were fixed and repainted in piece 4.
 
@@ -156,7 +157,7 @@ Each landmark has notes, photos and a priority in `pipeline/landmarks/<slug>/` (
 | P2 | Sint-Michielskerk | pending | `-1_-1` | yes, from the uncorrected render |
 | P2 | Buda (toren, fabriek, brug) | pending | `-1_-2` / `-2_-2` | yes, from the uncorrected render |
 | P2 | Collegebrug | pending | `-1_-2` | yes, from the uncorrected render |
-| P2 | Leiebruggen | Noordbrug **done** (render edit, piece 3); others pending | `-1_-1`, `-2_-1`, `-3_-1` | yes (piece 3) |
+| P2 | Leiebruggen | Noordbrug **done** (render edit, piece 3), R36 bridge **done** (render edit `edit_r36brug.ts`, 15b); others pending | `-1_-1`, `-2_-1`, `-3_-1` | yes (piece 3) |
 | P2 | Sint-Elooiskerk | **done** (`massing.json`, piece 3) | `-3_-2` | **yes** (piece 3); its spire was in the old map-edge fade (no longer: the map is bigger) |
 | P2 | K in Kortrijk | **done** (`massing.json`, piece 4) | `1_-1` | **yes** (piece 4) |
 | P2 | Sint-Janstoren | **done** (`massing.json` + `colours.json`, piece 4) | `1_-1` / `2_-1` | **yes** (piece 4) |

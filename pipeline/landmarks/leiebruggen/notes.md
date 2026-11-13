@@ -25,3 +25,9 @@ Leie bridges: flat modern bridges with light railings across a straight blue riv
 - refs/03-leieboorden-kortrijk.jpg
 
 Sources and licences: refs/SOURCES.md.
+
+## R36 bridge (Burgemeester Vercruysselaan)
+
+OSM way 826126060, 127 m, over the Leie at the mouth of the Kanaal Bossuit-Kortrijk, between two roundabouts. Street View (IJzerkaai bank, look-up only): a long, slender deck in light concrete on V-shaped piers on both banks, open below (Koning Albertpark paths, the skatebowl and the quays pass under), white railings and lamp posts. DHMV II: deck 16.6 m TAW at the ends, ~18.8 m in the middle, ~19 m wide; ground and water below at 10-12.5 m.
+
+**Done (2026-11-13, Tom's feedback):** render edit `edit_r36brug.ts`. The render drew the road on the ground (a closed embankment); the edit fills that strip with the water or grass beside it and draws the raised deck, its light south edge, railings, lamps and piers. Run it before painting windows `-1_-3` / `0_-3`, then `--restore` (originals in `render.orig-r36brug/`).
