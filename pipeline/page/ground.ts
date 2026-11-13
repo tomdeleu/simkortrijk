@@ -52,11 +52,19 @@ export function drawGround(
 
   // 1. areas
   for (const k of AREA_ORDER) for (const f of of(k)) {
+    if (k === "water" || k === "pool") continue; // below: all water at once, then pools
     path(f.r!); ctx.fillStyle = FILL[k]; ctx.fill("evenodd");
     if (k === "pitch") { ctx.lineWidth = 0.25; ctx.strokeStyle = "rgba(255,255,255,0.85)"; ctx.stroke(); }
     if (k === "pool") { ctx.lineWidth = 0.6; ctx.strokeStyle = "#e9ecee"; ctx.stroke(); }
-    if (k === "water") { ctx.lineWidth = 1; ctx.strokeStyle = "rgba(220,235,240,0.5)"; ctx.stroke(); }
   }
+  // water: fill every water area, stroke the light shore line, then fill again, so the line stays on the
+  // bank only. Stroking each area on its own drew a white line straight across the river wherever two
+  // water areas meet (the Leie and the canal mouth), and the painter turned it into a footbridge.
+  const waters = of("water");
+  for (const f of waters) { path(f.r!); ctx.fillStyle = FILL.water; ctx.fill("evenodd"); }
+  for (const f of waters) { path(f.r!); ctx.lineWidth = 1; ctx.strokeStyle = "rgba(220,235,240,0.5)"; ctx.stroke(); }
+  for (const f of waters) { path(f.r!); ctx.fillStyle = FILL.water; ctx.fill("evenodd"); }
+  for (const f of of("pool")) { path(f.r!); ctx.fillStyle = FILL.pool; ctx.fill("evenodd"); ctx.lineWidth = 0.6; ctx.strokeStyle = "#e9ecee"; ctx.stroke(); }
 
   // 2. sea: deep, shallows along the shore (clipped to the water), surf line
   for (const f of of("sea")) {

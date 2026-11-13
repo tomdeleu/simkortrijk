@@ -119,7 +119,7 @@ async function readTile(layer: string, z: number, x: number, y: number): Promise
  */
 type Deck = { y: number; w: number; m: number; pts: Array<[number, number]>; box: number[] };
 let decks: Deck[] = [];
-const DECK_STYLE = "decks4"; // bump to re-export painted tiles after changing the deck drawing
+const DECK_STYLE = "decks5"; // bump to re-export painted tiles after changing the deck drawing
 /**
  * Landmark bridges that are painted by hand into the art (render edit + repaint): no asphalt deck on
  * top of them. Broelbrug (OSM way 567818112), next to the Broeltorens; the R36 bridge over the Leie
@@ -157,10 +157,74 @@ function bridgeDecks(ways: Array<{ y: number; w: number; l: number; s: number[] 
   }
   decks.sort((a, b) => a.y - b.y);
 }
+/**
+ * Railway bridges (viaducts over streets): the painter draws the tracks running over the road, so on
+ * the outer sides of each rail bridge a light concrete parapet with a soft shadow line is laid over the
+ * paint (not between two tracks side by side). Tom, 2026-11-13. Hand-painted rail bridges are skipped.
+ */
+type Parapet = { pts: Array<[number, number]>; m: number; box: number[] };
+let parapets: Parapet[] = [];
+const PAINTED_RAIL_BRIDGES = [{ lat: 50.82746, lon: 3.25052, r: 35 }]; // De Drie Duikers (edit_bridges.ts)
+async function railParapets(areas: string[], heights: Heights) {
+  parapets = [];
+  const skip = PAINTED_RAIL_BRIDGES.map((b) => ({ e: ecefToEnu(llhToEcef(b.lat, b.lon, GROUND_H)), r: b.r }));
+  const rails: Array<Array<{ e: number[]; vis: number }>> = [];
+  const seen = new Set<number>();
+  for (const a of areas) {
+    const f = join(RAW, a, "ground.json");
+    if (!existsSync(f)) continue;
+    for (const el of readJson(f).elements ?? []) {
+      const t = el.tags ?? {};
+      if (seen.has(el.id) || el.type !== "way" || !el.geometry || t.railway !== "rail" || !(Number(t.layer) > 0 || (t.bridge && t.bridge !== "no"))) continue;
+      seen.add(el.id);
+      const pts: Array<{ e: number[]; vis: number }> = [];
+      for (let i = 0; i < el.geometry.length - 1; i++) {
+        const a0 = el.geometry[i], b0 = el.geometry[i + 1];
+        const ea = ecefToEnu(llhToEcef(a0.lat, a0.lon, 0)), eb = ecefToEnu(llhToEcef(b0.lat, b0.lon, 0));
+        const n = Math.max(1, Math.ceil(Math.hypot(eb[0] - ea[0], eb[1] - ea[1]) / 3));
+        for (let k = 0; k < n + (i === el.geometry.length - 2 ? 1 : 0); k++) {
+          const f2 = k / n, lat = a0.lat + (b0.lat - a0.lat) * f2, lon = a0.lon + (b0.lon - a0.lon) * f2;
+          const g = await onGround(heights, lat, lon);
+          const surf = heights.at(g.x, g.y);
+          const e = ecefToEnu(llhToEcef(lat, lon, g.h));
+          const [px, py] = enuToPixel(e);
+          const vis = (surf === null || surf <= g.h + 2.5) && edgeDistance(px, py) >= (EDGE0 + EDGE1) / 2 ? 1 : 0;
+          pts.push({ e, vis });
+        }
+      }
+      if (pts.length >= 2 && !pts.some((p) => skip.some(({ e, r }) => Math.hypot(p.e[0] - e[0], p.e[1] - e[1]) < r))) rails.push(pts);
+    }
+  }
+  const OFF = 2.5; // m from the track axis to the parapet
+  const near = (x: number, y: number, self: number) => rails.some((r, j) => j !== self && r.some((p) => Math.hypot(p.e[0] - x, p.e[1] - y) < 2.6));
+  rails.forEach((r, i) => {
+    for (const side of [-1, 1]) {
+      let run: Array<[number, number]> = [], scale = 0, n = 0;
+      const flush = () => {
+        if (run.length >= 2) {
+          const xs = run.map((p) => p[0]), ys = run.map((p) => p[1]);
+          parapets.push({ pts: run, m: scale / n, box: [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)] });
+        }
+        run = []; scale = 0; n = 0;
+      };
+      r.forEach((p, k) => {
+        const q = r[Math.min(r.length - 1, k + 1)], o = r[Math.max(0, k - 1)];
+        const dx = q.e[0] - o.e[0], dy = q.e[1] - o.e[1], L = Math.hypot(dx, dy) || 1;
+        const nx = (-dy / L) * side, ny = (dx / L) * side;
+        // another track on this side (double-track viaduct): no parapet between the tracks
+        if (!p.vis || near(p.e[0] + nx * 4.5, p.e[1] + ny * 4.5, i)) { flush(); return; }
+        const a = enuToPixel([p.e[0] + nx * OFF, p.e[1] + ny * OFF, p.e[2] + 1]), b = enuToPixel([p.e[0] + nx * (OFF + 1), p.e[1] + ny * (OFF + 1), p.e[2] + 1]);
+        run.push([a[0], a[1]]); scale += Math.hypot(b[0] - a[0], b[1] - a[1]); n++;
+      });
+      flush();
+    }
+  });
+}
 /** SVG of the bridge decks crossing a native web tile at global art px (x0, y0), or null */
 function deckSvg(x0: number, y0: number) {
   const hit = decks.filter((d) => d.box[0] < x0 + SPAN + d.w && d.box[2] > x0 - d.w && d.box[1] < y0 + SPAN + d.w && d.box[3] > y0 - d.w);
-  if (!hit.length) return null;
+  const rail = parapets.filter((d) => d.box[0] < x0 + SPAN + 8 && d.box[2] > x0 - 8 && d.box[1] < y0 + SPAN + 8 && d.box[3] > y0 - 8);
+  if (!hit.length && !rail.length) return null;
   const line = (d: Deck, color: string, width: number, extra = "") =>
     `<polyline points="${d.pts.map(([x, y]) => `${((x - x0) * HD).toFixed(1)},${((y - y0) * HD).toFixed(1)}`).join(" ")}" fill="none" stroke="${color}" stroke-width="${width.toFixed(1)}" stroke-linejoin="round" ${extra}/>`;
   const body = hit.map((d) => {
@@ -169,6 +233,9 @@ function deckSvg(x0: number, y0: number) {
     // pavement), so a deck reads as the same road passing over, not as a dark render strip (Tom, 2026-11-13)
     return line(d, "#8a8191", w + 1.5 * m, 'stroke-linecap="butt"') + line(d, "#ece4dc", w + 0.9 * m, 'stroke-linecap="butt"')
       + line(d, "#a59ba9", w, 'stroke-linecap="butt"') + line(d, "#f6f2ec", 0.15 * m, `stroke-dasharray="${3 * m} ${3 * m}"`);
+  }).join("") + rail.map((d) => {
+    const m = d.m * HD, pl = (c: string, w: number, dy: number) => `<polyline points="${d.pts.map(([x, y]) => `${((x - x0) * HD).toFixed(1)},${((y - y0) * HD + dy).toFixed(1)}`).join(" ")}" fill="none" stroke="${c}" stroke-width="${w.toFixed(1)}" stroke-linejoin="round" stroke-linecap="round"/>`;
+    return pl("#8a8191", 0.7 * m, 0.9 * m) + pl("#ece4dc", 0.6 * m, 0) + pl("#f8f4ee", 0.2 * m, -0.15 * m);
   }).join("");
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${TS}" height="${TS}">${body}</svg>`);
 }
@@ -407,6 +474,7 @@ async function exportRoads(areas: string[], heights: Heights) {
     if (edgeDistance(x, y) < (EDGE0 + EDGE1) / 2) { w.s[k + 3] = 0; occluded++; }
   }
   bridgeDecks(ways);
+  await railParapets(areas, heights);
   writeData("roads", JSON.stringify(encodeRoads(ways)));
   console.log(`  roads: ${ways.length} ways, ${total} samples, ${((occluded / Math.max(1, total)) * 100).toFixed(1)}% occluded`);
 }

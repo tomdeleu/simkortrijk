@@ -44,4 +44,6 @@ All bridges in painted tiles were checked in the paint and on Google Street View
 | De Drie Duikers (rail, OSM 298628668/7) | double-track steel girder bridge | bare tracks over water | light grey side girders |
 | Kasteelbrug, Leiebrug, Dambrug, Gentsesteenweg, lock footbridge, R36 west | flat modern bridges with steel railings | flat road over water | fine (export deck in road colour) |
 
-Still open: railway viaducts over streets (tracks drawn over the road, no parapets).
+Railway viaducts over streets: `export.ts` (`railParapets`) lays light concrete parapets along their outer sides over the paint (2026-11-13).
+
+R36 bridge, second pass (Tom: "it floats"): the deck now starts at the road's own height, rises in a hump, narrows to the road width and takes the road's render colour, so it continues the road instead of hovering over it.
