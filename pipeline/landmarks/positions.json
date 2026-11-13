@@ -124,5 +124,15 @@
   "prio": "P3",
   "lat": 50.8202325,
   "lon": 3.2555048
+ },
+ "hoog-mosscher": {
+  "prio": "P3",
+  "lat": 50.8150719,
+  "lon": 3.2559102
+ },
+ "newfoundland-memorial": {
+  "prio": "P3",
+  "lat": 50.8387337,
+  "lon": 3.2851944
  }
 }

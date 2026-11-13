@@ -7,7 +7,7 @@ description: Paint the next piece (stuk) of the SimKortrijk map end to end, the 
 
 A piece (`stuk`) is a few neighbouring render tiles plus the landmarks in them. One piece at a time. `docs/PAINT_STATUS.md` is the source of truth (piece table, grid, landmarks, lessons): read it first, and read `.claude/skills/map-style/SKILL.md` and `.claude/skills/paint-tiles/SKILL.md` once per session.
 
-Tom's rule (`PAINT_STATUS.md`, "Working rule"): propose, wait for his go, do the piece, record it. When Tom says to work on his own ("zelfstandig"), skip the wait but still do every step below, and stop before publishing unless he said to publish.
+Tom's rule (`PAINT_STATUS.md`, "Working rule"): propose, wait for his go, do the piece, record it. When Tom says to work on his own ("zelfstandig"), skip the wait but still do every step below, and publish, commit and deploy at the end (standing permission).
 
 Paths below are relative to the repo root. `D=data/derived/kortrijk-binnenstad`. The Python tools need `pillow numpy scipy` (Tom's system Python has none: make a venv in the scratchpad, `python3 -m venv $S/venv && $S/venv/bin/pip install pillow numpy scipy`).
 
@@ -24,8 +24,10 @@ Paths below are relative to the repo root. `D=data/derived/kortrijk-binnenstad`.
 For every landmark in the piece (and any large building the render gets wrong, like Hangar K's sawtooth roof):
 
 - `python3 pipeline/tools/landmark_refs.py <slug> --search "<name> Kortrijk" --require Kortrijk --ortho <lat>,<lon>`: Commons photos (licence and author into `refs/SOURCES.md`, max 900 px) and a Digitaal Vlaanderen orthophoto crop. Add searches for the Onroerend Erfgoed inventory name (`--search "parochiekerk Sint-X Kortrijk"`). `--require` is needed: Commons search also returns churches of the same name in other towns. The tool retries Wikimedia's 429.
+- **Street View is required (Tom).** If Claude in Chrome is not connected, use the Chrome DevTools browser (`mcp__plugin_chrome-devtools-mcp_chrome-devtools__new_page` / `navigate_page` / `take_screenshot`; wait ~5 s with `evaluate_script` before the screenshot; on Google's consent page click "Alles afwijzen"). Check every named landmark and every tall or odd object the tool lists (chimneys, silos, monuments, masts) before deciding how it renders.
 - Google Street View and satellite (Claude in Chrome, `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=<lat>,<lon>&heading=<deg>&pitch=15&fov=90`, satellite `https://www.google.com/maps/@<lat>,<lon>,90m/data=!3m1!1e3`): **look only, never store** (rule 1). The camera looks along heading 20°, so the facades that matter face south-south-west: stand south-west of the building and look north-east. Never record the Maps sidebar (it shows Tom's saved places).
 - WebSearch for dates, materials and the inventory text when the photos leave questions.
+- To crop the render at a lat/lon, project with `llhToPixel(lat, lon, 20 + height)` (the ground is ~20 m in that frame); at 0 the crop lands ~60 px too low.
 - `cd pipeline && npx tsx tools/landmark_measure.ts <OIDN>` prints the footprint in (u, v) metres, `anchor`, `axis_deg`, where u and v point, and an nDSM grid: read ridges (a row or column of maxima), eaves (the edge values), towers (a local peak; a LiDAR spire tip is a few m short) and sawtooth roofs (a periodic pattern). Find the OIDN with the GRB footprints near the OSM centre in `data/raw/<area>/buildings.geojson`.
 - Write `pipeline/landmarks/<slug>/notes.md` (what it looks like, OSM/GRB ids, the render fix, references), and add the slug to `pipeline/landmarks/positions.json` and the table in `pipeline/landmarks/README.md`.
 
@@ -73,7 +75,7 @@ TILES_ORIGIN=https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev npm run export 
 - `cd pipeline && npx tsx src/paintstatus.ts --next="<next tiles>" --label "voorstel: stuk N+1 ..."` regenerates `docs/paint-status.png` with the next proposal.
 - Report to Tom: what changed, calls and cost, screenshots, open points, and the proposal for the next piece.
 
-## 8. Publish (only when Tom says so)
+## 8. Publish, commit, deploy (standing permission from Tom, 2026-11-13)
 
 ```sh
 cd /private/tmp && TOK=$(npx -y wrangler auth token | tail -1) && cd - && \
@@ -81,4 +83,4 @@ CLOUDFLARE_API_TOKEN="$TOK" CLOUDFLARE_ACCOUNT_ID=fa71ab6722bdece3cb45e84ff630e3
 TILES_ORIGIN=https://pub-74f69231228247acb76f1009b1fa86f5.r2.dev npm run publish -- kortrijk --yes --keep
 ```
 
-Tiles-only changes need no Worker redeploy. Check `.../regions/kortrijk/data/world.json` answers 200, then mark the piece live in `PAINT_STATUS.md` and `CLAUDE.md`. Commit and open a PR only when Tom asks (branch `pieceN-<where>`).
+A big publish (thousands of files, ~4 files/s) takes longer than the 10-minute limit of a foreground command and is then cut off: run it with `run_in_background` and its full output in a log file (no `| tail`, which hides the error). Tiles-only changes need no Worker redeploy. Check `.../regions/kortrijk/data/world.json` answers 200, then mark the piece live in `PAINT_STATUS.md` and `CLAUDE.md`. Then commit on a branch (`pieceN-<where>`), push, open the PR and merge it to main, and redeploy the Worker (`TILES_ORIGIN=... npm run build`, then `npx wrangler deploy --env-file <empty file>`). No need to ask first.
