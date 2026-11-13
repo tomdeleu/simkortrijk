@@ -7,13 +7,15 @@
  * Tom's feedback 2026-11-13). Like edit_noordbrug.ts: originals are kept in
  * data/derived/<area>/render.orig-r36brug/ and put back with --restore after painting.
  *
+ *   (draws onto the current render: run --restore first before drawing it again)
  *   npx tsx landmarks/leiebruggen/edit_r36brug.ts            # draw
  *   npx tsx landmarks/leiebruggen/edit_r36brug.ts --restore  # put the raw render back
  *
  * Geometry (Lambert 72, metres; heights TAW): the OSM bridge way runs 127 m from (72497.2, 169945.5)
  * to (72614.8, 169898.0). DHMV II: deck 16.6 m at the ends rising to ~18.8 m in the middle, ground and
  * water below at 10-12.5 m; the deck spans offsets -10.5 .. +8.5 m from the OSM axis (normal points
- * north-north-east, so the -10.5 edge is the south side the camera sees).
+ * north-north-east, so the -10.5 edge is the south side the camera sees). Colours are the painted road and
+ * pavement colours (#a59ba9, #ece4dc): a darker deck made the painter paint a dark bridge (Tom, 2026-11-13).
  */
 import { copyFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
@@ -68,8 +70,8 @@ for (const k of tiles) {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${T}" height="${T}">`
     + poly(shadow, "#3a3d44", `fill-opacity="0.18"`)
     + piers.map(([a, b]) => line(a, b, 5, "#b9b8b2") + line(a, b, 3, "#dddbd4")).join("")
-    + poly(fascia, "#e2e0d9") + pl(edge(SOUTH, -1.6), 1.2, "#a9a7a0")
-    + poly(top, "#74777e")
+    + poly(fascia, "#ece4dc") + pl(edge(SOUTH, -1.6), 1.2, "#b9b0b8")
+    + poly(top, "#a59ba9")
     + pl(edge(SOUTH + 1.2), 1.4, "#e9e9e6") + pl(edge(NORTH - 1.2), 1.4, "#e9e9e6") + pl(edge(-1), 1.1, "#f2f2ee", "6 6")
     + pl(edge(SOUTH, 1.1), 1.6, "#f4f4f1") + pl(edge(NORTH, 1.1), 1.4, "#f4f4f1")
     + lamps.map(([a, b]) => line(a, b, 1.4, "#8d9097")).join("")
@@ -79,7 +81,8 @@ for (const k of tiles) {
   const strip = [...ts.filter((t) => t > 5 && t < LEN - 5).map((t) => P(t, SOUTH - 2.5, GROUND)), ...ts.filter((t) => t > 5 && t < LEN - 5).map((t) => P(t, NORTH + 2.5, GROUND)).reverse()];
   const maskSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${T}" height="${T}">${poly(strip, "#fff")}</svg>`;
   const mask = await sharp(Buffer.from(maskSvg)).greyscale().raw().toBuffer();
-  const { data: px, info } = await sharp(keep).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  // draw onto the current render (other render edits may already be in it); --restore puts the raw one back
+  const { data: px, info } = await sharp(await sharp(file).toBuffer()).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   for (let x = 0; x < T; x++) {
     let bot = -1;
     for (let y = T - 1; y >= 0; y--) if (mask[y * T + x] > 127) { bot = y; break; }
