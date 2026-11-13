@@ -34,7 +34,10 @@ import { MAX_ATTEMPTS, MAX_ROOF_NOVELTY, MIN_MATCH, MIN_TEXTURE, paintVerdict, s
 const WIN = 1024, OVERLAP = 128, STRIDE = WIN - OVERLAP, T = CAMERA.tile;
 /** Blend band in the middle of each overlap; outside it a window's own pixels win outright. */
 const FEATHER = 64;
-const STYLE = join(PIPELINE, "style", "reference.png");
+// PAINT_STYLE overrides the style image for one run: windows with little content (rail yards, open
+// ground) tend to come back as a copy of reference.png (the Broeltorens and the Leie); a painted window
+// of a similar area as the style image avoids that (piece 8).
+const STYLE = process.env.PAINT_STYLE || join(PIPELINE, "style", "reference.png");
 const TREES = join(PIPELINE, "style", "trees.png"); // pastel mint and sage crowns, style C
 const SEA = join(PIPELINE, "style", "sea.png");
 /** Background of the model input outside the map (cream paper). */

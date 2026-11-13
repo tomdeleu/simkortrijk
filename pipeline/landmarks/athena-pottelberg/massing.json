@@ -1,0 +1,145 @@
+{
+ "_doc": "Render massing for Athena campus Pottelberg (Pottelberg 4, secondary school; Nominatim name, not in our OSM extract), read by pipeline/src/scene.ts. GRB 1746889 (the U of wings) rendered as one flat 26.85 m block with orange walls (3D GRB HN_P99 is the highest ridge). Metres in Lambert 72 around 'anchor' (vertex mean), u along 'axis_deg' -51.5 (u south-east, v north-east). DHMV II: wings ~10 m wide with pitched roofs: west wing ridge 21.5 m along v at u -59 (eaves ~17.5 m), north wing west half ridge 27 m along u at v 38-40 (eaves ~20 m), north wing east half ridge 17.5 m (eaves 14.5 m), east wing ridge 23 m at u 49-51 (eaves ~17 m), its north end lower. Look (orthophoto in refs/: red tile roofs; wall colour not checked, Street View was not available): red tiled pitched roofs on brick wings around a courtyard.",
+ "anchor": [
+  50.8202325,
+  3.2555048
+ ],
+ "axis_deg": -51.5,
+ "replace_oidn": [
+  1746889
+ ],
+ "parts": [
+  {
+   "id": "wings up to the lowest eave (GRB footprint)",
+   "footprint": "grb",
+   "h": 14,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.55,
+    0.45
+   ],
+   "roof": [
+    0.8,
+    0.46,
+    0.36
+   ]
+  },
+  {
+   "id": "west wing",
+   "rect": [
+    -64,
+    -54,
+    -69,
+    29
+   ],
+   "h": 21.5,
+   "eave": 17.5,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.55,
+    0.45
+   ],
+   "roof": [
+    0.8,
+    0.46,
+    0.36
+   ]
+  },
+  {
+   "id": "north wing, tall west half",
+   "rect": [
+    -64,
+    -25,
+    29,
+    47
+   ],
+   "h": 27,
+   "eave": 20,
+   "shape": "gable-u",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.55,
+    0.45
+   ],
+   "roof": [
+    0.8,
+    0.46,
+    0.36
+   ]
+  },
+  {
+   "id": "north wing, east half",
+   "rect": [
+    -25,
+    42.5,
+    31,
+    43
+   ],
+   "h": 17.5,
+   "eave": 14.5,
+   "shape": "gable-u",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.55,
+    0.45
+   ],
+   "roof": [
+    0.8,
+    0.46,
+    0.36
+   ]
+  },
+  {
+   "id": "east wing",
+   "rect": [
+    42.5,
+    53.5,
+    -70,
+    15
+   ],
+   "h": 23,
+   "eave": 17,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.55,
+    0.45
+   ],
+   "roof": [
+    0.8,
+    0.46,
+    0.36
+   ]
+  },
+  {
+   "id": "east wing, north end",
+   "rect": [
+    42.5,
+    53.5,
+    15,
+    31
+   ],
+   "h": 18.5,
+   "eave": 14.5,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.55,
+    0.45
+   ],
+   "roof": [
+    0.8,
+    0.46,
+    0.36
+   ]
+  }
+ ]
+}

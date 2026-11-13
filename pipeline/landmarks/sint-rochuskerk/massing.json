@@ -1,0 +1,243 @@
+{
+ "_doc": "Render massing for the Sint-Rochuskerk (Pijlstraat; OSM way 568247160, Q1846945; neo-Gothic 1863-1870, west tower 1875, no longer a parish church since 2020), read by pipeline/src/scene.ts. GRB 1738471 rendered as a cream box with a stubby cream LiDAR octagon. Metres in Lambert 72 around 'anchor' (vertex mean of the footprint), u along 'axis_deg' -175.7 (u points west: u +21 is the Pijlstraat front with the tower), v to the south: v +7.2 is the south wall on the Sint-Rochus parking. DHMV II: one broad roof over nave and aisles, ridge 19 m on v -4.5, eaves ~12 m; choir to u -31.6 with a three-sided apse, ridge ~17 m; low sacristies 5-8 m beside the choir; tower u 15.5..22.5, LiDAR spire tip 44.6 m (under-sampled). Look (Commons refs/, Street View Pijlstraat and parking, Google satellite; look-up only): dark red-brown brick, dark slate roof, brick west tower with clock and belfry stage, octagonal slate needle with four corner pinnacles, rose window and lancet windows, red door.",
+ "anchor": [
+  50.8199241,
+  3.270074
+ ],
+ "axis_deg": -175.7,
+ "replace_oidn": [
+  1738471
+ ],
+ "parts": [
+  {
+   "id": "sacristies and side rooms (GRB footprint)",
+   "footprint": "grb",
+   "h": 6,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "nave and aisles under one roof",
+   "rect": [
+    -24,
+    15.5,
+    -16.6,
+    7.2
+   ],
+   "h": 19,
+   "eave": 12,
+   "shape": "gable-u",
+   "style": 6,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "choir",
+   "rect": [
+    -31.6,
+    -24,
+    -9.2,
+    0.9
+   ],
+   "h": 17,
+   "eave": 12,
+   "shape": "gable-u",
+   "style": 6,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "three-sided apse",
+   "poly": [
+    [
+     -31.6,
+     0.9
+    ],
+    [
+     -34.4,
+     -1.8
+    ],
+    [
+     -34.5,
+     -6.3
+    ],
+    [
+     -31.7,
+     -9.2
+    ]
+   ],
+   "h": 15,
+   "eave": 12,
+   "shape": "pyramid",
+   "style": 6,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "west tower (brick, clock and belfry stage)",
+   "rect": [
+    15.5,
+    22.5,
+    -8,
+    -1
+   ],
+   "h": 27,
+   "shape": "flat",
+   "style": 6,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "octagonal slate needle",
+   "oct": [
+    19,
+    -4.5,
+    3.2
+   ],
+   "h": 47,
+   "eave": 27,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.48,
+    0.52,
+    0.61
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "corner pinnacle 1",
+   "oct": [
+    15.9,
+    -7.6,
+    0.6
+   ],
+   "h": 31.5,
+   "eave": 27,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "corner pinnacle 2",
+   "oct": [
+    22.1,
+    -7.6,
+    0.6
+   ],
+   "h": 31.5,
+   "eave": 27,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "corner pinnacle 3",
+   "oct": [
+    15.9,
+    -1.4,
+    0.6
+   ],
+   "h": 31.5,
+   "eave": 27,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "corner pinnacle 4",
+   "oct": [
+    22.1,
+    -1.4,
+    0.6
+   ],
+   "h": 31.5,
+   "eave": 27,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.7,
+    0.47,
+    0.39
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  }
+ ]
+}

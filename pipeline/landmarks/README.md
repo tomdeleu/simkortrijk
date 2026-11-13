@@ -26,6 +26,11 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 | P2 | schouwburg | Stadsschouwburg | brick + white stone, stepped gables, slate |
 | P3 | groeningeabdij | Groeningeabdij (Abby) | brick wings with steep tiled roofs |
 | P3 | baggaertshof | Baggaertshof | done (colours.json): whitewash + red pantiles |
+| P2 | sint-janskerk | Sint-Janskerk | done (massing.json): buff stone cruciform church, crossing tower with slate needle + turrets |
+| P3 | verrijzeniskerk | Verrijzeniskerk | done (massing.json): round white church, green copper cone, lantern and spire |
+| P3 | athena-pottelberg | Athena campus Pottelberg | done (massing.json): gabled school wings instead of a flat 27 m block |
+| P3 | sint-rochuskerk | Sint-Rochuskerk | done (massing.json): dark brick, one slate roof, apse, brick tower with slate needle + 4 pinnacles |
+| P3 | hangar-k | Hangar K | done (massing.json): 16 red gabled bays on a brick hall |
 | P3 | groeningemonument | Groeningemonument + poort | statue in park |
 | - | _city | oblique aerials of the binnenstad | palette check for building_colours.py |
 

@@ -1,0 +1,156 @@
+{
+ "_doc": "Render massing for the Verrijzeniskerk (Burgemeester Pyckestraat, Doorniksewijk; OSM way 581276680, Q104684849), read by pipeline/src/scene.ts. GRB 1739037 (round, 3D GRB 8.1 m) rendered as a flat grey disc. Metres in Lambert 72 around 'anchor' (vertex mean), axis_deg -53.8 (irrelevant for a round plan). DHMV II: a cone from ~3 m at the rim to ~8 m half way and 12-14 m at the centre (u 1.5, v -1.5), ~22 m across. Look (Onroerend Erfgoed photo 10793 in refs/, orthophoto; no Street View, the browser was not connected): modern round church with low white walls, a pleated green copper roof of star points, and a green copper lantern with a thin spire and cross in the middle.",
+ "anchor": [
+  50.818703,
+  3.2620336
+ ],
+ "axis_deg": -53.8,
+ "replace_oidn": [
+  1739037
+ ],
+ "parts": [
+  {
+   "id": "low white wall (GRB footprint)",
+   "footprint": "grb",
+   "h": 4.5,
+   "shape": "flat",
+   "style": 5,
+   "wall": [
+    0.93,
+    0.92,
+    0.88
+   ],
+   "roof": [
+    0.5,
+    0.75,
+    0.65
+   ]
+  },
+  {
+   "id": "pleated green copper roof (as a cone)",
+   "poly": [
+    [
+     12.0,
+     -2.0
+    ],
+    [
+     11.16,
+     2.21
+    ],
+    [
+     8.78,
+     5.78
+    ],
+    [
+     5.21,
+     8.16
+    ],
+    [
+     1.0,
+     9.0
+    ],
+    [
+     -3.21,
+     8.16
+    ],
+    [
+     -6.78,
+     5.78
+    ],
+    [
+     -9.16,
+     2.21
+    ],
+    [
+     -10.0,
+     -2.0
+    ],
+    [
+     -9.16,
+     -6.21
+    ],
+    [
+     -6.78,
+     -9.78
+    ],
+    [
+     -3.21,
+     -12.16
+    ],
+    [
+     1.0,
+     -13.0
+    ],
+    [
+     5.21,
+     -12.16
+    ],
+    [
+     8.78,
+     -9.78
+    ],
+    [
+     11.16,
+     -6.21
+    ]
+   ],
+   "h": 11.5,
+   "eave": 4.5,
+   "shape": "pyramid",
+   "style": 5,
+   "wall": [
+    0.93,
+    0.92,
+    0.88
+   ],
+   "roof": [
+    0.5,
+    0.75,
+    0.65
+   ]
+  },
+  {
+   "id": "green copper lantern",
+   "oct": [
+    1,
+    -2,
+    2.2
+   ],
+   "h": 15,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.5,
+    0.75,
+    0.65
+   ],
+   "roof": [
+    0.5,
+    0.75,
+    0.65
+   ]
+  },
+  {
+   "id": "thin spire",
+   "oct": [
+    1,
+    -2,
+    1.6
+   ],
+   "h": 23,
+   "eave": 15,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.5,
+    0.75,
+    0.65
+   ],
+   "roof": [
+    0.5,
+    0.75,
+    0.65
+   ]
+  }
+ ]
+}
