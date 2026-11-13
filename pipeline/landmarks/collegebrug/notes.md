@@ -13,9 +13,9 @@ Footbridge and cycle bridge (2012, Ney & Partners), 203 m long. It zigzags in an
 
 Collegebrug: a slim grey steel footbridge zigzagging over the river, hung by cables from two leaning masts.
 
-## Render fixes needed
+## Render fix
 
-- The render has only the deck as a road (if any). Draw two slanted mast lines and fan cables, or say it in the window prompt. Check that its tile is inside the area tiles first.
+**Done (2026-11-13, Tom's feedback):** render edit `edit_collegebrug.ts`. The render had a flat path (the painter made a straight white line). Google satellite and Street View: an S-curve from the Diksmuidekaai over the Leie, a wide bend over the Budabeach park and on along the bank to the IJzerkaai, hung from sagging cables between two slanted A-masts on the two banks. The edit fills the ground path under the deck with what lies beside it and draws the deck (OSM line, DHMV height, ~4.5 m wide) in the painted path colour with a grey steel girder, railings, masts, cables and hangers. Run before painting windows `-2_-3` / `-1_-3`, then `--restore` (originals in `render.orig-collegebrug/`); it draws onto the current render, so run it after `leiebruggen/edit_r36brug.ts`.
 
 ## References
 

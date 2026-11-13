@@ -119,12 +119,13 @@ async function readTile(layer: string, z: number, x: number, y: number): Promise
  */
 type Deck = { y: number; w: number; m: number; pts: Array<[number, number]>; box: number[] };
 let decks: Deck[] = [];
-const DECK_STYLE = "decks2"; // bump to re-export painted tiles after changing the deck drawing
+const DECK_STYLE = "decks3"; // bump to re-export painted tiles after changing the deck drawing
 /**
  * Landmark bridges that are painted by hand into the art (render edit + repaint): no asphalt deck on
- * top of them. Broelbrug (OSM way 567818112), next to the Broeltorens.
+ * top of them. Broelbrug (OSM way 567818112), next to the Broeltorens; the R36 bridge over the Leie
+ * (OSM way 826126060, landmarks/leiebruggen/edit_r36brug.ts).
  */
-const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }];
+const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }, { lat: 50.83456, lon: 3.26934, r: 40 }];
 function bridgeDecks(ways: Array<{ y: number; w: number; l: number; s: number[] }>) {
   decks = [];
   const skip = PAINTED_BRIDGES.map((b) => ({ e: ecefToEnu(llhToEcef(b.lat, b.lon, GROUND_H)), r: b.r }));
@@ -164,8 +165,10 @@ function deckSvg(x0: number, y0: number) {
     `<polyline points="${d.pts.map(([x, y]) => `${((x - x0) * HD).toFixed(1)},${((y - y0) * HD).toFixed(1)}`).join(" ")}" fill="none" stroke="${color}" stroke-width="${width.toFixed(1)}" stroke-linejoin="round" ${extra}/>`;
   const body = hit.map((d) => {
     const m = d.m * HD, w = d.w * HD; // web px per metre across the deck, deck width in web px
-    return line(d, "#55565c", w + 1.5 * m, 'stroke-linecap="butt"') + line(d, "#e2ddd2", w + 0.9 * m, 'stroke-linecap="butt"')
-      + line(d, "#6e7078", w, 'stroke-linecap="butt"') + line(d, "#f4f1ea", 0.15 * m, `stroke-dasharray="${3 * m} ${3 * m}"`);
+    // painted road colours (sampled next to the bridge ends on the paint: lavender-grey asphalt, light
+    // pavement), so a deck reads as the same road passing over, not as a dark render strip (Tom, 2026-11-13)
+    return line(d, "#8a8191", w + 1.5 * m, 'stroke-linecap="butt"') + line(d, "#ece4dc", w + 0.9 * m, 'stroke-linecap="butt"')
+      + line(d, "#a59ba9", w, 'stroke-linecap="butt"') + line(d, "#f6f2ec", 0.15 * m, `stroke-dasharray="${3 * m} ${3 * m}"`);
   }).join("");
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${TS}" height="${TS}">${body}</svg>`);
 }
