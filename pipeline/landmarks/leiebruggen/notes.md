@@ -31,3 +31,17 @@ Sources and licences: refs/SOURCES.md.
 OSM way 826126060, 127 m, over the Leie at the mouth of the Kanaal Bossuit-Kortrijk, between two roundabouts. Street View (IJzerkaai bank, look-up only): a long, slender deck in light concrete on V-shaped piers on both banks, open below (Koning Albertpark paths, the skatebowl and the quays pass under), white railings and lamp posts. DHMV II: deck 16.6 m TAW at the ends, ~18.8 m in the middle, ~19 m wide; ground and water below at 10-12.5 m.
 
 **Done (2026-11-13, Tom's feedback):** render edit `edit_r36brug.ts`. The render drew the road on the ground (a closed embankment); the edit fills that strip with the water or grass beside it and draws the raised deck, its light south edge, railings, lamps and piers. Run it before painting windows `-1_-3` / `0_-3`, then `--restore` (originals in `render.orig-r36brug/`).
+
+## The other bridges (2026-11-13, Tom: "recheck all bridges")
+
+All bridges in painted tiles were checked in the paint and on Google Street View from the deck (look-up only). `edit_bridges.ts` draws the ones the painter got wrong, one spec per bridge, in painted colours, onto the current render (`--restore` after painting; originals in `render.orig-bridges/`):
+
+| Bridge | Real | Was painted as | Now |
+|---|---|---|---|
+| Budabrug (Budastraat, OSM 1264315394, 2014) | flat steel road bridge, dark slanted side girders, white mesh railings | arched stone bridge | `edit_bridges.ts`, kept out of the export deck overlay |
+| Kalkovenbrug (OSM 118613392) | narrow footbridge (timber until 2025, composite from 2026) | thin white line | slim footbridge |
+| Footbridge at the Nijverheidskaai (OSM 767977976) | slim steel footbridge | thin white line | slim footbridge |
+| De Drie Duikers (rail, OSM 298628668/7) | double-track steel girder bridge | bare tracks over water | light grey side girders |
+| Kasteelbrug, Leiebrug, Dambrug, Gentsesteenweg, lock footbridge, R36 west | flat modern bridges with steel railings | flat road over water | fine (export deck in road colour) |
+
+Still open: railway viaducts over streets (tracks drawn over the road, no parapets).

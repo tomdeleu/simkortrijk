@@ -119,13 +119,13 @@ async function readTile(layer: string, z: number, x: number, y: number): Promise
  */
 type Deck = { y: number; w: number; m: number; pts: Array<[number, number]>; box: number[] };
 let decks: Deck[] = [];
-const DECK_STYLE = "decks3"; // bump to re-export painted tiles after changing the deck drawing
+const DECK_STYLE = "decks4"; // bump to re-export painted tiles after changing the deck drawing
 /**
  * Landmark bridges that are painted by hand into the art (render edit + repaint): no asphalt deck on
  * top of them. Broelbrug (OSM way 567818112), next to the Broeltorens; the R36 bridge over the Leie
- * (OSM way 826126060, landmarks/leiebruggen/edit_r36brug.ts).
+ * (OSM way 826126060, landmarks/leiebruggen/edit_r36brug.ts); the Budabrug (OSM 1264315394, edit_bridges.ts).
  */
-const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }, { lat: 50.83456, lon: 3.26934, r: 40 }];
+const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }, { lat: 50.83456, lon: 3.26934, r: 40 }, { lat: 50.831435, lon: 3.261719, r: 15 }];
 function bridgeDecks(ways: Array<{ y: number; w: number; l: number; s: number[] }>) {
   decks = [];
   const skip = PAINTED_BRIDGES.map((b) => ({ e: ecefToEnu(llhToEcef(b.lat, b.lon, GROUND_H)), r: b.r }));
