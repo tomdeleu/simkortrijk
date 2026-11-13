@@ -9,7 +9,7 @@ What is painted on the live map and what is not. **Update this file after every 
 
 Regenerate `docs/paint-status.png` when the grid changes.
 
-Last updated: **2026-11-13**, after the publish of pieces 8-12 at about 15:15 CET (1 591 files to R2, no Worker redeploy needed). Before that: the piece 7 publish of about 13:30 CET (571 files to R2, no Worker redeploy needed). Before that: the piece 6 publish of about 12:00 CET (487 files to R2, no Worker redeploy needed). Before that: the piece 5 publish of 2026-11-11 about 23:15 CET (3 915 files: the `scene.ts` fixes changed renders all over the map). Before that: piece 4b at 22:20, piece 4 at 22:00. Before that: the 1600 m map publish of about 21:10 CET (4 697 files to R2 bucket `simkortrijk`, region `kortrijk`, every tile re-exported because the edge fade moved; Worker redeployed). Before that: piece 3 at 19:05, the HD publish at 17:32.
+Last updated: **2026-11-13**, after the publish of pieces 13-15 (about 16:24 CET, 2 522 files to R2). Before that: the publish of pieces 8-12 at about 15:15 CET (1 591 files). Before that: the piece 7 publish of about 13:30 CET (571 files to R2, no Worker redeploy needed). Before that: the piece 6 publish of about 12:00 CET (487 files to R2, no Worker redeploy needed). Before that: the piece 5 publish of 2026-11-11 about 23:15 CET (3 915 files: the `scene.ts` fixes changed renders all over the map). Before that: piece 4b at 22:20, piece 4 at 22:00. Before that: the 1600 m map publish of about 21:10 CET (4 697 files to R2 bucket `simkortrijk`, region `kortrijk`, every tile re-exported because the edge fade moved; Worker redeployed). Before that: piece 3 at 19:05, the HD publish at 17:32.
 
 ![Paint status: painted tiles outlined in red, render-only tiles greyed, landmarks by priority, the proposed next piece dashed blue](paint-status.png)
 
@@ -42,8 +42,11 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 | 11 | North: the Leie above the Broel block | paint `-2_-3` `-1_-3` `0_-3`; old window `0_-3` was mostly unpainted render (dark render trees) and was repainted; `-2_-3` `-1_-3` (excluded since piece 0) painted from the real render; `-3_-3` `-3_-4` `-2_-4` `-1_-4` `0_-4` new | none named (Leie, footbridge, island park, Budatoren side) | **done**, live (published about 15:15 CET) | 8 / ~$0.72 | 2026-11-13 |
 | 12 | East edge | paint `4_-2` `4_-1` `4_0`; windows `4_-3` `4_-2` `4_-1` `4_0` from piece 6/7 reused, `5_-2` `5_-1` `5_0` new; `5_-3` skipped (half of it is outside the map) so the top right corner of `4_-2` fades into the render | none (the 34 m tower in `5_-1` lies outside the windows) | **done**, live (published about 15:15 CET) | 3 / ~$0.27 | 2026-11-13 |
 | 12b | Tom's feedback on piece 12: De Wildernis | repaint window `5_-1` (first try copied the style image, then `PAINT_STYLE`); tiles `4_-1` `4_0` reassembled | De Wildernis (`wildernis/massing.json`): the hut on the island in the Gebroeders Van Raemdonckpark had 14 m from the DSM (tree crowns; the hut is newer than DHMV II) and was painted as a 4-storey brick block; now a low timber hut | **done**, live (published about 15:32 CET, 81 files) | 2 / ~$0.18 | 2026-11-13 |
+| 13 | Corners around the block | paint `3_1` `3_2` `-3_2` `-3_3` `3_-3` `-3_-3`; windows `4_1` `4_2` `-4_2` `-4_3` `-4_4` `-3_4` `4_-4` `-4_-4` new (`4_1` `4_2` repainted once: invented water from the local style image), `3_-3` repainted (the 34 m chimney on the Groeningekaai is now in the render) | Hoog Mosscher (`massing.json`: brick château, slate hipped roof, turret; the render had a flat 17 m white block). `scene.ts` KNW fixes for the whole map, all checked on Street View: factory chimneys under 6 m² are kept and drawn in brick (Hof te Walle 35 m, Groeningekaai 34 m), high-voltage pylons and TV masts skipped (solid fake towers), DSM cabins capped at 4 m, DSM monuments at 8 m; Newfoundland Memorial (`massing.json`: granite cairn with the bronze caribou, not a 25 m cylinder). 41 unpainted render tiles re-rendered (these fixes plus the piece 6 shed cap) | **done**, live | 11 / ~$0.99 | 2026-11-13 |
+| 14 | North row above the canal | paint `-3_-4` `-2_-4` `-1_-4` `0_-4` `1_-4` `2_-4` `3_-4` `4_-4` `4_-3`; windows `-1_-5` `0_-5` `1_-5` `2_-5` `3_-5` new; windows above the tiles where row `-5` does not exist were skipped (half outside the map: their top fades into the render and the map-edge fade) | none named in the windows | **done**, live | 5 / ~$0.45 | 2026-11-13 |
+| 15 | South row below Pottelberg to Sint-Rochus | paint `-2_3` `-1_3` `0_3` `1_3` `2_3` `3_3`; windows `-2_4` `-1_4` new; `0_4` .. `3_4` skipped (row 4 ends at `tx` -1: the bottom of `0_3` .. `3_3` fades into the map edge) | Hoog Mosscher (window `-1_4`) | **done**, live | 2 / ~$0.18 | 2026-11-13 |
 
-Progress: **43 of 109** tiles painted (39.4%), all live. The old 800 m binnenstad (29 tiles) is now fully painted. Total so far: 117 paint calls, about $10.53.
+Progress: **64 of 109** tiles painted (58.7%), all live. The old 800 m binnenstad (29 tiles) is now fully painted. Total so far: 135 paint calls, about $12.15.
 
 Open follow-ups: none from piece 4. K in Kortrijk, the Sint-Janstoren and the Baggaertshof were fixed and repainted in piece 4.
 
@@ -52,6 +55,8 @@ How piece 1 was painted (and how the next pieces go): the local `windows/` held 
 `render.orig/` (used by `broeltorens/edit_broel.py`) still holds renders from before the per-building colours. Do not run `edit_broel.py --restore` as is: it would put those stale renders back over `-1_-1` `-1_-2` `0_-1` `0_-2`. Re-render those tiles instead (`npm run render -- kortrijk-binnenstad --only=tx,ty --force`), or refresh `render.orig/` first. `edit_noordbrug.ts` keeps its own copies in `render.orig-noordbrug/`.
 
 After reassembling tile `1_-1`, run `npx tsx landmarks/k-in-kortrijk/edit_k.ts --logo-on-paint` (from `pipeline/`): GPT drops the small red K logo, so it is drawn on the paint tile again. And repaint in landmark order: in 4b, `1_0` was painted before the new `1_-1`, which only worked because K does not reach into the `1_0` strip.
+
+Pieces 13-15 lessons: Street View is a must (Tom). Claude in Chrome can disconnect; the Chrome DevTools browser (`mcp__plugin_chrome-devtools-mcp_*`: `new_page`, `navigate_page`, `take_screenshot`) works too, after "Alles afwijzen" on Google's consent page. KNW structures need their own rules (see `scene.ts`): factory chimneys are real, pylons are not solid towers. The local style image `PAINT_STYLE` (window `0_3`) has small ponds and once made `4_1` and `4_2` grow water; use the default style for dense housing and `PAINT_STYLE` only after a copy. When cropping the render at a lat/lon, project at the ground height (~20 m in `llhToPixel`), not 0.
 
 Wildernis lesson: a GRB footprint newer than DHMV II (its interior is ~0 m in the nDSM) still gets a DSM p95 height from the trees or walls around it. The shed cap only covers footprints under 40 m²; bigger ones like this 220 m² hut need a `massing.json` (or a future check in `scene.ts`: interior median ~0 m means "height unknown").
 
@@ -87,9 +92,9 @@ Neighbour strips carry old paint along: in piece 2 the old `0_-1` window (OLV-ke
 | Area on the live map | `kortrijk-binnenstad`, since 2026-11-11 evening **1600 m** around the Belfort (bbox 50.813201,3.242863 – 50.841947,3.288372, 3.2 × 3.2 km: binnenstad, the whole ring, station quarter, Overleie, Kortrijk Weide, Sint-Jan). Before: 800 m (50.820387,3.254240 – 50.834760,3.276994), 29 tiles. The 800 m raw data is kept in `data/raw/kortrijk-binnenstad.800m/`, the replaced edge renders in `data/derived/kortrijk-binnenstad/pre-expand/`. |
 | Render tiles (1024 px, 0.25 m/px, 256 m) | **109**, `tx` -8..7 × `ty` -6..4 (irregular, see grid); tile coordinates did not change |
 | Web resolution | **HD**: native zoom 9 at 0.125 m/px from `render-hd/` (2048 px per tile), AVIF q65. The 6 painted tiles are 1024 px paint upscaled: they are no sharper than before until they are repainted at 2K into `paint-hd/`. |
-| Painted tiles | **43**: `tx` -2..0 × `ty` -2..-1 (Broeltorens / Sint-Maarten block), `-1_0` `0_0` (piece 1), `1_-2` `1_-1` (piece 2), `-3_-2` `-3_-1` `-3_0` `-2_0` (piece 3), `1_0` `2_-2` `2_-1` `2_0` (piece 4), `-2_1` `-1_1` `0_1` `1_1` (piece 5), `3_-1` `3_0` `2_1` `-3_1` (piece 6), `3_-2` `2_-3` `1_-3` (piece 7), `0_2` `1_2` `2_2` (piece 8), `-1_2` `-2_2` (piece 9), `-4_-2` `-4_-1` `-4_0` (piece 10), `-2_-3` `-1_-3` `0_-3` (piece 11), `4_-2` `4_-1` `4_0` (piece 12) |
-| Render-only tiles | **66**, showing the coloured 3D render (per-building colours, `--soften 0.5`), not painted |
-| Coverage | **39.4%** of the map (43 of 109 equal tiles, all live); 100% of the old 800 m binnenstad (29 of 29) |
+| Painted tiles | **64**: `tx` -2..0 × `ty` -2..-1 (Broeltorens / Sint-Maarten block), `-1_0` `0_0` (piece 1), `1_-2` `1_-1` (piece 2), `-3_-2` `-3_-1` `-3_0` `-2_0` (piece 3), `1_0` `2_-2` `2_-1` `2_0` (piece 4), `-2_1` `-1_1` `0_1` `1_1` (piece 5), `3_-1` `3_0` `2_1` `-3_1` (piece 6), `3_-2` `2_-3` `1_-3` (piece 7), `0_2` `1_2` `2_2` (piece 8), `-1_2` `-2_2` (piece 9), `-4_-2` `-4_-1` `-4_0` (piece 10), `-2_-3` `-1_-3` `0_-3` (piece 11), `4_-2` `4_-1` `4_0` (piece 12), the corners and the rows `ty` -4 and 3 (pieces 13-15) |
+| Render-only tiles | **45**, showing the coloured 3D render (per-building colours, `--soften 0.5`), not painted |
+| Coverage | **58.7%** of the map (64 of 109 equal tiles, all live); 100% of the old 800 m binnenstad (29 of 29) |
 | Style | Style A + real colours (`.claude/skills/map-style`) |
 | Painter | OpenAI `gpt-image-2.6-flare`, quality high, input fidelity high, `PAINT_ATTEMPTS=1` |
 | Painted | 2026-11-11, 16:01–16:06 CET |
@@ -98,21 +103,21 @@ Neighbour strips carry old paint along: in piece 2 the old `0_-1` window (OLV-ke
 
 ## Tile grid (`tx` across, `ty` down)
 
-`P` = painted, `r` = coloured render only (the old 800 m area), `n` = coloured render only, new with the 1600 m area, `.` = no tile.
+`P` = painted, `n` = coloured render only, `.` = no tile.
 
 ```
-ty \ tx   -8  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7
-  -6       .   .   .   .   .   .   .   .   .   .   n   n   .   .   .   .
-  -5       .   .   .   .   .   .   .   n   n   n   n   n   .   .   .   .
-  -4       .   .   .   n   n   n   n   n   n   n   n   n   n   .   .   .
-  -3       n   n   n   n   n   n   P   P   P   P   P   n   n   .   .   .
-  -2       .   n   n   n   P   P   P   P   P   P   P   P   P   n   .   .
-  -1       .   n   n   n   P   P   P   P   P   P   P   P   P   n   .   .
-   0       .   .   n   n   P   P   P   P   P   P   P   P   P   n   n   .
-   1       .   .   n   n   n   P   P   P   P   P   P   n   n   n   n   n
-   2       .   .   .   n   n   n   P   P   P   P   P   n   n   n   n   n
-   3       .   .   .   n   n   n   n   n   n   n   n   n   .   .   .   .
-   4       .   .   .   .   n   n   n   n   .   .   .   .   .   .   .   .
+ty \ tx     -8  -7  -6  -5  -4  -3  -2  -1   0   1   2   3   4   5   6   7
+  -6        .   .   .   .   .   .   .   .   .   .   n   n   .   .   .   .
+  -5        .   .   .   .   .   .   .   n   n   n   n   n   .   .   .   .
+  -4        .   .   .   n   n   P   P   P   P   P   P   P   P   .   .   .
+  -3        n   n   n   n   n   P   P   P   P   P   P   P   P   .   .   .
+  -2        .   n   n   n   P   P   P   P   P   P   P   P   P   n   .   .
+  -1        .   n   n   n   P   P   P   P   P   P   P   P   P   n   .   .
+   0        .   .   n   n   P   P   P   P   P   P   P   P   P   n   n   .
+   1        .   .   n   n   n   P   P   P   P   P   P   P   n   n   n   n
+   2        .   .   .   n   n   P   P   P   P   P   P   P   n   n   n   n
+   3        .   .   .   n   n   P   P   P   P   P   P   P   .   .   .   .
+   4        .   .   .   .   n   n   n   n   .   .   .   .   .   .   .   .
 ```
 
 The painted edge tiles of the old map (`-3_-2` `-2_-2` `-3_0`) were checked against their new renders: only a few trees and kerbs outside the old bbox differ (0.4–2.8% of pixels), so their paint stays. Edge windows that GPT filled with an invented city (`-4_0`, `-2_-3`, `-1_-3`) now lie over real render tiles: repaint them from the new render before they are used as neighbour strips.
@@ -131,10 +136,7 @@ Assembled with `python3 pipeline/tools/assemble_block.py --skip=-2_-3,-1_-3`. Be
 
 ## Not painted yet
 
-- **The rest of the map:** 66 tiles, all in the 1600 m ring. In order of interest:
-  - the corners around the block: `3_1` `3_2` (east of the Sint-Rochuskerk), `-3_2` `-3_3` (rail yard), `3_-3` `-3_-3`: most of their windows are already painted (missing: `4_1` `4_2`, `-4_2` `-4_3`, `-4_-4`), then row `ty` 3 (`-2_3` .. `2_3`, needs row `j` 4);
-  - then the 80 tiles of the 1600 m ring, starting from the painted `2_-3` and `3_*` windows in the east.
-
+- **The rest of the map:** 45 tiles in the outer ring: pieces 16-21 of the plan (east ring, far east, west ring, far west, north tip, south-west).
   Paint outward from the block so every new window has painted neighbours. Skip mostly-empty edge windows.
 - **The whole municipality** (area `kortrijk`): nothing yet. It needs fetch, ground, scene and render first.
 
@@ -168,6 +170,8 @@ Each landmark has notes, photos and a priority in `pipeline/landmarks/<slug>/` (
 | P2 | Sint-Janskerk | **done** (`massing.json`, piece 7) | `3_-2` | **yes** (piece 7) |
 | P3 | Verrijzeniskerk | **done** (`massing.json`, piece 8) | `0_2` | **yes** (piece 8) |
 | P3 | Athena campus Pottelberg | **done** (`massing.json`, piece 9) | `-2_2` | **yes** (piece 9) |
+| P3 | Hoog Mosscher | **done** (`massing.json`, piece 13) | `-1_4` | window `-1_4` painted (piece 15); tile `-1_4` not yet |
+| P3 | Newfoundland Memorial | **done** (`massing.json`, piece 13) | `3_-5` | no |
 | P3 | Groeningemonument | none (too small for the massing; the park and plinth come from the render) | `2_-2` | **yes** (piece 4) |
 
 Tiles are from the landmark's OSM position projected with `pipeline/src/camera.ts`. Station and Schouwburg are approximate.

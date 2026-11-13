@@ -51,7 +51,7 @@ function simplify(r: P2[], tol: number): P2[] {
   return r.filter((_, i) => keep[i]);
 }
 
-function ringFromLonLat(coords: number[][], hole = false): P2[] | null {
+function ringFromLonLat(coords: number[][], hole = false, minArea2 = 6): P2[] | null {
   let r: P2[] = coords.map(([lon, lat]) => { const p = toEnu(lon, lat); return [p[0], p[1]] as P2; });
   if (r.length > 1 && r[0][0] === r[r.length - 1][0] && r[0][1] === r[r.length - 1][1]) r = r.slice(0, -1);
   let far = 0;
@@ -60,7 +60,7 @@ function ringFromLonLat(coords: number[][], hole = false): P2[] | null {
   if (r.length < 3) return null;
   const wantCcw = !hole;
   if ((area2(r) > 0) !== wantCcw) r.reverse();
-  return Math.abs(area2(r)) >= 6 ? r : null;
+  return Math.abs(area2(r)) >= minArea2 ? r : null;
 }
 
 function inside([x, y]: P2, poly: P2[]) {
@@ -161,15 +161,24 @@ for (const f of fc.features ?? []) {
   // "verdieping" strip became a 26 m white wall. Cap DSM heights of canopies and small annexes.
   // The same goes for small GBG outbuildings (bijgebouw): a 13 m² garden shed under a tree was 23 m.
   const dsmAnnex = (p.layer === "Gba" || (p.layer === "Gbg" && p.LBLTYPE === "bijgebouw")) && String(p.height_src ?? "").startsWith("DHMV");
+  // KNW structures (piece 13, checked on Street View): factory chimneys are real and slender (2.6 m²,
+  // under the sliver limit), so keep them and draw them in brick; high-voltage pylons and TV masts are
+  // lattice towers that render as solid fake towers, so skip them; electrical cabins and monuments
+  // measured on the DSM get the trees around them (a 25 m "monument" was a 6.5 m cairn under poplars).
+  const knw = p.layer === "Knw" ? String(p.LBLTYPE ?? "") : "";
+  if (knw.startsWith("hoogspanningsmast")) continue;
+  const chimney = knw === "schoorsteen" || knw.startsWith("silo");
+  const dsm = String(p.height_src ?? "").startsWith("DHMV");
   for (const poly of polys) {
-    const ring = ringFromLonLat(poly[0]);
+    const ring = ringFromLonLat(poly[0], false, chimney ? 1 : 6);
     if (!ring) continue;
     const small = Math.abs(area2(ring)) / 2 < 40;
-    const h = dsmAnnex && p.LBLTYPE === "afdak" ? Math.min(h0, 5) : dsmAnnex && small ? Math.min(h0, 9) : h0;
+    const h = dsmAnnex && p.LBLTYPE === "afdak" ? Math.min(h0, 5) : dsmAnnex && small ? Math.min(h0, 9)
+      : knw === "cabine" && dsm ? Math.min(h0, 4) : knw === "cultuur-historisch monument" && dsm ? Math.min(h0, 8) : h0;
     const holes = (poly as number[][][]).slice(1).map((hole: number[][]) => ringFromLonLat(hole, true)).filter((r): r is P2[] => !!r);
     const c: P2 = [ring.reduce((a, q) => a + q[0], 0) / ring.length, ring.reduce((a, q) => a + q[1], 0) / ring.length];
     const id = Number(p.OIDN) || buildings.length;
-    const col = colours[String(p.OIDN)];
+    const col = chimney ? { wall: [0.72, 0.46, 0.38], roof: [0.6, 0.4, 0.34], gable: null } : colours[String(p.OIDN)];
     buildings.push({
       ring, holes, h, s: styleOf(h, String(p.layer ?? "Gbg"), id, Math.abs(area2(ring)), isChurch(c)),
       c: col ? [...col.wall, ...col.roof] : undefined, g: col && !holes.length ? gableEnu(col.gable) : null,

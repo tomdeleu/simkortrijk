@@ -81,7 +81,7 @@ Attribution on the map must include `Bron: Grootschalig Referentie Bestand Vlaan
 - Areas of one region are exported together: `npm run export -- kortrijk-binnenstad kortrijk`.
 - Unpainted tiles are allowed. Export uses `paint/` where it exists and `render/` elsewhere.
 - Do not delete `data/derived/` or `data/web-state/`.
-- Do not run `npm run publish` or `npm run deploy` unless the user asked. Publish asks `[y/N]` unless `--yes`.
+- Tom has given standing permission (2026-11-13): commit, push (branch + PR, merged to main), deploy the Worker (`npm run build` + `npx wrangler deploy`) and publish tiles (`npm run publish -- kortrijk --yes --keep`) whenever finished work is checked, without asking first. The Cloudflare limits below still hold.
 
 ## Style: A + real colours (live)
 
@@ -104,7 +104,7 @@ Only touch R2 bucket `simkortrijk` and Worker `simkortrijk`. Never change any ot
 
 - **Paint one piece at a time, with Tom in the loop** (method: `.claude/skills/paint-piece`). Before each piece: show `docs/paint-status.png`, propose tiles, landmarks, render fixes, cost and useful references, and wait for Tom's go and any reference material he adds. After each piece: update the piece table and summary in `docs/PAINT_STATUS.md` and regenerate `docs/paint-status.png`. Full rule in `docs/PAINT_STATUS.md` ("Working rule").
 
-**`docs/PAINT_STATUS.md` is the single source of truth**: what is painted and what is not, the tile and window grid, cost, excluded windows, landmark status, and restore points. Update it (and `docs/paint-status.png`) after every paint run and every publish. In short, as of 2026-11-13: the map is 109 tiles (1600 m around the Belfort); 43 are painted (39.4%, all live; the old 800 m binnenstad is complete), 66 are coloured render, and the rest of the municipality is not started.
+**`docs/PAINT_STATUS.md` is the single source of truth**: what is painted and what is not, the tile and window grid, cost, excluded windows, landmark status, and restore points. Update it (and `docs/paint-status.png`) after every paint run and every publish. In short, as of 2026-11-13: the map is 109 tiles (1600 m around the Belfort); 64 are painted (58.7%, all live; the old 800 m binnenstad is complete), 45 are coloured render, and the rest of the municipality is not started.
 
 Live since 2026-11-11, published to R2 in HD (native zoom 9, 0.125 m/px from `render-hd/`, AVIF q65; viewer reads `scale` from world.json): 29 tiles of `kortrijk-binnenstad`, rendered with per-building colours (`--soften 0.5`) and the Sint-Maartenskerk `massing.json`. Six are painted in **Style A + real colours** with **OpenAI `gpt-image-2.6-flare`** (quality high, input fidelity high, `PAINT_ATTEMPTS=1`): `tx` -2..0, `ty` -2..-1, the Broeltorens block. Windows `-2_-3` and `-1_-3` (mostly empty map edge) are skipped and stay render (`assemble_block.py --skip=-2_-3,-1_-3`). Cost was 11 calls, about $1. Windows and paint tiles live in `data/derived` (gitignored), and the published copies are on R2.
 
@@ -139,7 +139,7 @@ Next, in this order:
 3. `roofNovelty` fails on every window (about 0.07–0.29, limit 0.04). Tighten the prompt or enforce the check. Do not raise the limit to hide it.
 4. Colour match between neighbouring windows for land and river (only open sea is matched). Less urgent with GPT.
 5. The Broeltorens cones are a bit squat. The beige quay downstream of the Broelbrug should be water (source data, not paint).
-6. Then paint the rest of the binnenstad block by block outward from the Broeltorens, export, `npm run dev` and look. Publish only when Tom asks: `npm run publish -- kortrijk --yes --keep`. The Worker reads tiles from R2, so a tiles-only change needs no redeploy; code changes need `npm run build` then `npx wrangler deploy`.
+6. Then paint the rest of the binnenstad block by block outward from the Broeltorens, export, `npm run dev` and look. Publish when a piece is checked (standing permission): `npm run publish -- kortrijk --yes --keep`. The Worker reads tiles from R2, so a tiles-only change needs no redeploy; code changes need `npm run build` then `npx wrangler deploy`.
 7. Optional: the whole municipality, area `kortrijk`. A custom domain on the bucket only if Tom asks.
 
 ## Secrets

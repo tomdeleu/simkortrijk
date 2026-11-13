@@ -1,0 +1,98 @@
+{
+ "_doc": "Render massing for Hoog Mosscher (stately home on a moated island, Hoog Mosscher 83; OSM way 868297311, historic=castle), read by pipeline/src/scene.ts. GRB 1756857 rendered as a flat 17.4 m white block that read as an apartment building. Metres in Lambert 72 around 'anchor' (vertex mean), u along 'axis_deg' -135.9 (u south-west, v south-east). DHMV II: main block u -8.8..6.4, v -18.7..-4.4 with a hipped roof (eaves ~10 m, top ~14 m), a corner turret near u -5.5, v -4.5 to ~18 m, a lower middle section to ~12 m and a north wing ~9 m. Look (Google satellite and Street View from Hoog Mosscher, look-up only): red brick with white window frames, dark slate roofs with dormers, among tall trees inside the moat.",
+ "anchor": [
+  50.8150719,
+  3.2559102
+ ],
+ "axis_deg": -135.9,
+ "replace_oidn": [
+  1756857
+ ],
+ "parts": [
+  {
+   "id": "north wing and middle (GRB footprint)",
+   "footprint": "grb",
+   "h": 9,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.78,
+    0.52,
+    0.44
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "main block, hipped slate roof",
+   "rect": [
+    -8.8,
+    6.4,
+    -18.7,
+    -4.4
+   ],
+   "h": 15,
+   "eave": 10.5,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.78,
+    0.52,
+    0.44
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "middle section",
+   "rect": [
+    -6.5,
+    8.1,
+    -4.4,
+    1.2
+   ],
+   "h": 12.5,
+   "eave": 10,
+   "shape": "gable-u",
+   "style": 4,
+   "wall": [
+    0.78,
+    0.52,
+    0.44
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "corner turret",
+   "oct": [
+    -6,
+    -4.8,
+    1.9
+   ],
+   "h": 19,
+   "eave": 13,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.78,
+    0.52,
+    0.44
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  }
+ ]
+}

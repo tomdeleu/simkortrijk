@@ -1,0 +1,53 @@
+{
+ "_doc": "Render massing for the Newfoundland Memorial (caribou on a granite cairn, Gentsesteenweg; OSM historic=memorial, Q5178692), read by pipeline/src/scene.ts. GRB KNW 2384 (cultuur-historisch monument) got 25 m from the DHMV II DSM: the poplars around it. Look (Street View from the N43, look-up only): a grey granite cairn of about 4 m with a bronze caribou on top, about 6.5 m in all.",
+ "anchor": [
+  50.8387337,
+  3.2851944
+ ],
+ "axis_deg": -37.0,
+ "replace_oidn": [
+  2384
+ ],
+ "parts": [
+  {
+   "id": "granite cairn",
+   "footprint": "grb",
+   "h": 4,
+   "eave": 1.2,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.66,
+    0.66,
+    0.64
+   ],
+   "roof": [
+    0.66,
+    0.66,
+    0.64
+   ]
+  },
+  {
+   "id": "bronze caribou",
+   "rect": [
+    -0.8,
+    0.8,
+    -0.4,
+    0.4
+   ],
+   "h": 6.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.42,
+    0.38,
+    0.3
+   ],
+   "roof": [
+    0.42,
+    0.38,
+    0.3
+   ]
+  }
+ ]
+}
