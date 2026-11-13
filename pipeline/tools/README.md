@@ -38,3 +38,12 @@ Output `data/raw/<area>/building_colours.json`, keyed by GRB OIDN. This does not
 Softening: measured colours are photo-real and read dark next to style A (Tom, 11 Nov 2026: "ergens tussen, nu te donker en te realistisch"). `--soften` (or `COLOUR_SOFTEN`, default 0.5) moves each colour half-way to the pastel twin of its class (`PASTEL_ROOF`, `PASTEL_WALL`) and keeps 60% of its offset from the class base, so neighbours stay different. 0 = measured, 1 = full pastel. The JSON keeps the measured colours as `wall_raw` / `roof_raw`.
 
 Paint prompt (applied in `pipeline/src/paint.ts`): image 1 is described as already carrying each building's own colour; style A keeps image-1 colour families softened into the pastel palette; the geometry lock forbids recolouring all roofs alike or swapping colours between neighbours and keeps the ridges of sloped roof planes. `pipeline/style/reference.png` is now the coloured Broeltorens window `-1_-2` painted with that prompt (the old all-coral reference would pull every roof to coral).
+
+## Piece helpers (`.claude/skills/paint-piece`)
+
+| Tool | What it does |
+|---|---|
+| `landmarks_in_tiles.ts <tiles>` | Tile centres (lat/lon) and the named churches, heritage, towers and GRB footprints over 25 m in them |
+| `landmark_measure.ts <OIDN>` | Footprint in (u, v) metres, `anchor`, `axis_deg` and a DHMV II nDSM grid, for a landmark `massing.json` |
+| `landmark_refs.py <slug> --search ... --require Kortrijk --ortho lat,lon` | Commons photos (licence into `refs/SOURCES.md`) and an orthophoto crop |
+| `window_check.py out.png <windows>` | Current render next to each paint window, for the eye check |

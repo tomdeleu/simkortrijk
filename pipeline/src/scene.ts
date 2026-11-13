@@ -159,7 +159,8 @@ for (const f of fc.features ?? []) {
   const h0 = Math.max(2.5, Number(p.height_m) || 8);
   // Annexes (GBA) measured on the DSM pick up trees and the walls behind them: a 0.6 m wide
   // "verdieping" strip became a 26 m white wall. Cap DSM heights of canopies and small annexes.
-  const dsmAnnex = p.layer === "Gba" && String(p.height_src ?? "").startsWith("DHMV");
+  // The same goes for small GBG outbuildings (bijgebouw): a 13 m² garden shed under a tree was 23 m.
+  const dsmAnnex = (p.layer === "Gba" || (p.layer === "Gbg" && p.LBLTYPE === "bijgebouw")) && String(p.height_src ?? "").startsWith("DHMV");
   for (const poly of polys) {
     const ring = ringFromLonLat(poly[0]);
     if (!ring) continue;

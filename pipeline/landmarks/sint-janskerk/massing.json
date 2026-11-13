@@ -1,0 +1,383 @@
+{
+ "_doc": "Render massing for the Sint-Janskerk (Sint-Jan-de-Doperkerk, 1911; OSM way 112452078, Q2795973, Onroerend Erfgoed 60201), read by pipeline/src/scene.ts. GRB 1742996 rendered as one 49 m cream block (the whole footprint extruded to the tower height, 3D GRB HN_P99). Metres in Lambert 72 around 'anchor' (vertex mean of the footprint), u along 'axis_deg' -16.1 (u points east-south-east to the apse, u -30 is the west front), v north-north-east (v -22 is the south transept front, facing the camera). DHMV II: nave ridge 23 m on v -6, clerestory eaves ~14 m, aisles ~10 m, transept ridge 24 m on u 0 from v -22 to +9, apse to u 23, crossing tower u -3.5..3.5, v -9.5..-2.5 with the LiDAR spire tip at 54.4 m (under-sampled). Look (Commons refs/, orthophoto; Street View not available this time): buff yellow stone, dark slate roofs, crossing tower with clock and belfry stage, octagonal slate needle with four corner turrets, rose windows and red doors in the west front and both transept fronts, slender corner turrets with slate cones.",
+ "anchor": [
+  50.8291382,
+  3.2812399
+ ],
+ "axis_deg": -16.1,
+ "replace_oidn": [
+  1742996
+ ],
+ "parts": [
+  {
+   "id": "aisles, chapels, porches (GRB footprint)",
+   "footprint": "grb",
+   "h": 10,
+   "shape": "flat",
+   "style": 6,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "nave and choir (clerestory)",
+   "rect": [
+    -29.4,
+    16,
+    -12.5,
+    0.5
+   ],
+   "h": 23,
+   "eave": 14,
+   "shape": "gable-u",
+   "style": 6,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "transept with rose-window fronts (south front faces the camera)",
+   "rect": [
+    -6,
+    6,
+    -22,
+    9
+   ],
+   "h": 24,
+   "eave": 14,
+   "shape": "gable-v",
+   "style": 6,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "apse",
+   "poly": [
+    [
+     16,
+     0.5
+    ],
+    [
+     19.5,
+     -0.5
+    ],
+    [
+     22.5,
+     -3.5
+    ],
+    [
+     22.5,
+     -8.5
+    ],
+    [
+     19.5,
+     -11.5
+    ],
+    [
+     16,
+     -12.5
+    ]
+   ],
+   "h": 21,
+   "eave": 14,
+   "shape": "pyramid",
+   "style": 6,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "crossing tower (stone, clock and belfry stage)",
+   "rect": [
+    -3.5,
+    3.5,
+    -9.5,
+    -2.5
+   ],
+   "h": 36,
+   "shape": "flat",
+   "style": 6,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.46,
+    0.5,
+    0.6
+   ]
+  },
+  {
+   "id": "octagonal slate needle",
+   "oct": [
+    0,
+    -6,
+    3.3
+   ],
+   "h": 57,
+   "eave": 36,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.48,
+    0.52,
+    0.61
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "tower corner turret 1",
+   "oct": [
+    -3.5,
+    -9.5,
+    0.8
+   ],
+   "h": 41,
+   "eave": 36,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "tower corner turret 2",
+   "oct": [
+    3.5,
+    -9.5,
+    0.8
+   ],
+   "h": 41,
+   "eave": 36,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "tower corner turret 3",
+   "oct": [
+    -3.5,
+    -2.5,
+    0.8
+   ],
+   "h": 41,
+   "eave": 36,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "tower corner turret 4",
+   "oct": [
+    3.5,
+    -2.5,
+    0.8
+   ],
+   "h": 41,
+   "eave": 36,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "front turret with slate cone 1",
+   "oct": [
+    -30,
+    -15.5,
+    1.1
+   ],
+   "h": 24,
+   "eave": 18,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "front turret with slate cone 2",
+   "oct": [
+    -30,
+    2.5,
+    1.1
+   ],
+   "h": 24,
+   "eave": 18,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "front turret with slate cone 3",
+   "oct": [
+    -6.5,
+    -22,
+    1.1
+   ],
+   "h": 24,
+   "eave": 18,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "front turret with slate cone 4",
+   "oct": [
+    6.5,
+    -22,
+    1.1
+   ],
+   "h": 24,
+   "eave": 18,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "front turret with slate cone 5",
+   "oct": [
+    -6.5,
+    9,
+    1.1
+   ],
+   "h": 24,
+   "eave": 18,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  },
+  {
+   "id": "front turret with slate cone 6",
+   "oct": [
+    6.5,
+    9,
+    1.1
+   ],
+   "h": 24,
+   "eave": 18,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.76,
+    0.58
+   ],
+   "roof": [
+    0.48,
+    0.52,
+    0.61
+   ]
+  }
+ ]
+}

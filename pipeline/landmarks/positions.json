@@ -99,5 +99,30 @@
   "prio": "P2",
   "lat": 50.8245192,
   "lon": 3.2642942
+ },
+ "sint-rochuskerk": {
+  "prio": "P3",
+  "lat": 50.8199707,
+  "lon": 3.2701527
+ },
+ "hangar-k": {
+  "prio": "P3",
+  "lat": 50.8253634,
+  "lon": 3.2544628
+ },
+ "sint-janskerk": {
+  "prio": "P2",
+  "lat": 50.8291103,
+  "lon": 3.2811753
+ },
+ "verrijzeniskerk": {
+  "prio": "P3",
+  "lat": 50.8187025,
+  "lon": 3.2620201
+ },
+ "athena-pottelberg": {
+  "prio": "P3",
+  "lat": 50.8202325,
+  "lon": 3.2555048
  }
 }

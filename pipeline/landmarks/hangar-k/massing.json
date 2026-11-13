@@ -1,0 +1,381 @@
+{
+ "_doc": "Render massing for Hangar K (Nelson Mandelaplein 1, former railway hangar, now a start-up campus; OSM way 152348420), read by pipeline/src/scene.ts. GRB 6340471 (155 x 30 m) rendered as one flat orange slab. Metres in Lambert 72 around 'anchor' (vertex mean of the footprint), u along 'axis_deg' -35.4 (the long side, along the railway), v across. DHMV II: a row of 16 roof bays with a 9.7 m period, 6 m at the gutters and 9.5 m at the ridges, ridges across the hall (along v). Look (Street View Nelson Mandelaplein, Google satellite; look-up only): orange-red brick walls with a row of brick gable ends on both long sides, red roofs with a glazed strip on each bay.",
+ "anchor": [
+  50.8255097,
+  3.2542906
+ ],
+ "axis_deg": -35.4,
+ "replace_oidn": [
+  6340471
+ ],
+ "parts": [
+  {
+   "id": "bay 1",
+   "rect": [
+    -58.2,
+    -48.53,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 2",
+   "rect": [
+    -48.53,
+    -38.85,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 3",
+   "rect": [
+    -38.85,
+    -29.18,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 4",
+   "rect": [
+    -29.18,
+    -19.5,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 5",
+   "rect": [
+    -19.5,
+    -9.83,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 6",
+   "rect": [
+    -9.83,
+    -0.15,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 7",
+   "rect": [
+    -0.15,
+    9.53,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 8",
+   "rect": [
+    9.53,
+    19.2,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 9",
+   "rect": [
+    19.2,
+    28.88,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 10",
+   "rect": [
+    28.88,
+    38.55,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 11",
+   "rect": [
+    38.55,
+    48.23,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 12",
+   "rect": [
+    48.23,
+    57.9,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 13",
+   "rect": [
+    57.9,
+    67.58,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 14",
+   "rect": [
+    67.58,
+    77.25,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 15",
+   "rect": [
+    77.25,
+    86.92,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  },
+  {
+   "id": "bay 16",
+   "rect": [
+    86.92,
+    96.6,
+    -21.7,
+    8.6
+   ],
+   "h": 9.5,
+   "eave": 6.2,
+   "shape": "gable-v",
+   "style": 2,
+   "wall": [
+    0.8,
+    0.5,
+    0.4
+   ],
+   "roof": [
+    0.8,
+    0.44,
+    0.36
+   ]
+  }
+ ]
+}
