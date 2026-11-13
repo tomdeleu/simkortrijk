@@ -1,0 +1,36 @@
+{
+ "_doc": "Render massing for De Wildernis (adventure playground and youth centre on the island in the Gebroeders Van Raemdonckpark, Lode de Boningelaan; Nominatim 'Wildernis', amenity=community_centre), read by pipeline/src/scene.ts. GRB 7780907 (bijgebouw, 25.5 x 8.7 m) got 14 m from the DHMV II DSM p95: the hut is newer than the survey (the footprint interior is ~0 m in the nDSM) and the p95 picked up the tree crowns around it, so the painter made a 4-storey brick block of it (Tom's feedback, 2026-11-13). Metres in Lambert 72 around 'anchor', u along 'axis_deg' 120.7 (the long side). Look: low, worn timber huts of a construction playground (web: Issuu booklet 'wildernis'); height not measured, a one-storey hut with a pitched roof is assumed.",
+ "anchor": [
+  50.8251063,
+  3.2828126
+ ],
+ "axis_deg": 120.7,
+ "replace_oidn": [
+  7780907
+ ],
+ "parts": [
+  {
+   "id": "low timber hut",
+   "rect": [
+    -7.7,
+    17.8,
+    -3.7,
+    5.0
+   ],
+   "h": 5.5,
+   "eave": 3,
+   "shape": "gable-u",
+   "style": 4,
+   "wall": [
+    0.74,
+    0.58,
+    0.42
+   ],
+   "roof": [
+    0.52,
+    0.55,
+    0.52
+   ]
+  }
+ ]
+}

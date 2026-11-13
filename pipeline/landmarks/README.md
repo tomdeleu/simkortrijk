@@ -29,6 +29,7 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 | P2 | sint-janskerk | Sint-Janskerk | done (massing.json): buff stone cruciform church, crossing tower with slate needle + turrets |
 | P3 | verrijzeniskerk | Verrijzeniskerk | done (massing.json): round white church, green copper cone, lantern and spire |
 | P3 | athena-pottelberg | Athena campus Pottelberg | done (massing.json): gabled school wings instead of a flat 27 m block |
+| P3 | wildernis | De Wildernis | done (massing.json): low timber hut instead of a 14 m DSM block |
 | P3 | sint-rochuskerk | Sint-Rochuskerk | done (massing.json): dark brick, one slate roof, apse, brick tower with slate needle + 4 pinnacles |
 | P3 | hangar-k | Hangar K | done (massing.json): 16 red gabled bays on a brick hall |
 | P3 | groeningemonument | Groeningemonument + poort | statue in park |

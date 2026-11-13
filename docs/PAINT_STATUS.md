@@ -41,8 +41,9 @@ The map is painted in **pieces** (`stukken`): a few neighbouring tiles, or one l
 | 10 | West edge: Overleie | paint `-4_-2` `-4_-1` `-4_0`; the old invented-city windows `-4_-2` `-4_-1` `-4_0` repainted from the real render, `-4_-3` `-5_-3` `-5_-2` `-5_-1` `-5_0` new; `-5_0` copied the style image, repainted with `PAINT_STYLE` | none (no named landmarks; a sloped 28 m block by the Leie looks plausible and was kept) | **done**, live (published about 15:15 CET) | 9 / ~$0.81 | 2026-11-13 |
 | 11 | North: the Leie above the Broel block | paint `-2_-3` `-1_-3` `0_-3`; old window `0_-3` was mostly unpainted render (dark render trees) and was repainted; `-2_-3` `-1_-3` (excluded since piece 0) painted from the real render; `-3_-3` `-3_-4` `-2_-4` `-1_-4` `0_-4` new | none named (Leie, footbridge, island park, Budatoren side) | **done**, live (published about 15:15 CET) | 8 / ~$0.72 | 2026-11-13 |
 | 12 | East edge | paint `4_-2` `4_-1` `4_0`; windows `4_-3` `4_-2` `4_-1` `4_0` from piece 6/7 reused, `5_-2` `5_-1` `5_0` new; `5_-3` skipped (half of it is outside the map) so the top right corner of `4_-2` fades into the render | none (the 34 m tower in `5_-1` lies outside the windows) | **done**, live (published about 15:15 CET) | 3 / ~$0.27 | 2026-11-13 |
+| 12b | Tom's feedback on piece 12: De Wildernis | repaint window `5_-1` (first try copied the style image, then `PAINT_STYLE`); tiles `4_-1` `4_0` reassembled | De Wildernis (`wildernis/massing.json`): the hut on the island in the Gebroeders Van Raemdonckpark had 14 m from the DSM (tree crowns; the hut is newer than DHMV II) and was painted as a 4-storey brick block; now a low timber hut | **done**, live (published about 15:32 CET, 81 files) | 2 / ~$0.18 | 2026-11-13 |
 
-Progress: **43 of 109** tiles painted (39.4%), all live. The old 800 m binnenstad (29 tiles) is now fully painted. Total so far: 115 paint calls, about $10.35.
+Progress: **43 of 109** tiles painted (39.4%), all live. The old 800 m binnenstad (29 tiles) is now fully painted. Total so far: 117 paint calls, about $10.53.
 
 Open follow-ups: none from piece 4. K in Kortrijk, the Sint-Janstoren and the Baggaertshof were fixed and repainted in piece 4.
 
@@ -51,6 +52,8 @@ How piece 1 was painted (and how the next pieces go): the local `windows/` held 
 `render.orig/` (used by `broeltorens/edit_broel.py`) still holds renders from before the per-building colours. Do not run `edit_broel.py --restore` as is: it would put those stale renders back over `-1_-1` `-1_-2` `0_-1` `0_-2`. Re-render those tiles instead (`npm run render -- kortrijk-binnenstad --only=tx,ty --force`), or refresh `render.orig/` first. `edit_noordbrug.ts` keeps its own copies in `render.orig-noordbrug/`.
 
 After reassembling tile `1_-1`, run `npx tsx landmarks/k-in-kortrijk/edit_k.ts --logo-on-paint` (from `pipeline/`): GPT drops the small red K logo, so it is drawn on the paint tile again. And repaint in landmark order: in 4b, `1_0` was painted before the new `1_-1`, which only worked because K does not reach into the `1_0` strip.
+
+Wildernis lesson: a GRB footprint newer than DHMV II (its interior is ~0 m in the nDSM) still gets a DSM p95 height from the trees or walls around it. The shed cap only covers footprints under 40 m²; bigger ones like this 220 m² hut need a `massing.json` (or a future check in `scene.ts`: interior median ~0 m means "height unknown").
 
 Pieces 10-12 lessons: `npm run render -- --only=tx,ty` renders any tile, also one outside the area's 109 (`5_-3` was created by mistake and deleted): check the grid before re-rendering. A window that is "painted and used" can still be mostly render (`0_-3` of piece 0): look at it before reusing it. Windows that are half outside the map (`5_-3`) are skipped, not painted.
 
