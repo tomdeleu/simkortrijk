@@ -1,0 +1,76 @@
+{
+ "_doc": "Render massing for the Nationaal Leiemonument (Leiegedenkteken, Koning Albertpark; protected monument; WWII memorial of the Battle of the Leie, May 1940), read by pipeline/src/scene.ts. No GRB footprint (empty replace_oidn: a free-standing object). DHMV II: the pylon tip at ~24.5 m above the ground (under-sampled) about 1.5 m east, 2 m south of the Google Maps pin. Look (Google Street View from the park, Google Maps photos, look-up only; tracesofwar.com): a tall slender white-grey stone pylon on a stepped terrace, in front of it (south-west) a dark bronze equestrian statue of King Leopold III with standing soldiers, a long low grey stone wall around the lawn.",
+ "anchor": [
+  50.8353472,
+  3.2685646
+ ],
+ "axis_deg": 0,
+ "replace_oidn": [],
+ "parts": [
+  {
+   "id": "stepped stone terrace",
+   "rect": [
+    -7,
+    7,
+    -8,
+    4
+   ],
+   "h": 1.2,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.7,
+    0.7,
+    0.68
+   ],
+   "roof": [
+    0.7,
+    0.7,
+    0.68
+   ]
+  },
+  {
+   "id": "pylon",
+   "rect": [
+    -2,
+    2,
+    -1.3,
+    1.3
+   ],
+   "h": 27,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.9,
+    0.89,
+    0.86
+   ],
+   "roof": [
+    0.9,
+    0.89,
+    0.86
+   ]
+  },
+  {
+   "id": "bronze equestrian group",
+   "oct": [
+    -1.5,
+    -4.5,
+    2.0
+   ],
+   "h": 6,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.28,
+    0.28,
+    0.29
+   ],
+   "roof": [
+    0.28,
+    0.28,
+    0.29
+   ]
+  }
+ ]
+}

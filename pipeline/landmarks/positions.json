@@ -144,5 +144,20 @@
   "prio": "P2",
   "lat": 50.8338,
   "lon": 3.264
+ },
+ "leiemonument": {
+  "prio": "P2",
+  "lat": 50.8353472,
+  "lon": 3.2685646
+ },
+ "moeder-aarde": {
+  "prio": "P3",
+  "lat": 50.8344702,
+  "lon": 3.2685861
+ },
+ "spinnerij-de-stoop": {
+  "prio": "P2",
+  "lat": 50.8325677,
+  "lon": 3.2818391
  }
 }

@@ -32,6 +32,9 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 | P3 | wildernis | De Wildernis | done (massing.json): low timber hut instead of a 14 m DSM block |
 | P2 | k-tower | K Tower | done (massing.json): white 66 m residential tower (missing: the DSM predates it) |
 | P2 | sint-amandscollege | Sint-Amandscollege / Guldensporencollege | done (colours.json: red brick + slate; massing.json: the quay school 14 m dark glass instead of the old Collegetoren's 58 m) |
+| P2 | leiemonument | Nationaal Leiemonument | done (massing.json, no GRB): pylon + bronze equestrian group |
+| P3 | moeder-aarde | Moeder Aarde II | done (massing.json, no GRB): reclining woman sculpture |
+| P2 | spinnerij-de-stoop | Spinnerij De Stoop (lofts) | done (massing.json): brick mill with corner tower; neighbours in spinnerijkaai/ |
 | P3 | hoog-mosscher | Hoog Mosscher | done (massing.json): brick château, slate hipped roof, turret |
 | P3 | newfoundland-memorial | Newfoundland Memorial | done (massing.json): granite cairn with a bronze caribou |
 | P3 | sint-rochuskerk | Sint-Rochuskerk | done (massing.json): dark brick, one slate roof, apse, brick tower with slate needle + 4 pinnacles |
@@ -41,7 +44,7 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 
 Two ways to fix a landmark in the render:
 
-- `massing.json` (preferred, real 3D, occlusion and lighting are right): `npm run scene` replaces the GRB footprint(s) in `replace_oidn`, and any LiDAR needle standing inside them, with hand-built parts. Parts are `rect` [u0, u1, v0, v1], `oct` [u, v, radius], `poly` [[u, v], ...] or `footprint: "grb"`, in metres around `anchor` (lat, lon) with u along `axis_deg` (Lambert 72, degrees CCW from grid east). `shape` is `flat`, `gable-u` / `gable-v` (ridge along u or v, walls up to `eave`), or `pyramid` (walls up to `eave`, facets to the apex at `h`: spires, tent roofs). `style` 6 is Gothic stone (lancet windows), 4 is plain. `wall` / `roof` are 0..1 sRGB. See `sint-maartenskerk/massing.json`.
+- `massing.json` (preferred, real 3D, occlusion and lighting are right; an empty `replace_oidn` adds a free-standing object such as a monument; a `footprint: "grb"` part can be limited to some footprints with `oidn: [...]`): `npm run scene` replaces the GRB footprint(s) in `replace_oidn`, and any LiDAR needle standing inside them, with hand-built parts. Parts are `rect` [u0, u1, v0, v1], `oct` [u, v, radius], `poly` [[u, v], ...] or `footprint: "grb"`, in metres around `anchor` (lat, lon) with u along `axis_deg` (Lambert 72, degrees CCW from grid east). `shape` is `flat`, `gable-u` / `gable-v` (ridge along u or v, walls up to `eave`), or `pyramid` (walls up to `eave`, facets to the apex at `h`: spires, tent roofs). `style` 6 is Gothic stone (lancet windows), 4 is plain. `wall` / `roof` are 0..1 sRGB. See `sint-maartenskerk/massing.json`.
 - `colours.json` (colour only): an OSM area polygon plus a wall name and roof class from `pipeline/tools/building_colours.py`; every GRB footprint whose centre lies inside gets those colours (`begijnhof/colours.json`). Rerun `building_colours.py`, then `npm run scene`.
 - A 2D render edit script like `broeltorens/edit_broel.py` (for things the renderer cannot extrude, such as the arched Broelbrug).
 
