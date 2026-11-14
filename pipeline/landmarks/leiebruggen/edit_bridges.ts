@@ -4,8 +4,14 @@
  * satellite, look-up only). The render draws roads and paths on the ground, so the painter made thin
  * white lines or a stone arch over the water. One spec per bridge, from its OSM line:
  *
- *   - Budabrug (Budastraat, OSM 1264315394, 2014): flat steel road bridge, dark grey slanted steel side
- *     girders, white mesh railings, light deck. Painted before as an arched stone bridge.
+ *   - Budabrug (Budastraat, OSM 1264315394, 2014): flat steel lift bridge, dark grey steel side
+ *     girders, white mesh railings. Painted before as an arched stone bridge. The DHMV LiDAR (and Street
+ *     View, May 2025) caught it lifted for a boat (DSM 17 m over 14.8 m quays), so it is drawn lowered,
+ *     flush with the quay roads (`level`; Tom, 2026-11-14: it stood up like a block over the Leie).
+ *   - IJzerkaaibrug (OSM 61597591): short, low concrete slab road bridge over the old Leie arm, flush with
+ *     the quays, concrete edge beam, galvanised railings, brick abutments (Street View, May 2025). The
+ *     export laid a loose asphalt deck over the paint here (Tom, 2026-11-14), so it is drawn here and
+ *     listed in PAINTED_BRIDGES in export.ts.
  *   - Kalkovenbrug (OSM 118613392): narrow footbridge over the Leie (timber until 2025, rebuilt in
  *     composite in 2026). Painted before as a thin white line.
  *   - Footbridge at the Nijverheidskaai (OSM 767977976, 62 m): slim steel footbridge, light deck, steel
@@ -39,9 +45,12 @@ if (process.argv.includes("--restore")) {
   process.exit(0);
 }
 
-type Spec = { name: string; ways: number[]; kind: "road" | "foot" | "rail"; half: number; clear: number; fillMax: number };
+// level: the deck lies flush with the road on both quays (height of the DTM 4 m beyond each end), not on
+// the DSM; face: colour of the visible side girder or edge beam, depth in m
+type Spec = { name: string; ways: number[]; kind: "road" | "foot" | "rail"; half: number; clear: number; fillMax: number; level?: boolean; face?: [string, number]; dash?: boolean };
 const SPECS: Spec[] = [
-  { name: "Budabrug", ways: [1264315394], kind: "road", half: 6.5, clear: 3.5, fillMax: 70 },
+  { name: "Budabrug", ways: [1264315394], kind: "road", half: 6.5, clear: 3.5, fillMax: 70, level: true, face: ["#5d6168", 1.8], dash: true },
+  { name: "IJzerkaaibrug", ways: [61597591], kind: "road", half: 5.0, clear: 2.5, fillMax: 70, level: true, face: ["#c4bfb7", 1.0], dash: false },
   { name: "Kalkovenbrug", ways: [118613392], kind: "foot", half: 1.6, clear: 2.5, fillMax: 26 },
   { name: "Nijverheidskaai footbridge", ways: [767977976], kind: "foot", half: 1.6, clear: 3, fillMax: 26 },
   { name: "De Drie Duikers", ways: [298628668, 298628667], kind: "rail", half: 5.2, clear: 4, fillMax: 0 },
@@ -67,7 +76,9 @@ for (const s of SPECS) {
   const ts = Array.from({ length: Math.ceil(L) + 1 }, (_, k) => Math.min(L, k));
   const gnd = ts.map((t) => sampleBilinear(dtm, A[0] + ax[0] * t, A[1] + ax[1] * t));
   const top = ts.map((t) => sampleBilinear(dsm, A[0] + ax[0] * t, A[1] + ax[1] * t));
+  const endH = [sampleBilinear(dtm, A[0] - ax[0] * 4, A[1] - ax[1] * 4), sampleBilinear(dtm, B[0] + ax[0] * 4, B[1] + ax[1] * 4)];
   const deckH = ts.map((_, i) => {
+    if (s.level) return endH[0] + ((endH[1] - endH[0]) * ts[i]) / L;
     const w = top.slice(Math.max(0, i - 5), i + 6).sort((p, q) => p - q);
     return Math.max(w[Math.floor(w.length / 2)] - (s.kind === "rail" ? 2.5 : 0.3), Math.min(...gnd) + s.clear);
   });
@@ -83,10 +94,11 @@ for (const s of SPECS) {
   const svg = (q: (p: [number, number]) => string) => {
     let out = poly(q, shadow, "#2f3a4a", 'fill-opacity="0.16"');
     if (s.kind === "road") {
-      out += poly(q, [...edge(s.half, 0), ...edge(s.half, -1.8).reverse()], "#5d6168")          // south steel girder face
+      const [fc, fd] = s.face ?? ["#5d6168", 1.8];
+      out += poly(q, [...edge(s.half, 0), ...edge(s.half, -fd).reverse()], fc)                   // south girder or edge beam face
         + poly(q, [...edge(s.half), ...edge(-s.half).reverse()], "#a59ba9")                     // deck in painted road colour
         + pl(q, edge(s.half - 1.4), 2.2, "#ece4dc") + pl(q, edge(-s.half + 1.4), 2.2, "#ece4dc") // pavements
-        + pl(q, edge(0), 0.9, "#f6f2ec", 'stroke-dasharray="5 5"')
+        + (s.dash === false ? "" : pl(q, edge(0), 0.9, "#f6f2ec", 'stroke-dasharray="5 5"'))
         + pl(q, edge(s.half, 1.1), 1.6, "#f4f4f1") + pl(q, edge(-s.half, 1.1), 1.4, "#f4f4f1")   // white mesh railings
         + pl(q, edge(s.half, 0.1), 1.2, "#7e848c");
     } else if (s.kind === "foot") {
@@ -129,6 +141,10 @@ for (const v of VIADUCTS) {
   const off = (p: number[]) => (p[0] - A[0]) * n[0] + (p[1] - A[1]) * n[1];
   const offs = v.ways.flatMap((id) => geo(id).map(off));
   const lo = Math.min(...offs) - 2.4, hi = Math.max(...offs) + 2.4, mid = (lo + hi) / 2; // lo..hi across the deck
+  // n points south, so `hi` is the edge the camera sees (heading 20°): the side face, abutment walls and
+  // ribs go there. Before 2026-11-14 they were drawn on `lo`, the north edge, hidden under the deck, which
+  // is why the viaduct read as a floating slab.
+  const vis = hi;
   const ts = Array.from({ length: Math.ceil(L / 2) + 1 }, (_, k) => Math.min(L, k * 2));
   const at0 = (t: number, o: number) => [A[0] + ax[0] * t + n[0] * o, A[1] + ax[1] * t + n[1] * o];
   const gnd = ts.map((t) => sampleBilinear(dtm, ...(at0(t, mid) as [number, number])));
@@ -149,7 +165,7 @@ for (const v of VIADUCTS) {
   const rail = (o: number) => upIdx.map((i) => P3(i, o, deckH[i] + 1.1 * grow(i)));
   // abutments: where the deck leaves the embankment it stands on a solid wall down to the ground, so it
   // reads as resting on the land, not hovering (the first and last 14 m of the lifted part)
-  const ends = upIdx.length > 1 ? [upIdx.filter((i) => ts[i] - ts[upIdx[0]] < 14), upIdx.filter((i) => ts[upIdx[upIdx.length - 1]] - ts[i] < 14)] : [];
+  const ends = upIdx.length > 1 ? [upIdx.filter((i) => ts[i] - ts[upIdx[0]] < 8), upIdx.filter((i) => ts[upIdx[upIdx.length - 1]] - ts[i] < 8)] : [];
   const wall = (sel: number[], o: number) => [...sel.map((i) => P3(i, o, deckH[i])), ...sel.map((i) => P3(i, o, gnd[i])).reverse()];
   const endWall = (i: number) => [P3(i, lo, deckH[i]), P3(i, hi, deckH[i]), P3(i, hi, gnd[i]), P3(i, lo, gnd[i])];
   const shadow = upIdx.length > 1 ? [...upIdx.map((i) => P3(i, lo + 1, gnd[i])), ...upIdx.map((i) => P3(i, hi - 1, gnd[i])).reverse()] : [];
@@ -166,15 +182,20 @@ for (const v of VIADUCTS) {
   const pl = (q: (p: [number, number]) => string, p: Array<[number, number]>, w: number, c: string, x = "") => `<polyline points="${p.map(q).join(" ")}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" ${x}/>`;
   const svg = (q: (p: [number, number]) => string) =>
     poly(q, shadow, "#2f3a4a", 'fill-opacity="0.22"')
-    + piers.map((i) => [lo + 2.5, mid, hi - 2.5].map((o) => pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 1.4)], 6, "#c9c5bd") + pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 1.4)], 3.5, "#e3dfd7")).join("")).join("")
-    + ends.map((sel) => sel.length > 1 ? poly(q, wall(sel, lo), "#d6d0c6") + pl(q, sel.map((i) => P3(i, lo, gnd[i])), 1.2, "#a49ba3") : "").join("")
-    + (ends.length ? poly(q, endWall(ends[1][ends[1].length - 1]), "#c8c2b8") : "")
-    + (upIdx.length > 1 ? poly(q, face(lo, 2.0), "#e2ddd5") + pl(q, upIdx.map((i) => P3(i, lo, deckH[i] - 2.0 * grow(i))), 1.3, "#9d949c") : "")
+    // square concrete piers (Street View: grey concrete columns under a galvanised steel box girder)
+    + piers.map((i) => [lo + 3.5, vis - 1.5].map((o) => pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 2.8)], 10, "#a29d96") + pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 2.8)], 6.5, "#c6c1b9")).join("")).join("")
+    + ends.map((sel) => sel.length > 1 ? poly(q, wall(sel, vis), "#bdb7ae") + pl(q, sel.map((i) => P3(i, vis, gnd[i])), 1.2, "#8f8a92") : "").join("")
+    + (ends.length ? poly(q, endWall(ends[1][ends[1].length - 1]), "#b3ada4") : "")
+    // the side of the deck: a slate-grey steel girder, 3 m deep, with a light top lip and a rib every 5 m
+    + (upIdx.length > 1 ? poly(q, face(vis, 3.0), "#727883")
+      + upIdx.filter((i) => Math.round(ts[i]) % 6 === 0 && grow(i) > 0.5).map((i) => pl(q, [P3(i, vis, deckH[i] - 0.3), P3(i, vis, deckH[i] - 3.0 * grow(i))], 1.1, "#8e949d")).join("")
+      + pl(q, upIdx.map((i) => P3(i, vis, deckH[i] - 0.25)), 1.4, "#b9bec5")
+      + pl(q, upIdx.map((i) => P3(i, vis, deckH[i] - 3.0 * grow(i))), 1.3, "#555a63") : "")
     + poly(q, [...edge(lo), ...edge(hi).reverse()], ROAD)
     + cyc.map((o) => pl(q, edge(o), 7, CYCLE)).join("")
     + lanes.map((o) => pl(q, edge(o), 0.9, "#f4f4f1", 'stroke-dasharray="5 5"')).join("")
     + pl(q, edge(lo + 0.6), 1.3, "#f4f4f1") + pl(q, edge(hi - 0.6), 1.3, "#f4f4f1")
-    + (upIdx.length > 1 ? pl(q, rail(lo), 1.6, "#f4f4f1") + pl(q, rail(hi), 1.4, "#f4f4f1") : "");
+    + (upIdx.length > 1 ? pl(q, rail(lo), 1.4, "#f4f4f1") + pl(q, rail(hi), 1.6, "#f4f4f1") : "");
   drawn.push({ svg, fill, fillMax: v.fillMax, pts: [...shadow, ...edge(lo, 3), ...edge(hi, 3), ...edge(lo, -3), ...edge(hi, -3)] });
   console.log(`  ${v.name}: ${L.toFixed(0)} m, elevated over ${upIdx.length ? (ts[upIdx[upIdx.length - 1]] - ts[upIdx[0]]).toFixed(0) : 0} m, ${Math.min(...deckH).toFixed(1)}-${Math.max(...deckH).toFixed(1)} m TAW, road ${ROAD}, cycle ${CYCLE}`);
 }

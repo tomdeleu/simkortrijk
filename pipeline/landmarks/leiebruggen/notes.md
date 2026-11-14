@@ -47,3 +47,9 @@ All bridges in painted tiles were checked in the paint and on Google Street View
 Railway viaducts over streets: `export.ts` (`railParapets`) lays light concrete parapets along their outer sides over the paint (2026-11-13).
 
 R36 bridge, second pass (Tom: "it floats"): the deck now starts at the road's own height, rises in a hump, narrows to the road width and takes the road's render colour, so it continues the road instead of hovering over it.
+
+Third pass, 2026-11-14 (Tom: R36 west "still not right", Budabrug and IJzerkaai bridge "loose blocks"; Google Street View, look-up only):
+
+- R36 west (Lambrechtlaan): a long galvanised steel box girder on square concrete piers, the quay road and a car park under its north-west end, abutment walls with murals. The script drew the front face on the north edge (hidden under the deck); it is now on the south edge: slate-grey steel girder 3 m deep with ribs, grey piers, 8 m concrete abutments.
+- Budabrug: a lift bridge, raised in the DHMV LiDAR and on Street View (May 2025). Drawn lowered, flush with the quays (`level`).
+- IJzerkaaibrug (OSM 61597591, over the old Leie arm by the Koning Albertpark): a short concrete slab road bridge at quay level, concrete edge beam, galvanised railings, brick abutments. Drawn by `edit_bridges.ts` and skipped by the export deck overlay.
