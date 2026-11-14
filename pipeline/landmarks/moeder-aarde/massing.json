@@ -1,5 +1,5 @@
 {
- "_doc": "Render massing for 'Moeder Aarde II' (reclining woman sculpture, Koning Albertpark 8, on the lawn on the west bank just south of the R36 bridge), read by pipeline/src/scene.ts. No GRB footprint. Look (Google Maps photos, look-up only): a large dark grey figure of a woman lying on the grass, about 14 m long and 3 m high at the raised hips, parallel to the bridge.",
+ "_doc": "Render massing for 'Moeder Aarde II' (reclining woman sculpture, Koning Albertpark 8, on the lawn on the west bank just south of the R36 bridge), read by pipeline/src/scene.ts. No GRB footprint. Look (Google Maps photos, look-up only): a large dark grey figure of a woman lying on the grass, about 15 m long and 3 m high at the raised hips, parallel to the bridge. Built from 19 rounded segments along the body (feet low, raised hips, back, shoulders, head) and two arms stretched forward on the grass, so it reads as a smooth figure and not as blocks (Tom, 2026-11-14).",
  "anchor": [
   50.8344702,
   3.2685861
@@ -8,38 +8,14 @@
  "replace_oidn": [],
  "parts": [
   {
-   "id": "legs",
-   "rect": [
-    -7,
-    -1.5,
-    -0.9,
-    0.9
+   "id": "body 1",
+   "oct": [
+    -7.2,
+    0,
+    0.45
    ],
-   "h": 1.0,
-   "eave": 0.6,
-   "shape": "gable-u",
-   "style": 4,
-   "wall": [
-    0.3,
-    0.31,
-    0.34
-   ],
-   "roof": [
-    0.3,
-    0.31,
-    0.34
-   ]
-  },
-  {
-   "id": "raised hips",
-   "rect": [
-    -2,
-    2,
-    -1.3,
-    1.3
-   ],
-   "h": 3.2,
-   "eave": 1.2,
+   "h": 0.55,
+   "eave": 0.4,
    "shape": "pyramid",
    "style": 4,
    "wall": [
@@ -48,22 +24,21 @@
     0.34
    ],
    "roof": [
-    0.3,
-    0.31,
-    0.34
+    0.36,
+    0.37,
+    0.4
    ]
   },
   {
-   "id": "torso and arms",
-   "rect": [
-    1.5,
-    5.5,
-    -1.2,
-    1.2
+   "id": "body 2",
+   "oct": [
+    -6.4,
+    0,
+    0.55
    ],
-   "h": 1.2,
-   "eave": 0.7,
-   "shape": "gable-u",
+   "h": 0.7,
+   "eave": 0.5,
+   "shape": "pyramid",
    "style": 4,
    "wall": [
     0.3,
@@ -71,19 +46,406 @@
     0.34
    ],
    "roof": [
-    0.3,
-    0.31,
-    0.34
+    0.36,
+    0.37,
+    0.4
    ]
   },
   {
-   "id": "head",
+   "id": "body 3",
    "oct": [
-    6.4,
+    -5.6,
     0,
-    0.9
+    0.65
+   ],
+   "h": 0.85,
+   "eave": 0.61,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 4",
+   "oct": [
+    -4.8,
+    0,
+    0.8
+   ],
+   "h": 1.1,
+   "eave": 0.79,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 5",
+   "oct": [
+    -4.0,
+    0,
+    0.95
    ],
    "h": 1.5,
+   "eave": 1.08,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 6",
+   "oct": [
+    -3.2,
+    0,
+    1.15
+   ],
+   "h": 2.1,
+   "eave": 1.51,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 7",
+   "oct": [
+    -2.4,
+    0,
+    1.35
+   ],
+   "h": 2.7,
+   "eave": 1.94,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 8",
+   "oct": [
+    -1.6,
+    0,
+    1.5
+   ],
+   "h": 3.1,
+   "eave": 2.23,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 9",
+   "oct": [
+    -0.8,
+    0,
+    1.5
+   ],
+   "h": 3.2,
+   "eave": 2.3,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 10",
+   "oct": [
+    0.0,
+    0,
+    1.45
+   ],
+   "h": 2.9,
+   "eave": 2.09,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 11",
+   "oct": [
+    0.8,
+    0,
+    1.3
+   ],
+   "h": 2.3,
+   "eave": 1.66,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 12",
+   "oct": [
+    1.6,
+    0,
+    1.2
+   ],
+   "h": 1.8,
+   "eave": 1.3,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 13",
+   "oct": [
+    2.4,
+    0,
+    1.2
+   ],
+   "h": 1.5,
+   "eave": 1.08,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 14",
+   "oct": [
+    3.2,
+    0,
+    1.25
+   ],
+   "h": 1.35,
+   "eave": 0.97,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 15",
+   "oct": [
+    4.0,
+    0,
+    1.2
+   ],
+   "h": 1.2,
+   "eave": 0.86,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 16",
+   "oct": [
+    4.8,
+    0,
+    1.0
+   ],
+   "h": 1.05,
+   "eave": 0.76,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 17",
+   "oct": [
+    5.6,
+    0,
+    0.75
+   ],
+   "h": 1.2,
+   "eave": 0.86,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 18",
+   "oct": [
+    6.3,
+    0,
+    0.85
+   ],
+   "h": 1.5,
+   "eave": 1.08,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "body 19",
+   "oct": [
+    7.0,
+    0,
+    0.7
+   ],
+   "h": 1.3,
+   "eave": 0.94,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "arm left",
+   "poly": [
+    [
+     4.2,
+     -0.9
+    ],
+    [
+     7.6,
+     -1.15
+    ],
+    [
+     7.8,
+     -0.75
+    ],
+    [
+     4.4,
+     -0.55
+    ]
+   ],
+   "h": 0.45,
    "shape": "flat",
    "style": 4,
    "wall": [
@@ -92,9 +454,43 @@
     0.34
    ],
    "roof": [
+    0.36,
+    0.37,
+    0.4
+   ]
+  },
+  {
+   "id": "arm right",
+   "poly": [
+    [
+     4.2,
+     0.9
+    ],
+    [
+     7.6,
+     1.15
+    ],
+    [
+     7.8,
+     0.75
+    ],
+    [
+     4.4,
+     0.55
+    ]
+   ],
+   "h": 0.45,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
     0.3,
     0.31,
     0.34
+   ],
+   "roof": [
+    0.36,
+    0.37,
+    0.4
    ]
   }
  ]
