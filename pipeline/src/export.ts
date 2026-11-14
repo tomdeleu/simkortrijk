@@ -124,10 +124,10 @@ const DECK_STYLE = "decks6"; // bump to re-export painted tiles after changing t
  * Landmark bridges that are painted by hand into the art (render edit + repaint): no asphalt deck on
  * top of them. Broelbrug (OSM way 567818112), next to the Broeltorens; the R36 bridge over the Leie
  * (OSM way 826126060, landmarks/leiebruggen/edit_r36brug.ts); the Budabrug (OSM 1264315394), the R36 west viaduct (Lambrechtlaan) and the
- * IJzerkaaibrug (OSM 61597591), all edit_bridges.ts. A deck laid on top of those sat at ground height
+ * IJzerkaaibrug (OSM 61597591), all edit_bridges.ts; the Noordbrug (Beheerstraat, OSM 537013800, edit_noordbrug.ts). A deck laid on top of those sat at ground height
  * beside the painted one and looked like a loose slab (Tom, 2026-11-14).
  */
-const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }, { lat: 50.83456, lon: 3.26934, r: 40 }, { lat: 50.831435, lon: 3.261719, r: 15 }, { lat: 50.82851, lon: 3.25342, r: 105 }, { lat: 50.83368, lon: 3.26965, r: 18 }];
+const PAINTED_BRIDGES = [{ lat: 50.830448, lon: 3.266918, r: 25 }, { lat: 50.83456, lon: 3.26934, r: 40 }, { lat: 50.831435, lon: 3.261719, r: 15 }, { lat: 50.82851, lon: 3.25342, r: 105 }, { lat: 50.83368, lon: 3.26965, r: 18 }, { lat: 50.82945, lon: 3.25625, r: 60 }];
 function bridgeDecks(ways: Array<{ y: number; w: number; l: number; s: number[] }>) {
   decks = [];
   const skip = PAINTED_BRIDGES.map((b) => ({ e: ecefToEnu(llhToEcef(b.lat, b.lon, GROUND_H)), r: b.r }));
