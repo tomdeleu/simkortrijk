@@ -1,0 +1,30 @@
+{
+ "_doc": "Render massing for the Guldensporencollege campus Kaai school building on the Diksmuidekaai (the former Sint-Amandscollege), read by pipeline/src/scene.ts. GRB 1730972 (3182 m2) had 58.4 m from 3D GRB: the height of the old Collegetoren that stood in this footprint until the K Tower replaced it, so the painter made a 12-storey brick block. Street View (Diksmuidekaai and IJzerkaai, look-up only, Tom's feedback 2026-11-14): a long modernist block of 3-4 storeys (~14 m) with dark glass curtain walls in a dark grey frame, a flat roof and a glass entrance box.",
+ "anchor": [
+  50.83302,
+  3.26418
+ ],
+ "axis_deg": 0,
+ "replace_oidn": [
+  1730972
+ ],
+ "parts": [
+  {
+   "id": "glass school block (GRB footprint)",
+   "footprint": "grb",
+   "h": 14,
+   "shape": "flat",
+   "style": 5,
+   "wall": [
+    0.5,
+    0.56,
+    0.64
+   ],
+   "roof": [
+    0.72,
+    0.72,
+    0.72
+   ]
+  }
+ ]
+}

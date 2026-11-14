@@ -1,0 +1,31 @@
+{
+ "_doc": "Render massing for the K Tower (Diksmuidekaai 11, Philippe Samyn and Partners, completed 2018; 66 m, 20 floors; replaced the 60 m Collegetoren), read by pipeline/src/scene.ts. GRB 6802479 (ground floor, 181 m2) and GBA 701163 (the upper floors, 294 m2) had 16 m from the DHMV II DSM, taken during the demolition, so the tower was missing (Tom's feedback 2026-11-14). Look (Street View, Google Maps photos, look-up only; visitkortrijk.be, infosteel.be): white residential tower of staggered glass and steel volumes with white balconies, on columns at the ground.",
+ "anchor": [
+  50.83328,
+  3.2650733
+ ],
+ "axis_deg": 0,
+ "replace_oidn": [
+  6802479,
+  701163
+ ],
+ "parts": [
+  {
+   "id": "white tower (GRB footprints)",
+   "footprint": "grb",
+   "h": 66,
+   "shape": "flat",
+   "style": 5,
+   "wall": [
+    0.95,
+    0.95,
+    0.93
+   ],
+   "roof": [
+    0.84,
+    0.84,
+    0.83
+   ]
+  }
+ ]
+}

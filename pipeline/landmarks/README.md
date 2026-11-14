@@ -30,6 +30,8 @@ Priority is visual weight on the map (height, footprint, how well-known it is).
 | P3 | verrijzeniskerk | Verrijzeniskerk | done (massing.json): round white church, green copper cone, lantern and spire |
 | P3 | athena-pottelberg | Athena campus Pottelberg | done (massing.json): gabled school wings instead of a flat 27 m block |
 | P3 | wildernis | De Wildernis | done (massing.json): low timber hut instead of a 14 m DSM block |
+| P2 | k-tower | K Tower | done (massing.json): white 66 m residential tower (missing: the DSM predates it) |
+| P2 | sint-amandscollege | Sint-Amandscollege / Guldensporencollege | done (colours.json: red brick + slate; massing.json: the quay school 14 m dark glass instead of the old Collegetoren's 58 m) |
 | P3 | hoog-mosscher | Hoog Mosscher | done (massing.json): brick château, slate hipped roof, turret |
 | P3 | newfoundland-memorial | Newfoundland Memorial | done (massing.json): granite cairn with a bronze caribou |
 | P3 | sint-rochuskerk | Sint-Rochuskerk | done (massing.json): dark brick, one slate roof, apse, brick tower with slate needle + 4 pinnacles |
