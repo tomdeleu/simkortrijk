@@ -56,7 +56,9 @@ PAINT_PROVIDER=openai OPENAI_IMAGE_MODEL=gpt-image-2.6-flare PAINT_ATTEMPTS=1 \
 - One window per call, from the painted block outward, landmarks first (so their neighbours continue the corrected paint).
 - Windows with little content (rail yards, open ground, sparse suburbs) tend to come back as a copy of the style image (the Broeltorens and the Leie, `match` ~0.05 with a shift), and the same call repeats the copy. Paint those with `PAINT_STYLE=<copy of a good painted window of a similar area>` (copy it to the scratchpad first, it must not change while painting).
 - After **every** window: `window_check.py` and look. `match` below ~0.3, a copied style image (repaint with `PAINT_STYLE`) (Broeltorens, river), invented water, a city in empty edge, or a fake tower: move it to `windows.replaced/` and repaint before going on.
-- `npm run paint -- --window` also rewrites any paint tile whose windows all exist; step 6 overwrites those. Note which tiles it touched (`ls -lT $D/paint`).
+- Also look along the line 128 px inside each edge that had a pasted neighbour strip: a hard seam there (a tree cut in half, roofs or water a shade lighter on one side) is in the window itself and assembly cannot hide it; repaint the window.
+- `npm run paint -- --window` also rewrites any paint tile whose windows all exist; step 6 overwrites those. Note which tiles it touched (`ls -lT $D/paint`), or compare with the backup and put the others back with `cp -p`.
+- A bridge drawn by a render edit must be in `PAINTED_BRIDGES` in `export.ts`, or the export lays a ground-height deck over it that misses the painted one.
 
 ## 6. Assemble, export, view
 
