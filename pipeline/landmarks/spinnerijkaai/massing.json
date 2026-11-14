@@ -1,0 +1,54 @@
+{
+ "_doc": "Render colours and heights for two buildings next to Spinnerij De Stoop on the Spinnerijkaai, read by pipeline/src/scene.ts (one part per GRB footprint via 'oidn'). Look (Google Street View from the Groeningekaai, look-up only; Tom's feedback 2026-11-14): GRB 1734208 on the quay is a low yellow (buff) brick building with a columned front and a flat roof (painted before as slate roofs on red brick); GRB 4600463 is a modern white apartment block of 5-6 storeys with balconies and solar panels on a flat roof (painted before as an orange tiled roof on buff walls).",
+ "anchor": [
+  50.8322,
+  3.2828
+ ],
+ "axis_deg": 0,
+ "replace_oidn": [
+  1734208,
+  4600463
+ ],
+ "parts": [
+  {
+   "id": "yellow quay building",
+   "footprint": "grb",
+   "oidn": [
+    1734208
+   ],
+   "h": 8,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.86,
+    0.74,
+    0.47
+   ],
+   "roof": [
+    0.7,
+    0.7,
+    0.69
+   ]
+  },
+  {
+   "id": "white apartments",
+   "footprint": "grb",
+   "oidn": [
+    4600463
+   ],
+   "h": 16.5,
+   "shape": "flat",
+   "style": 5,
+   "wall": [
+    0.94,
+    0.93,
+    0.9
+   ],
+   "roof": [
+    0.78,
+    0.78,
+    0.77
+   ]
+  }
+ ]
+}

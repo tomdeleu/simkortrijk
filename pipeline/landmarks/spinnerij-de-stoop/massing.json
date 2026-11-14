@@ -1,0 +1,96 @@
+{
+ "_doc": "Render massing for the former Spinnerij De Stoop (Spinnerijkaai 43-45, lofts and offices in a textile mill built by Camiel De Stoop), read by pipeline/src/scene.ts. GRB 1734211 (3560 m2, 3D GRB 14.25 m) rendered as a plain block, so the painter lost the tower (Tom's feedback 2026-11-14: 'redo the lofts'). Metres in Lambert 72 around 'anchor', u along 'axis_deg' -110.9 (u points SSW to the canal, u +27 is the canal front), v east (v -6 is the west side). DHMV II: the mill at 14 m; a square tower at the south-west corner on the canal, u 26..32, v -8..-2, ~20 m above the ground plus a belvedere. Look (Google Street View from the Groeningekaai, look-up only): red-brown brick mill of four storeys with tall windows, a flat dark roof, a square brick tower with an open belvedere at the west end of the canal front, a crenellated brick parapet at the east end.",
+ "anchor": [
+  50.8325677,
+  3.2818391
+ ],
+ "axis_deg": -110.9,
+ "replace_oidn": [
+  1734211
+ ],
+ "parts": [
+  {
+   "id": "mill (GRB footprint)",
+   "footprint": "grb",
+   "h": 14,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.7,
+    0.4,
+    0.32
+   ],
+   "roof": [
+    0.42,
+    0.43,
+    0.46
+   ]
+  },
+  {
+   "id": "crenellated east end on the canal",
+   "rect": [
+    20,
+    27.5,
+    17,
+    24.5
+   ],
+   "h": 16,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.7,
+    0.4,
+    0.32
+   ],
+   "roof": [
+    0.42,
+    0.43,
+    0.46
+   ]
+  },
+  {
+   "id": "corner tower",
+   "rect": [
+    25.5,
+    32,
+    -8.5,
+    -2
+   ],
+   "h": 22,
+   "shape": "flat",
+   "style": 2,
+   "wall": [
+    0.64,
+    0.36,
+    0.29
+   ],
+   "roof": [
+    0.42,
+    0.43,
+    0.46
+   ]
+  },
+  {
+   "id": "belvedere",
+   "rect": [
+    26.5,
+    31,
+    -7.5,
+    -3
+   ],
+   "h": 25,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.56,
+    0.32,
+    0.26
+   ],
+   "roof": [
+    0.42,
+    0.43,
+    0.46
+   ]
+  }
+ ]
+}

@@ -339,7 +339,7 @@ console.log(`  GRB buildings: ${buildings.length}`);
 {
   const dir = join(import.meta.dirname, "..", "landmarks");
   type Part = {
-    id: string; footprint?: "grb"; rect?: [number, number, number, number]; oct?: [number, number, number]; poly?: Array<[number, number]>;
+    id: string; footprint?: "grb"; oidn?: number[]; rect?: [number, number, number, number]; oct?: [number, number, number]; poly?: Array<[number, number]>;
     h: number; style?: number; wall: number[]; roof: number[]; shape?: "flat" | "gable-u" | "gable-v" | "pyramid"; eave?: number;
   };
   type Massing = { anchor: [number, number]; axis_deg: number; replace_oidn: Array<number | string>; parts: Part[] };
@@ -349,7 +349,8 @@ console.log(`  GRB buildings: ${buildings.length}`);
     const m: Massing = readJson(f);
     const ids = new Set(m.replace_oidn.map(String));
     const grb = buildings.filter((b) => b.oidn && ids.has(b.oidn));
-    if (!grb.length) { console.log(`  landmark ${lm}: GRB ${[...ids]} not in this area, skipped`); continue; }
+    // an empty replace_oidn is a free-standing object (a monument in a park, no GRB footprint)
+    if (!grb.length && ids.size) { console.log(`  landmark ${lm}: GRB ${[...ids]} not in this area, skipped`); continue; }
     // drop the GRB footprints and any LiDAR needle standing inside them
     const doomed = new Set(grb);
     for (const b of buildings) {
@@ -367,7 +368,7 @@ console.log(`  GRB buildings: ${buildings.length}`);
     };
     for (const part of m.parts) {
       let rings: P2[][] = [];
-      if (part.footprint === "grb") rings = grb.map((g) => g.ring);
+      if (part.footprint === "grb") rings = grb.filter((g) => !part.oidn || part.oidn.includes(Number(g.oidn))).map((g) => g.ring);
       else if (part.rect) {
         const [u0, u1, v0, v1] = part.rect;
         rings = [[enu(u0, v0), enu(u1, v0), enu(u1, v1), enu(u0, v1)]];

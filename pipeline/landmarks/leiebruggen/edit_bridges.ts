@@ -103,6 +103,66 @@ for (const s of SPECS) {
   console.log(`  ${s.name}: ${L.toFixed(0)} m, deck ${Math.min(...deckH).toFixed(1)}-${Math.max(...deckH).toFixed(1)} m TAW over ground ${Math.min(...gnd).toFixed(1)} m`);
 }
 
+
+// Long road viaducts with several carriageways (Tom, 2026-11-14: the R36 west bridge "floats"). The
+// render draws them on the ground and the export laid a deck over the paint, so the deck seemed to lie on
+// top of the road at both ends. Here the deck follows the DSM over its whole length (it meets the road at
+// the ends, where the road is on the embankment), takes the road's render colour, is only drawn where it
+// is clearly above the ground, and the ground road under it is opened up.
+type Viaduct = { name: string; axis: number; ways: number[]; cycle: number[]; piers: number[]; fillMax: number };
+const VIADUCTS: Viaduct[] = [
+  // Burgemeester Lambrechtlaan (R36 west) over the Leie: two one-way carriageways and two cycle tracks,
+  // 199 m, deck 15.5 m TAW on the embankments to 19.5 m over the river (ground 10-12.5 m). Street View:
+  // a long, low concrete beam viaduct with light railings, open below over the quays and the park.
+  { name: "R36 west (Lambrechtlaan)", axis: 28270495, ways: [114830948, 28270495, 112955382, 114831019], cycle: [114830948, 114831019], piers: [40, 75, 120, 160], fillMax: 260 },
+];
+const rawTile = async (x: number, y: number) => {
+  const k = `${Math.floor(x / T)}_${Math.floor(y / T)}`, keep = join(orig, `${k}.png`), file = join(dir, "render", `${k}.png`);
+  const src = existsSync(keep) ? keep : file;
+  const { data } = await sharp(src).removeAlpha().extract({ left: Math.round(x - Math.floor(x / T) * T) - 2, top: Math.round(y - Math.floor(y / T) * T) - 2, width: 5, height: 5 }).raw().toBuffer({ resolveWithObject: true });
+  return `rgb(${[0, 1, 2].map((c) => Math.round([...Array(25).keys()].reduce((a, i) => a + data[i * 3 + c], 0) / 25)).join(",")})`;
+};
+for (const v of VIADUCTS) {
+  const ax0 = geo(v.axis), A = ax0[0], B = ax0[ax0.length - 1];
+  const L = Math.hypot(B[0] - A[0], B[1] - A[1]), ax = [(B[0] - A[0]) / L, (B[1] - A[1]) / L];
+  let n = [-ax[1], ax[0]]; const flipped = n[1] > 0; if (flipped) n = [-n[0], -n[1]]; // n: the side the camera sees
+  const off = (p: number[]) => (p[0] - A[0]) * n[0] + (p[1] - A[1]) * n[1];
+  const offs = v.ways.flatMap((id) => geo(id).map(off));
+  const lo = Math.min(...offs) - 2.4, hi = Math.max(...offs) + 2.4, mid = (lo + hi) / 2; // lo..hi across the deck
+  const ts = Array.from({ length: Math.ceil(L / 2) + 1 }, (_, k) => Math.min(L, k * 2));
+  const at0 = (t: number, o: number) => [A[0] + ax[0] * t + n[0] * o, A[1] + ax[1] * t + n[1] * o];
+  const gnd = ts.map((t) => sampleBilinear(dtm, ...(at0(t, mid) as [number, number])));
+  const top = ts.map((t) => { const hs = [lo + 3, mid, hi - 3].map((o) => sampleBilinear(dsm, ...(at0(t, o) as [number, number]))).sort((p, q) => p - q); return hs[1]; });
+  const deckH = top.map((_, i) => { const w = top.slice(Math.max(0, i - 4), i + 5).sort((p, q) => p - q); return w[Math.floor(w.length / 2)] - 0.3; });
+  const idx = ts.map((_, i) => i).filter((i) => deckH[i] - gnd[i] > 1.2 && i > 0 && i < ts.length - 1);
+  if (idx.length < 3) continue;
+  const P3 = (i: number, o: number, h: number) => { const [x, y] = at0(ts[i], o); return P(x, y, h); };
+  const edge = (o: number, dh = 0) => idx.map((i) => P3(i, o, deckH[i] + dh));
+  const shadow = [...idx.map((i) => P3(i, lo + 1, gnd[i])), ...idx.map((i) => P3(i, hi - 1, gnd[i])).reverse()];
+  const high = idx.filter((i) => deckH[i] - gnd[i] > 3);
+  const fill = high.length > 2 ? [...high.map((i) => P3(i, lo - 1, gnd[i])), ...high.map((i) => P3(i, hi + 1, gnd[i])).reverse()] : null;
+  // colours from the raw render right where the deck starts (road and cycle track)
+  const i0 = idx[0], cyc = v.cycle.map((id) => off(geo(id)[0]));
+  const lanes = v.ways.filter((id) => !v.cycle.includes(id)).map((id) => off(geo(id)[0]));
+  const start = P3(Math.max(0, i0 - 3), lanes[0] + 1.5, gnd[Math.max(0, i0 - 3)]);
+  const ROAD = await rawTile(start[0], start[1]);
+  const CYCLE = "#c98c6c"; // the orange cycle-track colour of the render
+  const piers = v.piers.map((t) => ts.findIndex((x) => x >= t)).filter((i) => i > 0 && deckH[i] - gnd[i] > 2.5);
+  const poly = (q: (p: [number, number]) => string, p: Array<[number, number]>, f: string, x = "") => `<polygon points="${p.map(q).join(" ")}" fill="${f}" ${x}/>`;
+  const pl = (q: (p: [number, number]) => string, p: Array<[number, number]>, w: number, c: string, x = "") => `<polyline points="${p.map(q).join(" ")}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" ${x}/>`;
+  const svg = (q: (p: [number, number]) => string) =>
+    poly(q, shadow, "#2f3a4a", 'fill-opacity="0.22"')
+    + piers.map((i) => [lo + 2.5, mid, hi - 2.5].map((o) => pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 1.4)], 6, "#c9c5bd") + pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 1.4)], 3.5, "#e3dfd7")).join("")).join("")
+    + poly(q, [...edge(lo), ...edge(lo, -1.4).reverse()], "#ece4dc") + pl(q, edge(lo, -1.4), 1.4, "#a49ba3")
+    + poly(q, [...edge(lo), ...edge(hi).reverse()], ROAD)
+    + cyc.map((o) => pl(q, edge(o), 7, CYCLE)).join("")
+    + lanes.map((o) => pl(q, edge(o), 0.9, "#f4f4f1", 'stroke-dasharray="5 5"')).join("")
+    + pl(q, edge(lo + 0.6), 1.3, "#f4f4f1") + pl(q, edge(hi - 0.6), 1.3, "#f4f4f1")
+    + pl(q, edge(lo, 1.1), 1.6, "#f4f4f1") + pl(q, edge(hi, 1.1), 1.4, "#f4f4f1");
+  drawn.push({ svg, fill, fillMax: v.fillMax, pts: [...shadow, ...edge(lo, 3), ...edge(hi, 3)] });
+  console.log(`  ${v.name}: ${L.toFixed(0)} m, deck drawn over ${(ts[idx[idx.length - 1]] - ts[idx[0]]).toFixed(0)} m, ${Math.min(...deckH).toFixed(1)}-${Math.max(...deckH).toFixed(1)} m TAW, road ${ROAD}, cycle ${CYCLE}`);
+}
+
 const tiles = new Set(drawn.flatMap((d) => d.pts.map(([x, y]) => `${Math.floor(x / T)}_${Math.floor(y / T)}`)));
 mkdirSync(orig, { recursive: true });
 for (const k of tiles) {

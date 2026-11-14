@@ -1,0 +1,101 @@
+{
+ "_doc": "Render massing for 'Moeder Aarde II' (reclining woman sculpture, Koning Albertpark 8, on the lawn on the west bank just south of the R36 bridge), read by pipeline/src/scene.ts. No GRB footprint. Look (Google Maps photos, look-up only): a large dark grey figure of a woman lying on the grass, about 14 m long and 3 m high at the raised hips, parallel to the bridge.",
+ "anchor": [
+  50.8344702,
+  3.2685861
+ ],
+ "axis_deg": 0,
+ "replace_oidn": [],
+ "parts": [
+  {
+   "id": "legs",
+   "rect": [
+    -7,
+    -1.5,
+    -0.9,
+    0.9
+   ],
+   "h": 1.0,
+   "eave": 0.6,
+   "shape": "gable-u",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.3,
+    0.31,
+    0.34
+   ]
+  },
+  {
+   "id": "raised hips",
+   "rect": [
+    -2,
+    2,
+    -1.3,
+    1.3
+   ],
+   "h": 3.2,
+   "eave": 1.2,
+   "shape": "pyramid",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.3,
+    0.31,
+    0.34
+   ]
+  },
+  {
+   "id": "torso and arms",
+   "rect": [
+    1.5,
+    5.5,
+    -1.2,
+    1.2
+   ],
+   "h": 1.2,
+   "eave": 0.7,
+   "shape": "gable-u",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.3,
+    0.31,
+    0.34
+   ]
+  },
+  {
+   "id": "head",
+   "oct": [
+    6.4,
+    0,
+    0.9
+   ],
+   "h": 1.5,
+   "shape": "flat",
+   "style": 4,
+   "wall": [
+    0.3,
+    0.31,
+    0.34
+   ],
+   "roof": [
+    0.3,
+    0.31,
+    0.34
+   ]
+  }
+ ]
+}
