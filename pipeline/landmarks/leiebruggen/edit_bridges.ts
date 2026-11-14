@@ -114,7 +114,7 @@ const VIADUCTS: Viaduct[] = [
   // Burgemeester Lambrechtlaan (R36 west) over the Leie: two one-way carriageways and two cycle tracks,
   // 199 m, deck 15.5 m TAW on the embankments to 19.5 m over the river (ground 10-12.5 m). Street View:
   // a long, low concrete beam viaduct with light railings, open below over the quays and the park.
-  { name: "R36 west (Lambrechtlaan)", axis: 28270495, ways: [114830948, 28270495, 112955382, 114831019], cycle: [114830948, 114831019], piers: [40, 75, 120, 160], fillMax: 260 },
+  { name: "R36 west (Lambrechtlaan)", axis: 28270495, ways: [114830948, 28270495, 112955382, 114831019], cycle: [114830948, 114831019], piers: [40, 75, 120, 160], fillMax: 320 },
 ];
 const rawTile = async (x: number, y: number) => {
   const k = `${Math.floor(x / T)}_${Math.floor(y / T)}`, keep = join(orig, `${k}.png`), file = join(dir, "render", `${k}.png`);
@@ -133,16 +133,30 @@ for (const v of VIADUCTS) {
   const at0 = (t: number, o: number) => [A[0] + ax[0] * t + n[0] * o, A[1] + ax[1] * t + n[1] * o];
   const gnd = ts.map((t) => sampleBilinear(dtm, ...(at0(t, mid) as [number, number])));
   const top = ts.map((t) => { const hs = [lo + 3, mid, hi - 3].map((o) => sampleBilinear(dsm, ...(at0(t, o) as [number, number]))).sort((p, q) => p - q); return hs[1]; });
-  const deckH = top.map((_, i) => { const w = top.slice(Math.max(0, i - 4), i + 5).sort((p, q) => p - q); return w[Math.floor(w.length / 2)] - 0.3; });
-  const idx = ts.map((_, i) => i).filter((i) => deckH[i] - gnd[i] > 1.2 && i > 0 && i < ts.length - 1);
+  // the deck meets the road at the road's own height at both ends (Tom, 2026-11-14: a deck that starts
+  // 1.2 m up with a light front edge "floats"): it is drawn over the whole length, at the ground where
+  // the DSM is near the ground, and only its elevated part gets a front face, railings, shadow and piers
+  const deckH = top.map((_, i) => { const w = top.slice(Math.max(0, i - 4), i + 5).sort((p, q) => p - q); return Math.max(gnd[i], w[Math.floor(w.length / 2)] - 0.3); });
+  const idx = ts.map((_, i) => i);
+  const lift = (i: number) => deckH[i] - gnd[i];
   if (idx.length < 3) continue;
   const P3 = (i: number, o: number, h: number) => { const [x, y] = at0(ts[i], o); return P(x, y, h); };
-  const edge = (o: number, dh = 0) => idx.map((i) => P3(i, o, deckH[i] + dh));
-  const shadow = [...idx.map((i) => P3(i, lo + 1, gnd[i])), ...idx.map((i) => P3(i, hi - 1, gnd[i])).reverse()];
-  const high = idx.filter((i) => deckH[i] - gnd[i] > 3);
+  const edge = (o: number, dh = 0, sel = idx) => sel.map((i) => P3(i, o, deckH[i] + dh));
+  const upIdx = idx.filter((i) => lift(i) > 1.5); // the elevated part
+  // railings and front face grow with the lift, so they start from nothing where the deck leaves the ground
+  const grow = (i: number) => Math.max(0, Math.min(1, (lift(i) - 1.5) / 2.5));
+  const face = (o: number, depth: number) => upIdx.length > 1 ? [...upIdx.map((i) => P3(i, o, deckH[i])), ...upIdx.map((i) => P3(i, o, deckH[i] - depth * grow(i))).reverse()] : [];
+  const rail = (o: number) => upIdx.map((i) => P3(i, o, deckH[i] + 1.1 * grow(i)));
+  // abutments: where the deck leaves the embankment it stands on a solid wall down to the ground, so it
+  // reads as resting on the land, not hovering (the first and last 14 m of the lifted part)
+  const ends = upIdx.length > 1 ? [upIdx.filter((i) => ts[i] - ts[upIdx[0]] < 14), upIdx.filter((i) => ts[upIdx[upIdx.length - 1]] - ts[i] < 14)] : [];
+  const wall = (sel: number[], o: number) => [...sel.map((i) => P3(i, o, deckH[i])), ...sel.map((i) => P3(i, o, gnd[i])).reverse()];
+  const endWall = (i: number) => [P3(i, lo, deckH[i]), P3(i, hi, deckH[i]), P3(i, hi, gnd[i]), P3(i, lo, gnd[i])];
+  const shadow = upIdx.length > 1 ? [...upIdx.map((i) => P3(i, lo + 1, gnd[i])), ...upIdx.map((i) => P3(i, hi - 1, gnd[i])).reverse()] : [];
+  const high = idx.filter((i) => lift(i) > 0.4); // open up the ground road under the whole lifted deck, or it shows as a second road below it
   const fill = high.length > 2 ? [...high.map((i) => P3(i, lo - 1, gnd[i])), ...high.map((i) => P3(i, hi + 1, gnd[i])).reverse()] : null;
   // colours from the raw render right where the deck starts (road and cycle track)
-  const i0 = idx[0], cyc = v.cycle.map((id) => off(geo(id)[0]));
+  const i0 = upIdx.length ? upIdx[0] : 0, cyc = v.cycle.map((id) => off(geo(id)[0]));
   const lanes = v.ways.filter((id) => !v.cycle.includes(id)).map((id) => off(geo(id)[0]));
   const start = P3(Math.max(0, i0 - 3), lanes[0] + 1.5, gnd[Math.max(0, i0 - 3)]);
   const ROAD = await rawTile(start[0], start[1]);
@@ -153,14 +167,16 @@ for (const v of VIADUCTS) {
   const svg = (q: (p: [number, number]) => string) =>
     poly(q, shadow, "#2f3a4a", 'fill-opacity="0.22"')
     + piers.map((i) => [lo + 2.5, mid, hi - 2.5].map((o) => pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 1.4)], 6, "#c9c5bd") + pl(q, [P3(i, o, gnd[i]), P3(i, o, deckH[i] - 1.4)], 3.5, "#e3dfd7")).join("")).join("")
-    + poly(q, [...edge(lo), ...edge(lo, -1.4).reverse()], "#ece4dc") + pl(q, edge(lo, -1.4), 1.4, "#a49ba3")
+    + ends.map((sel) => sel.length > 1 ? poly(q, wall(sel, lo), "#d6d0c6") + pl(q, sel.map((i) => P3(i, lo, gnd[i])), 1.2, "#a49ba3") : "").join("")
+    + (ends.length ? poly(q, endWall(ends[1][ends[1].length - 1]), "#c8c2b8") : "")
+    + (upIdx.length > 1 ? poly(q, face(lo, 2.0), "#e2ddd5") + pl(q, upIdx.map((i) => P3(i, lo, deckH[i] - 2.0 * grow(i))), 1.3, "#9d949c") : "")
     + poly(q, [...edge(lo), ...edge(hi).reverse()], ROAD)
     + cyc.map((o) => pl(q, edge(o), 7, CYCLE)).join("")
     + lanes.map((o) => pl(q, edge(o), 0.9, "#f4f4f1", 'stroke-dasharray="5 5"')).join("")
     + pl(q, edge(lo + 0.6), 1.3, "#f4f4f1") + pl(q, edge(hi - 0.6), 1.3, "#f4f4f1")
-    + pl(q, edge(lo, 1.1), 1.6, "#f4f4f1") + pl(q, edge(hi, 1.1), 1.4, "#f4f4f1");
-  drawn.push({ svg, fill, fillMax: v.fillMax, pts: [...shadow, ...edge(lo, 3), ...edge(hi, 3)] });
-  console.log(`  ${v.name}: ${L.toFixed(0)} m, deck drawn over ${(ts[idx[idx.length - 1]] - ts[idx[0]]).toFixed(0)} m, ${Math.min(...deckH).toFixed(1)}-${Math.max(...deckH).toFixed(1)} m TAW, road ${ROAD}, cycle ${CYCLE}`);
+    + (upIdx.length > 1 ? pl(q, rail(lo), 1.6, "#f4f4f1") + pl(q, rail(hi), 1.4, "#f4f4f1") : "");
+  drawn.push({ svg, fill, fillMax: v.fillMax, pts: [...shadow, ...edge(lo, 3), ...edge(hi, 3), ...edge(lo, -3), ...edge(hi, -3)] });
+  console.log(`  ${v.name}: ${L.toFixed(0)} m, elevated over ${upIdx.length ? (ts[upIdx[upIdx.length - 1]] - ts[upIdx[0]]).toFixed(0) : 0} m, ${Math.min(...deckH).toFixed(1)}-${Math.max(...deckH).toFixed(1)} m TAW, road ${ROAD}, cycle ${CYCLE}`);
 }
 
 const tiles = new Set(drawn.flatMap((d) => d.pts.map(([x, y]) => `${Math.floor(x / T)}_${Math.floor(y / T)}`)));
